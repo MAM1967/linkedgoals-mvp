@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Compiled JavaScript files
 lib/**/*.js
 lib/**/*.js.map
@@ -8,3 +9,6 @@ typings/
 # Node.js dependency directory
 node_modules/
 *.local
+=======
+node_modules\nfirebase-debug.log\ndist\nbuild\n.env
+>>>>>>> dcc43ca056fd73a2b2df18380874f6249ee117dc

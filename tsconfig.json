@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "compilerOptions": {
     "module": "NodeNext",
     "esModuleInterop": true,
@@ -13,5 +14,11 @@
   "compileOnSave": true,
   "include": [
     "src"
+=======
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+>>>>>>> dcc43ca056fd73a2b2df18380874f6249ee117dc
   ]
 }

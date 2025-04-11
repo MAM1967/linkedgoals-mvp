@@ -1,0 +1,104 @@
+/* Container for the whole app */
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Header: name + sign out button */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.logout {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Tabs layout */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Each tab button */
+.tabs button {
+  padding: 0.5rem 1rem;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.tabs button.active {
+  background: #222;
+  color: white;
+}
+
+/* Text input and textarea */
+input,
+textarea {
+  width: 100%;
+  padding: 0.6rem;
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Submit buttons */
+button:not(.logout) {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+  border: none;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:not(.logout):hover {
+  background: #0056b3;
+}
+
+/* Make text and spacing mobile-friendly */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  input,
+  textarea,
+  button {
+    font-size: 1rem;
+  }
+
+  .logout {
+    width: 100%;
+  }
+}
+
