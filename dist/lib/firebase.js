@@ -7,7 +7,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-
 const firebaseConfig = {
     apiKey: "AIzaSyD2q7PxQoZykMIih6-8fCeNhxBjPxVpBpc",
     authDomain: "linkedgoals-d7053.firebaseapp.com",
@@ -17,5 +16,6 @@ const firebaseConfig = {
     appId: "1:753801883214:web:cf46567024a37452a65d1f"
 };
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+export { auth, db };

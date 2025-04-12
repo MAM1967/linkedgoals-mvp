@@ -3,16 +3,27 @@
 import { useState } from "react";
 import { auth } from "@/lib/firebase";
 import { saveCheckin } from "@/lib/firestore";
+import { CheckinData } from "@/types";
+
+console.log("🧠 Using the NEW CheckinForm with dropdowns!");
+
+type CheckinFormProps = {
+  onCheckinSaved?: () => void;
+};
 
 const defaultCircles = [
-  { label: "Career", emoji: "💼" },
-  { label: "Wellness", emoji: "🧘" },
-  { label: "Spiritual", emoji: "🙏" },
+  { name: "Career", icon: "🏆" },
+  { name: "Leadership", icon: "🧠" },
+  { name: "Productivity", icon: "⚙️" },
 ];
 
-export default function CheckinForm() {
-  const [selectedCircle, setSelectedCircle] = useState(defaultCircles[0].label);
+export default function CheckinForm({ onCheckinSaved }: CheckinFormProps) {
+  const [selectedCircle, setSelectedCircle] = useState(defaultCircles[0].name);
   const [message, setMessage] = useState("");
+  const [goalName, setGoalName] = useState("");
+  const [goalDescription, setGoalDescription] = useState("");
+  const [goalDueDate, setGoalDueDate] = useState("");
+  const [goalComplete, setGoalComplete] = useState(false);
   const [status, setStatus] = useState<null | "saving" | "success" | "error">(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,10 +36,28 @@ export default function CheckinForm() {
       return console.error("User not signed in.");
     }
 
+    const data: CheckinData = {
+      circle: selectedCircle,
+      message,
+      goal: goalName
+        ? {
+            name: goalName,
+            description: goalDescription,
+            dueDate: goalDueDate || undefined,
+            completed: goalComplete,
+          }
+        : undefined,
+    };
+
     try {
-      await saveCheckin(user.uid, selectedCircle, message);
+      await saveCheckin(user.uid, data);
       setStatus("success");
       setMessage("");
+      setGoalName("");
+      setGoalDescription("");
+      setGoalDueDate("");
+      setGoalComplete(false);
+      if (onCheckinSaved) onCheckinSaved();
     } catch (err) {
       console.error("Error saving check-in:", err);
       setStatus("error");
@@ -36,60 +65,76 @@ export default function CheckinForm() {
   };
 
   return (
-    <div className="w-full px-4 pt-6 pb-10 sm:pt-10 sm:pb-16 sm:px-6 md:px-8 max-w-xl mx-auto">
-      <div className="bg-white shadow-md rounded-2xl border border-gray-100 p-5 sm:p-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 text-center">
-          Daily Check-In
-        </h2>
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-md mx-auto">
+      <h2 className="text-xl font-semibold">Daily Check-In</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select a Circle
-            </label>
-            <select
-              value={selectedCircle}
-              onChange={(e) => setSelectedCircle(e.target.value)}
-              className="w-full p-2 sm:p-3 rounded-lg border border-gray-300 text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500"
-            >
-              {defaultCircles.map(({ label, emoji }) => (
-                <option key={label} value={label}>
-                  {emoji} {label}
-                </option>
-              ))}
-            </select>
-          </div>
+      <select
+        value={selectedCircle}
+        onChange={(e) => setSelectedCircle(e.target.value)}
+        className="w-full p-2 border rounded"
+      >
+        {defaultCircles.map(({ name, icon }) => (
+          <option key={name} value={name}>
+            {icon} {name}
+          </option>
+        ))}
+      </select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your Thoughts
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="What's on your mind today?"
-              rows={4}
-              className="w-full p-3 rounded-lg border border-gray-300 text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="What's on your mind today?"
+        rows={4}
+        className="w-full p-2 border rounded"
+        required
+      />
 
-          <button
-            type="submit"
-            disabled={status === "saving"}
-            className="w-full py-2 sm:py-3 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition"
-          >
-            {status === "saving" ? "Saving..." : "Submit Check-In"}
-          </button>
-
-          {status === "success" && (
-            <p className="text-green-600 text-center text-sm">✅ Check-in saved!</p>
-          )}
-          {status === "error" && (
-            <p className="text-red-600 text-center text-sm">❌ Failed to save check-in.</p>
-          )}
-        </form>
+      <div className="bg-gray-50 p-3 rounded border">
+        <h3 className="font-medium">SMART Goal (optional)</h3>
+        <input
+          type="text"
+          placeholder="Goal name"
+          value={goalName}
+          onChange={(e) => setGoalName(e.target.value)}
+          className="w-full p-2 border rounded mt-2"
+        />
+        <textarea
+          placeholder="Goal description or success criteria"
+          value={goalDescription}
+          onChange={(e) => setGoalDescription(e.target.value)}
+          rows={2}
+          className="w-full p-2 border rounded mt-2"
+        />
+        <input
+          type="date"
+          value={goalDueDate}
+          onChange={(e) => setGoalDueDate(e.target.value)}
+          className="w-full p-2 border rounded mt-2"
+        />
+        <label className="flex items-center mt-2">
+          <input
+            type="checkbox"
+            checked={goalComplete}
+            onChange={(e) => setGoalComplete(e.target.checked)}
+            className="mr-2"
+          />
+          Mark as completed
+        </label>
       </div>
-    </div>
+
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+      >
+        {status === "saving" ? "Saving..." : "Submit Check-In"}
+      </button>
+
+      {status === "success" && (
+        <p className="text-green-600">Check-in saved!</p>
+      )}
+      {status === "error" && (
+        <p className="text-red-600">Failed to save check-in.</p>
+      )}
+    </form>
   );
 }

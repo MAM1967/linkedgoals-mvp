@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { auth, db } from "./firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
   collection,
@@ -10,6 +10,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import Auth from "./Auth";
+import CheckinForm from "@/components/CheckinForm";
 import "./App.css";
 
 import {
@@ -23,10 +24,8 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [goal, setGoal] = useState("");
   const [goals, setGoals] = useState<string[]>([]);
-  const [checkIn, setCheckIn] = useState("");
-  const [checkIns, setCheckIns] = useState<string[]>([]);
+  const [checkIns, setCheckIns] = useState<any[]>([]);
   const [tab, setTab] = useState<"dashboard" | "goals" | "checkins" | "circles">("dashboard");
-
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
 
@@ -52,7 +51,7 @@ function App() {
     const snapshot = await getDocs(
       query(collection(db, `users/${uid}/checkins`), orderBy("createdAt", "desc"))
     );
-    const fetchedCheckIns = snapshot.docs.map((doc) => doc.data().text);
+    const fetchedCheckIns = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     setCheckIns(fetchedCheckIns);
   };
 
@@ -70,17 +69,6 @@ function App() {
       });
       setGoal("");
       fetchGoals(user.uid);
-    }
-  };
-
-  const handleAddCheckIn = async () => {
-    if (checkIn.trim() && user) {
-      await addDoc(collection(db, `users/${user.uid}/checkins`), {
-        text: checkIn,
-        createdAt: serverTimestamp(),
-      });
-      setCheckIn("");
-      fetchCheckIns(user.uid);
     }
   };
 
@@ -106,18 +94,10 @@ function App() {
       </header>
 
       <div className="tabs">
-        <button className={tab === "dashboard" ? "active" : ""} onClick={() => setTab("dashboard")}>
-          <FaTachometerAlt /> Dashboard
-        </button>
-        <button className={tab === "goals" ? "active" : ""} onClick={() => setTab("goals")}>
-          <FaBullseye /> Goals
-        </button>
-        <button className={tab === "checkins" ? "active" : ""} onClick={() => setTab("checkins")}>
-          <FaCheckCircle /> Check-Ins
-        </button>
-        <button className={tab === "circles" ? "active" : ""} onClick={() => setTab("circles")}>
-          <FaUsers /> Circles
-        </button>
+        <button className={tab === "dashboard" ? "active" : ""} onClick={() => setTab("dashboard")}> <FaTachometerAlt /> Dashboard </button>
+        <button className={tab === "goals" ? "active" : ""} onClick={() => setTab("goals")}> <FaBullseye /> Goals </button>
+        <button className={tab === "checkins" ? "active" : ""} onClick={() => setTab("checkins")}> <FaCheckCircle /> Check-Ins </button>
+        <button className={tab === "circles" ? "active" : ""} onClick={() => setTab("circles")}> <FaUsers /> Circles </button>
       </div>
 
       {tab === "dashboard" && (
@@ -146,16 +126,27 @@ function App() {
 
       {tab === "checkins" && (
         <section>
-          <h2>Weekly Check-In</h2>
-          <textarea
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            placeholder="What did you accomplish this week? What's next?"
-          />
-          <button onClick={handleAddCheckIn}>Submit Check-In</button>
-          <ul>
-            {checkIns.map((c, i) => (
-              <li key={i}>{c}</li>
+          <CheckinForm onCheckinSaved={() => fetchCheckIns(user.uid)} />
+
+          <ul className="space-y-4 mt-6">
+            {checkIns.map((entry) => (
+              <li key={entry.id} className="border p-3 rounded bg-gray-50">
+                <p className="text-sm text-gray-600">🌀 {entry.circle}</p>
+                <p className="font-medium">{entry.message}</p>
+
+                {entry.goal && (
+                  <div className="mt-2 p-2 border-l-4 border-blue-300 bg-blue-50">
+                    <p className="font-semibold">🎯 Goal: {entry.goal.name}</p>
+                    {entry.goal.description && <p className="text-sm">{entry.goal.description}</p>}
+                    {entry.goal.dueDate && (
+                      <p className="text-xs text-gray-500">Due: {entry.goal.dueDate}</p>
+                    )}
+                    {entry.goal.completed && (
+                      <p className="text-green-600 text-sm mt-1">✅ Completed</p>
+                    )}
+                  </div>
+                )}
+              </li>
             ))}
           </ul>
         </section>
@@ -164,7 +155,6 @@ function App() {
       {tab === "circles" && (
         <section>
           <h2>Your Accountability Circle</h2>
-
           <input
             type="email"
             placeholder="Enter email to invite"
@@ -172,7 +162,6 @@ function App() {
             onChange={(e) => setInviteEmail(e.target.value)}
           />
           <button onClick={handleSendInvite}>Send Invite</button>
-
           {invites.length === 0 ? (
             <p style={{ marginTop: "1rem" }}>You haven’t invited anyone yet.</p>
           ) : (

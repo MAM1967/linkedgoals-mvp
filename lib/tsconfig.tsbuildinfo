@@ -1,0 +1,1 @@
+{"root":["../src/app.tsx","../src/auth.tsx","../src/firebase.ts","../src/index.ts","../src/main.tsx","../src/vite-env.d.ts","../src/components/checkinform.tsx","../src/components/dashboard.tsx","../src/components/sidebar.tsx","../src/types/types.ts"],"errors":true,"version":"5.7.3"}
