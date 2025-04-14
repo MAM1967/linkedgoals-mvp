@@ -9,10 +9,10 @@ const defaultCircles = [
     { name: "Leadership", icon: "🧠" },
     { name: "Productivity", icon: "⚙️" },
 ];
-export default function CheckinForm({ onCheckinSaved }) {
+export default function CheckinForm({ goals, onCheckinSaved, }) {
     const [selectedCircle, setSelectedCircle] = useState(defaultCircles[0].name);
     const [message, setMessage] = useState("");
-    const [goalName, setGoalName] = useState("");
+    const [selectedGoalId, setSelectedGoalId] = useState("");
     const [goalDescription, setGoalDescription] = useState("");
     const [goalDueDate, setGoalDueDate] = useState("");
     const [goalComplete, setGoalComplete] = useState(false);
@@ -25,12 +25,14 @@ export default function CheckinForm({ onCheckinSaved }) {
             setStatus("error");
             return console.error("User not signed in.");
         }
+        const selectedGoal = goals.find((g) => g.id === selectedGoalId);
         const data = {
             circle: selectedCircle,
             message,
-            goal: goalName
+            goalId: selectedGoal?.id || null,
+            goal: selectedGoal
                 ? {
-                    name: goalName,
+                    name: selectedGoal.name,
                     description: goalDescription,
                     dueDate: goalDueDate || undefined,
                     completed: goalComplete,
@@ -41,7 +43,7 @@ export default function CheckinForm({ onCheckinSaved }) {
             await saveCheckin(user.uid, data);
             setStatus("success");
             setMessage("");
-            setGoalName("");
+            setSelectedGoalId("");
             setGoalDescription("");
             setGoalDueDate("");
             setGoalComplete(false);
@@ -53,5 +55,5 @@ export default function CheckinForm({ onCheckinSaved }) {
             setStatus("error");
         }
     };
-    return (_jsxs("form", { onSubmit: handleSubmit, className: "space-y-4 p-4 max-w-md mx-auto", children: [_jsx("h2", { className: "text-xl font-semibold", children: "Daily Check-In" }), _jsx("select", { value: selectedCircle, onChange: (e) => setSelectedCircle(e.target.value), className: "w-full p-2 border rounded", children: defaultCircles.map(({ name, icon }) => (_jsxs("option", { value: name, children: [icon, " ", name] }, name))) }), _jsx("textarea", { value: message, onChange: (e) => setMessage(e.target.value), placeholder: "What's on your mind today?", rows: 4, className: "w-full p-2 border rounded", required: true }), _jsxs("div", { className: "bg-gray-50 p-3 rounded border", children: [_jsx("h3", { className: "font-medium", children: "SMART Goal (optional)" }), _jsx("input", { type: "text", placeholder: "Goal name", value: goalName, onChange: (e) => setGoalName(e.target.value), className: "w-full p-2 border rounded mt-2" }), _jsx("textarea", { placeholder: "Goal description or success criteria", value: goalDescription, onChange: (e) => setGoalDescription(e.target.value), rows: 2, className: "w-full p-2 border rounded mt-2" }), _jsx("input", { type: "date", value: goalDueDate, onChange: (e) => setGoalDueDate(e.target.value), className: "w-full p-2 border rounded mt-2" }), _jsxs("label", { className: "flex items-center mt-2", children: [_jsx("input", { type: "checkbox", checked: goalComplete, onChange: (e) => setGoalComplete(e.target.checked), className: "mr-2" }), "Mark as completed"] })] }), _jsx("button", { type: "submit", className: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition", children: status === "saving" ? "Saving..." : "Submit Check-In" }), status === "success" && (_jsx("p", { className: "text-green-600", children: "Check-in saved!" })), status === "error" && (_jsx("p", { className: "text-red-600", children: "Failed to save check-in." }))] }));
+    return (_jsxs("form", { onSubmit: handleSubmit, className: "space-y-4 p-4 max-w-md mx-auto", children: [_jsx("h2", { className: "text-xl font-semibold", children: "Daily Check-In" }), _jsx("select", { value: selectedCircle, onChange: (e) => setSelectedCircle(e.target.value), className: "w-full p-2 border rounded", children: defaultCircles.map(({ name, icon }) => (_jsxs("option", { value: name, children: [icon, " ", name] }, name))) }), _jsx("textarea", { value: message, onChange: (e) => setMessage(e.target.value), placeholder: "What's on your mind today?", rows: 4, className: "w-full p-2 border rounded", required: true }), _jsxs("div", { className: "bg-gray-50 p-3 rounded border", children: [_jsx("h3", { className: "font-medium", children: "Link to a Goal (optional)" }), _jsxs("select", { value: selectedGoalId, onChange: (e) => setSelectedGoalId(e.target.value), className: "w-full p-2 border rounded mt-2", children: [_jsx("option", { value: "", children: "None" }), goals.map((goal) => (_jsxs("option", { value: goal.id, children: ["\uD83C\uDFAF ", goal.name] }, goal.id)))] }), _jsx("textarea", { placeholder: "Describe your progress or criteria", value: goalDescription, onChange: (e) => setGoalDescription(e.target.value), rows: 2, className: "w-full p-2 border rounded mt-2" }), _jsx("input", { type: "date", value: goalDueDate, onChange: (e) => setGoalDueDate(e.target.value), className: "w-full p-2 border rounded mt-2" }), _jsxs("label", { className: "flex items-center mt-2", children: [_jsx("input", { type: "checkbox", checked: goalComplete, onChange: (e) => setGoalComplete(e.target.checked), className: "mr-2" }), "Mark as completed"] })] }), _jsx("button", { type: "submit", className: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition", children: status === "saving" ? "Saving..." : "Submit Check-In" }), status === "success" && (_jsx("p", { className: "text-green-600", children: "Check-in saved!" })), status === "error" && (_jsx("p", { className: "text-red-600", children: "Failed to save check-in." }))] }));
 }

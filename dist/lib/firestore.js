@@ -5,6 +5,7 @@ export async function saveCheckin(userId, data) {
     const checkinRef = await addDoc(ref, {
         circle: data.circle,
         message: data.message,
+        goalId: data.goal?.name || null, // optional
         createdAt: serverTimestamp(),
     });
     if (data.goal) {

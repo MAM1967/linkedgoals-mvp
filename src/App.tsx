@@ -12,6 +12,7 @@ import {
 import Auth from "./Auth";
 import CheckinForm from "@/components/CheckinForm";
 import "./App.css";
+import GoalProgressDashboard from "@/components/GoalProgressDashboard";
 
 import {
   FaTachometerAlt,
@@ -23,9 +24,11 @@ import {
 function App() {
   const [user, setUser] = useState<any>(null);
   const [goal, setGoal] = useState("");
-  const [goals, setGoals] = useState<string[]>([]);
+  const [goals, setGoals] = useState<{ id: string; name: string }[]>([]); // ✅
   const [checkIns, setCheckIns] = useState<any[]>([]);
-  const [tab, setTab] = useState<"dashboard" | "goals" | "checkins" | "circles">("dashboard");
+  const [tab, setTab] = useState<
+    "dashboard" | "goals" | "checkins" | "circles"
+  >("dashboard");
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
 
@@ -43,15 +46,24 @@ function App() {
 
   const fetchGoals = async (uid: string) => {
     const snapshot = await getDocs(collection(db, `users/${uid}/goals`));
-    const fetchedGoals = snapshot.docs.map((doc) => doc.data().text);
+    const fetchedGoals = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      name: doc.data().text,
+    }));
     setGoals(fetchedGoals);
   };
 
   const fetchCheckIns = async (uid: string) => {
     const snapshot = await getDocs(
-      query(collection(db, `users/${uid}/checkins`), orderBy("createdAt", "desc"))
+      query(
+        collection(db, `users/${uid}/checkins`),
+        orderBy("createdAt", "desc")
+      )
     );
-    const fetchedCheckIns = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const fetchedCheckIns = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
     setCheckIns(fetchedCheckIns);
   };
 
@@ -90,20 +102,45 @@ function App() {
     <div className="container">
       <header>
         <h1>Welcome, {user.email}</h1>
-        <button className="logout" onClick={() => signOut(auth)}>Sign Out</button>
+        <button className="logout" onClick={() => signOut(auth)}>
+          Sign Out
+        </button>
       </header>
-
       <div className="tabs">
-        <button className={tab === "dashboard" ? "active" : ""} onClick={() => setTab("dashboard")}> <FaTachometerAlt /> Dashboard </button>
-        <button className={tab === "goals" ? "active" : ""} onClick={() => setTab("goals")}> <FaBullseye /> Goals </button>
-        <button className={tab === "checkins" ? "active" : ""} onClick={() => setTab("checkins")}> <FaCheckCircle /> Check-Ins </button>
-        <button className={tab === "circles" ? "active" : ""} onClick={() => setTab("circles")}> <FaUsers /> Circles </button>
+        <button
+          className={tab === "dashboard" ? "active" : ""}
+          onClick={() => setTab("dashboard")}
+        >
+          {" "}
+          <FaTachometerAlt /> Dashboard{" "}
+        </button>
+        <button
+          className={tab === "goals" ? "active" : ""}
+          onClick={() => setTab("goals")}
+        >
+          {" "}
+          <FaBullseye /> Goals{" "}
+        </button>
+        <button
+          className={tab === "checkins" ? "active" : ""}
+          onClick={() => setTab("checkins")}
+        >
+          {" "}
+          <FaCheckCircle /> Check-Ins{" "}
+        </button>
+        <button
+          className={tab === "circles" ? "active" : ""}
+          onClick={() => setTab("circles")}
+        >
+          {" "}
+          <FaUsers /> Circles{" "}
+        </button>
       </div>
 
       {tab === "dashboard" && (
         <section>
           <h2>Dashboard</h2>
-          <p>3 of 5 goals completed this month. Keep going!</p>
+          <GoalProgressDashboard userId={user.uid} />
         </section>
       )}
 
@@ -118,15 +155,17 @@ function App() {
           <button onClick={handleAddGoal}>Add Goal</button>
           <ul>
             {goals.map((g, i) => (
-              <li key={i}>{g}</li>
+              <li key={g.id}>{g.name}</li>
             ))}
           </ul>
         </section>
       )}
-
       {tab === "checkins" && (
         <section>
-          <CheckinForm onCheckinSaved={() => fetchCheckIns(user.uid)} />
+          <CheckinForm
+            goals={goals}
+            onCheckinSaved={() => fetchCheckIns(user.uid)}
+          />
 
           <ul className="space-y-4 mt-6">
             {checkIns.map((entry) => (
@@ -137,12 +176,18 @@ function App() {
                 {entry.goal && (
                   <div className="mt-2 p-2 border-l-4 border-blue-300 bg-blue-50">
                     <p className="font-semibold">🎯 Goal: {entry.goal.name}</p>
-                    {entry.goal.description && <p className="text-sm">{entry.goal.description}</p>}
+                    {entry.goal.description && (
+                      <p className="text-sm">{entry.goal.description}</p>
+                    )}
                     {entry.goal.dueDate && (
-                      <p className="text-xs text-gray-500">Due: {entry.goal.dueDate}</p>
+                      <p className="text-xs text-gray-500">
+                        Due: {entry.goal.dueDate}
+                      </p>
                     )}
                     {entry.goal.completed && (
-                      <p className="text-green-600 text-sm mt-1">✅ Completed</p>
+                      <p className="text-green-600 text-sm mt-1">
+                        ✅ Completed
+                      </p>
                     )}
                   </div>
                 )}
@@ -151,7 +196,6 @@ function App() {
           </ul>
         </section>
       )}
-
       {tab === "circles" && (
         <section>
           <h2>Your Accountability Circle</h2>
@@ -178,4 +222,3 @@ function App() {
 }
 
 export default App;
-
