@@ -8,6 +8,7 @@ export async function saveCheckin(userId: string, data: CheckinData) {
   const checkinRef = await addDoc(ref, {
     circle: data.circle,
     message: data.message,
+    goalId: data.goal?.name || null, // optional
     createdAt: serverTimestamp(),
   });
 

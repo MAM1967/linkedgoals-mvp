@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Define Your SMART Goal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Define Your SMART Goal</h1>
+        <form id="smart-goal-form">
+            <div class="form-group">
+                <label for="specific">Specific:</label>
+                <textarea id="specific" name="specific" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="measurable-type">Measurable Type:</label>
+                <select id="measurable-type" name="measurable-type" required>
+                    <option value="">Select measurement type</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="yes/no">Yes/No</option>
+                </select>
+            </div>
+
+            <div id="measurable-input-container" class="form-group">
+                <!-- Conditional input fields will be added here by JavaScript -->
+            </div>
+
+            <div class="form-group">
+                <label for="achievable">Achievable:</label>
+                <textarea id="achievable" name="achievable" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="relevant">Relevant:</label>
+                <textarea id="relevant" name="relevant" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="time-bound">Time-bound:</label>
+                <input type="date" id="time-bound" name="time-bound" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Save Goal</button>
+                <button type="button" id="cancel-button">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="data-entry.js"></script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import { CheckinData } from "@/types";
 console.log("🧠 Using the NEW CheckinForm with dropdowns!");
 
 type CheckinFormProps = {
+  goals: { id: string; name: string }[];
   onCheckinSaved?: () => void;
 };
 
@@ -17,14 +18,19 @@ const defaultCircles = [
   { name: "Productivity", icon: "⚙️" },
 ];
 
-export default function CheckinForm({ onCheckinSaved }: CheckinFormProps) {
+export default function CheckinForm({
+  goals,
+  onCheckinSaved,
+}: CheckinFormProps) {
   const [selectedCircle, setSelectedCircle] = useState(defaultCircles[0].name);
   const [message, setMessage] = useState("");
-  const [goalName, setGoalName] = useState("");
+  const [selectedGoalId, setSelectedGoalId] = useState<string>("");
   const [goalDescription, setGoalDescription] = useState("");
   const [goalDueDate, setGoalDueDate] = useState("");
   const [goalComplete, setGoalComplete] = useState(false);
-  const [status, setStatus] = useState<null | "saving" | "success" | "error">(null);
+  const [status, setStatus] = useState<null | "saving" | "success" | "error">(
+    null
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +42,15 @@ export default function CheckinForm({ onCheckinSaved }: CheckinFormProps) {
       return console.error("User not signed in.");
     }
 
+    const selectedGoal = goals.find((g) => g.id === selectedGoalId);
+
     const data: CheckinData = {
       circle: selectedCircle,
       message,
-      goal: goalName
+      goalId: selectedGoal?.id || null,
+      goal: selectedGoal
         ? {
-            name: goalName,
+            name: selectedGoal.name,
             description: goalDescription,
             dueDate: goalDueDate || undefined,
             completed: goalComplete,
@@ -53,7 +62,7 @@ export default function CheckinForm({ onCheckinSaved }: CheckinFormProps) {
       await saveCheckin(user.uid, data);
       setStatus("success");
       setMessage("");
-      setGoalName("");
+      setSelectedGoalId("");
       setGoalDescription("");
       setGoalDueDate("");
       setGoalComplete(false);
@@ -90,16 +99,22 @@ export default function CheckinForm({ onCheckinSaved }: CheckinFormProps) {
       />
 
       <div className="bg-gray-50 p-3 rounded border">
-        <h3 className="font-medium">SMART Goal (optional)</h3>
-        <input
-          type="text"
-          placeholder="Goal name"
-          value={goalName}
-          onChange={(e) => setGoalName(e.target.value)}
+        <h3 className="font-medium">Link to a Goal (optional)</h3>
+        <select
+          value={selectedGoalId}
+          onChange={(e) => setSelectedGoalId(e.target.value)}
           className="w-full p-2 border rounded mt-2"
-        />
+        >
+          <option value="">None</option>
+          {goals.map((goal) => (
+            <option key={goal.id} value={goal.id}>
+              🎯 {goal.name}
+            </option>
+          ))}
+        </select>
+
         <textarea
-          placeholder="Goal description or success criteria"
+          placeholder="Describe your progress or criteria"
           value={goalDescription}
           onChange={(e) => setGoalDescription(e.target.value)}
           rows={2}
