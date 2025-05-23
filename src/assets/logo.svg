@@ -1,0 +1,16 @@
+<svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- People Circle Icon -->
+  <g transform="translate(50, 50) scale(0.8)">
+    <path d="M50 25 A25 25 0 1 1 50 75 A25 25 0 1 1 50 25" fill="white"/>
+    <path d="M25 75 A25 25 0 1 1 75 75" fill="white"/>
+    <path d="M75 50 A25 25 0 1 1 25 50" fill="white"/>
+    <path d="M25,50 C25,75 75,75 75,50" stroke="white" fill="none" stroke-width="2"/>
+    <path d="M50,25 C25,25 25,75 50,75" stroke="white" fill="none" stroke-width="2"/>
+    <path d="M50,75 C75,75 75,25 50,25" stroke="white" fill="none" stroke-width="2"/>
+  </g>
+  
+  <!-- Linkedgoals Text -->
+  <text x="200" y="120" font-family="Arial" font-size="100" font-weight="bold" fill="white">
+    Linkedgoals
+  </text>
+</svg> 

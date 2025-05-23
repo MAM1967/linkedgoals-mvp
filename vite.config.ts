@@ -3,15 +3,15 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-  root: "./src",
   plugins: [react()],
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
+    sourcemap: true
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  build: {
-    outDir: "../frontend/dist", // ✅ Output directory for Firebase hosting
-    emptyOutDir: true,
   },
 });

@@ -1,14 +1,32 @@
-<<<<<<< HEAD
-# Compiled JavaScript files
-lib/**/*.js
-lib/**/*.js.map
-
-# TypeScript v1 declaration files
-typings/
-
 # Node.js dependency directory
 node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
 *.local
-=======
-node_modules\nfirebase-debug.log\ndist\nbuild\n.env
->>>>>>> dcc43ca056fd73a2b2df18380874f6249ee117dc
+
+# Firebase
+firebase-debug.log
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE specific
+.vscode/
+
+# Compiled JavaScript files (if you compile TS to JS in the same src directory, less common with Vite)
+# src/**/*.js
+# src/**/*.js.map
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_Store

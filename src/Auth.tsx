@@ -3,9 +3,20 @@ import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  User,
+  AuthError,
 } from "firebase/auth";
+import { FaLinkedin } from "react-icons/fa";
+import logo from "./assets/logo.svg";
 
-export default function Auth({ onAuth }: { onAuth: (user: any) => void }) {
+const LINKEDIN_CLIENT_ID = "7880c93kzzfsgj";
+const REDIRECT_URI = "https://linkedgoals-d7053.web.app/linkedin";
+
+interface AuthProps {
+  onAuth: (user: User) => void;
+}
+
+export default function Auth({ onAuth }: AuthProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
@@ -19,38 +30,87 @@ export default function Auth({ onAuth }: { onAuth: (user: any) => void }) {
       } else {
         userCred = await signInWithEmailAndPassword(auth, email, password);
       }
-      onAuth(userCred.user); // Pass user back to parent
-    } catch (err: any) {
-      setError(err.message);
+      onAuth(userCred.user);
+    } catch (err: unknown) {
+      const authError = err as AuthError;
+      setError(authError.message || "Authentication failed");
     }
   };
 
+  const handleLinkedInLogin = () => {
+    // Generate random state for security
+    const state = Math.random().toString(36).substring(7);
+    console.log("🌐 Generated OAuth state:", state);
+    sessionStorage.setItem("linkedin_oauth_state", state);
+
+    // Define the scope - only request basic profile
+    const scope = "openid profile email";
+    console.log("🔐 Using LinkedIn scope:", scope);
+
+    // LinkedIn OAuth 2.0 authorization URL
+    const authUrl = new URL("https://www.linkedin.com/oauth/v2/authorization");
+    authUrl.searchParams.append("response_type", "code");
+    authUrl.searchParams.append("client_id", LINKEDIN_CLIENT_ID);
+    authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
+    authUrl.searchParams.append("state", state);
+    authUrl.searchParams.append("scope", scope);
+
+    // Redirect to LinkedIn login
+    window.location.href = authUrl.toString();
+  };
+
   return (
-    <div style={{ maxWidth: "400px", margin: "2rem auto", textAlign: "center" }}>
-      <h2>{isRegistering ? "Register" : "Login"}</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ padding: "0.5rem", marginBottom: "1rem", width: "100%" }}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ padding: "0.5rem", marginBottom: "1rem", width: "100%" }}
-      />
-      <button onClick={handleAuth} style={{ padding: "0.5rem 1rem", marginBottom: "1rem" }}>
-        {isRegistering ? "Create Account" : "Log In"}
-      </button>
-      <div>
-        <button onClick={() => setIsRegistering(!isRegistering)} style={{ fontSize: "0.9rem" }}>
-          {isRegistering ? "Already have an account? Log in" : "New? Create an account"}
-        </button>
+    <div className="login-container">
+      <div className="login-card">
+        <img src={logo} alt="Linkedgoals Logo" className="logo" />
+        <h2>{isRegistering ? "Create Your Account" : "Welcome Back"}</h2>
+        <p>
+          {isRegistering
+            ? "Join your accountability circle"
+            : "Sign in to continue to Linkedgoals"}
+        </p>
+
+        <div className="form-container">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-field"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input-field"
+          />
+          <button onClick={handleAuth} className="auth-button">
+            {isRegistering ? "Create Account" : "Sign In"}
+          </button>
+        </div>
+
+        <div className="linkedin-login">
+          <button onClick={handleLinkedInLogin} className="linkedin-button">
+            <FaLinkedin />
+            Sign in with LinkedIn
+          </button>
+        </div>
+
+        {error && <p className="error-message">{error}</p>}
+
+        <p className="toggle-auth">
+          {isRegistering
+            ? "Already have an account? "
+            : "Don't have an account? "}
+          <button
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="toggle-button"
+          >
+            {isRegistering ? "Sign In" : "Create Account"}
+          </button>
+        </p>
       </div>
-      {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
     </div>
   );
 }
