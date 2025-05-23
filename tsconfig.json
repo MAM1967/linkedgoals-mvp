@@ -14,12 +14,19 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "baseUrl": "./src",
-    "rootDir": "./src",               // ✅ <--- Add this line
     "outDir": "./dist",
     "paths": {
+      "@components/*": ["components/*"],
+      "@lib/*": ["lib/*"],
       "@/*": ["*"]
-    }
+    },
+    "types": ["vite/client", "jest", "node"]
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "src/**/__tests__/**/*",
+    "jest.config.cjs",
+    "vite.config.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

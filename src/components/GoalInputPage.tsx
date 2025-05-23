@@ -3,11 +3,37 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../lib/firebase"; // Corrected path
 import "./GoalInputPage.css"; // We will create this CSS file
 
+// Define the allowed categories for the MVP
+const MVP_CATEGORIES = ["Career", "Productivity", "Skills"];
+
+// Define the new structure for the measurable field (consistent with other files)
+interface MeasurableData {
+  type: string;
+  targetValue: number | string | null;
+  currentValue: number | string | boolean | null;
+  unit?: string;
+}
+
+const MEASURABLE_TYPES = [
+  { value: "Numeric", label: "Numeric (e.g., count, pages, hours)" },
+  { value: "Date", label: "Target Date" },
+  { value: "DailyStreak", label: "Daily Check-in Streak" },
+  { value: "Boolean", label: "Done / Not Done" },
+];
+
 const GoalInputPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [goalDescription, setGoalDescription] = useState("");
+  const [category, setCategory] = useState<string>(MVP_CATEGORIES[0]); // New state for category, default to first
   const [specific, setSpecific] = useState("");
-  const [measurable, setMeasurable] = useState("");
+
+  // State for the structured measurable field
+  const [measurableType, setMeasurableType] = useState<string>(
+    MEASURABLE_TYPES[0].value
+  );
+  const [measurableTarget, setMeasurableTarget] = useState<string>(""); // Generic string for input, convert later
+  const [measurableUnit, setMeasurableUnit] = useState<string>(""); // e.g., pages, days
+
   const [achievable, setAchievable] = useState("");
   const [relevant, setRelevant] = useState("");
   const [dueDate, setDueDate] = useState(""); // Store as string from date input
@@ -15,7 +41,7 @@ const GoalInputPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const totalSteps = 6; // Description + S + M + A + R + T (DueDate)
+  const totalSteps = 7; // Description + Category + S + M + A + R + T (DueDate)
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -78,13 +104,27 @@ const GoalInputPage: React.FC = () => {
       return;
     }
 
+    // Basic validation for all fields including measurable parts based on type
+    let measurableDataError = false;
+    if (
+      measurableType === "Numeric" &&
+      (!measurableTarget.trim() || !measurableUnit.trim())
+    )
+      measurableDataError = true;
+    if (measurableType === "Date" && !measurableTarget.trim())
+      measurableDataError = true;
+    if (measurableType === "DailyStreak" && !measurableTarget.trim())
+      measurableDataError = true;
+    // Boolean type needs no extra validation for measurable target/unit
+
     if (
       !goalDescription.trim() ||
       !specific.trim() ||
-      !measurable.trim() ||
+      measurableDataError || // Check our flag
       !achievable.trim() ||
       !relevant.trim() ||
-      !dueDate.trim() // also trim dueDate before validation
+      !dueDate.trim() ||
+      !category // Ensure category is selected
     ) {
       setError("Please fill out all fields before saving.");
       return;
@@ -99,26 +139,92 @@ const GoalInputPage: React.FC = () => {
       return;
     }
 
+    let currentVal: number | string | boolean | null = null;
+    let targetVal: number | string | null = null;
+
+    switch (measurableType) {
+      case "Numeric":
+        targetVal = parseFloat(measurableTarget);
+        if (isNaN(targetVal)) {
+          setError("Numeric target value must be a number.");
+          return;
+        }
+        currentVal = 0; // Default current value for numeric
+        break;
+      case "Date":
+        const validatedMeasurableDate = isValidDateString(
+          measurableTarget.trim()
+        );
+        if (!validatedMeasurableDate) {
+          setError("Invalid target date for 'Measurable' field.");
+          return;
+        }
+        targetVal = validatedMeasurableDate; // Now definitely a string
+        currentVal = null; // Or perhaps today's date string if needed for comparison later
+        break;
+      case "DailyStreak":
+        targetVal = parseInt(measurableTarget, 10);
+        if (isNaN(targetVal) || targetVal <= 0) {
+          setError("Daily streak target must be a positive number of days.");
+          return;
+        }
+        currentVal = 0; // Default current streak
+        break;
+      case "Boolean":
+        targetVal = null; // No specific target value for boolean
+        currentVal = false; // Default to not done
+        break;
+      default:
+        setError("Invalid measurable type selected.");
+        return;
+    }
+
+    // Define a clear type for the object to be saved to Firestore
+    interface GoalToSave {
+      description: string;
+      specific: string;
+      measurable: MeasurableData; // Structured measurable data
+      achievable: string;
+      relevant: string;
+      dueDate: string; // Overall goal due date
+      category: string;
+      createdAt: any; // Firebase ServerTimestamp placeholder
+      status: string;
+      completed: boolean;
+    }
+
+    const goalDataToSave: GoalToSave = {
+      description: goalDescription,
+      specific,
+      measurable: {
+        type: measurableType,
+        targetValue: targetVal,
+        currentValue: currentVal,
+        ...(measurableType === "Numeric" &&
+          measurableUnit.trim() && { unit: measurableUnit.trim() }),
+      },
+      achievable,
+      relevant,
+      dueDate: validatedDate,
+      category: category,
+      createdAt: serverTimestamp(),
+      status: "active",
+      completed: false,
+    };
+
     try {
       const goalsCollectionRef = collection(
         db,
         `users/${auth.currentUser.uid}/goals`
       );
-      await addDoc(goalsCollectionRef, {
-        description: goalDescription,
-        specific,
-        measurable,
-        achievable,
-        relevant,
-        dueDate: validatedDate, // Use the validated and potentially normalized date
-        createdAt: serverTimestamp(),
-        status: "active",
-        completed: false,
-      });
+      await addDoc(goalsCollectionRef, goalDataToSave);
       setSuccess("Goal saved successfully!");
       setGoalDescription("");
+      setCategory(MVP_CATEGORIES[0]); // Reset category
       setSpecific("");
-      setMeasurable("");
+      setMeasurableType(MEASURABLE_TYPES[0].value);
+      setMeasurableTarget("");
+      setMeasurableUnit("");
       setAchievable("");
       setRelevant("");
       setDueDate(""); // Reset to empty string for the input field
@@ -146,6 +252,23 @@ const GoalInputPage: React.FC = () => {
       case 2:
         return (
           <div className="form-step">
+            <label htmlFor="category">Category:</label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {MVP_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="form-step">
             <label htmlFor="specific">Specific:</label>
             <textarea
               id="specific"
@@ -155,19 +278,81 @@ const GoalInputPage: React.FC = () => {
             />
           </div>
         );
-      case 3:
+      case 4:
         return (
           <div className="form-step">
-            <label htmlFor="measurable">Measurable:</label>
-            <textarea
-              id="measurable"
-              value={measurable}
-              onChange={(e) => setMeasurable(e.target.value)}
-              placeholder="How will you measure progress and know when it's achieved?"
-            />
+            <label htmlFor="measurableType">Measurable By:</label>
+            <select
+              id="measurableType"
+              value={measurableType}
+              onChange={(e) => {
+                setMeasurableType(e.target.value);
+                setMeasurableTarget(""); // Reset target and unit on type change
+                setMeasurableUnit("");
+              }}
+            >
+              {MEASURABLE_TYPES.map((mType) => (
+                <option key={mType.value} value={mType.value}>
+                  {mType.label}
+                </option>
+              ))}
+            </select>
+
+            {measurableType === "Numeric" && (
+              <>
+                <div>
+                  <label htmlFor="measurableTargetNumeric">Target Value:</label>
+                  <input
+                    type="number"
+                    id="measurableTargetNumeric"
+                    value={measurableTarget}
+                    onChange={(e) => setMeasurableTarget(e.target.value)}
+                    placeholder="e.g., 20"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="measurableUnit">Unit:</label>
+                  <input
+                    type="text"
+                    id="measurableUnit"
+                    value={measurableUnit}
+                    onChange={(e) => setMeasurableUnit(e.target.value)}
+                    placeholder="e.g., pages, tasks, hours"
+                  />
+                </div>
+              </>
+            )}
+
+            {measurableType === "Date" && (
+              <div>
+                <label htmlFor="measurableTargetDate">Target Date:</label>
+                <input
+                  type="date"
+                  id="measurableTargetDate"
+                  value={measurableTarget}
+                  onChange={(e) => setMeasurableTarget(e.target.value)}
+                />
+              </div>
+            )}
+
+            {measurableType === "DailyStreak" && (
+              <div>
+                <label htmlFor="measurableTargetStreak">
+                  Target Streak (days):
+                </label>
+                <input
+                  type="number"
+                  id="measurableTargetStreak"
+                  value={measurableTarget}
+                  onChange={(e) => setMeasurableTarget(e.target.value)}
+                  placeholder="e.g., 21"
+                />
+              </div>
+            )}
+            {/* Boolean type needs no additional input for target value */}
           </div>
         );
-      case 4:
+      case 5:
         return (
           <div className="form-step">
             <label htmlFor="achievable">Achievable:</label>
@@ -179,7 +364,7 @@ const GoalInputPage: React.FC = () => {
             />
           </div>
         );
-      case 5:
+      case 6:
         return (
           <div className="form-step">
             <label htmlFor="relevant">Relevant:</label>
@@ -191,7 +376,7 @@ const GoalInputPage: React.FC = () => {
             />
           </div>
         );
-      case 6:
+      case 7:
         return (
           <div className="form-step">
             <label htmlFor="dueDate">Time-bound (Due Date):</label>

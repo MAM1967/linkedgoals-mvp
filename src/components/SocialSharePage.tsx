@@ -7,9 +7,21 @@ import {
   onSnapshot,
   Timestamp,
   Unsubscribe,
+  doc,
+  getDoc,
+  setDoc,
+  increment,
+  serverTimestamp,
 } from "firebase/firestore";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import "./SocialSharePage.css"; // We'll create this CSS file later
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTwitter,
+  faFacebook,
+  faLinkedin,
+} from "@fortawesome/free-brands-svg-icons";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 // Interface for SMART Goals (same as in Dashboard and GoalInputPage)
 interface SmartGoal {
@@ -33,72 +45,90 @@ const SocialSharePage: React.FC = () => {
   const [loadingGoals, setLoadingGoals] = useState(true);
   const [errorGoals, setErrorGoals] = useState<string | null>(null);
   const [selectedGoal, setSelectedGoal] = useState<SmartGoal | null>(null);
-  const [shareMessage, setShareMessage] = useState("");
+  const [shareText, setShareText] = useState<string>("");
   const [isMilestoneShare, setIsMilestoneShare] = useState(false);
-  const [pageTitle, setPageTitle] = useState("Share Your Goals on LinkedIn");
+  const [pageTitle, setPageTitle] = useState<string>("Share Your Progress");
   const [shareType, setShareType] = useState<"progress" | "coachInvitation">(
     "progress"
   );
 
   // State to hold the full URL for sharing if needed, e.g. for a direct link to the app/goal
   // For now, we primarily share text, but this could be useful for 'Copy Link' functionality
-  const [shareUrl, setShareUrl] = useState<string>("");
+  const [shareUrl, setShareUrl] = useState<string>(window.location.origin);
+  const [goalDescription, setGoalDescription] = useState<string | null>(null);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set the share URL once, e.g., to the current page or a specific goal page if applicable
-    setShareUrl(window.location.href); // Example: current page URL
+    const incomingText = searchParams.get("text");
+    const goalId = searchParams.get("goalId");
+    const milestone = searchParams.get("milestone");
+    let constructedShareUrl = window.location.origin;
 
-    const milestoneType = searchParams.get("milestone");
-    const textParam = searchParams.get("text");
-
-    if (milestoneType === "goalComplete" && textParam) {
-      setShareMessage(textParam);
-      setIsMilestoneShare(true);
-      setShareType("progress");
-      setPageTitle("Share Your Achievement!");
-      setLoadingGoals(false);
-    } else {
-      setIsMilestoneShare(false);
-      setPageTitle("Share Your Goals on LinkedIn");
-      const user = auth.currentUser;
-      if (!user) {
-        setLoadingGoals(false);
-        setErrorGoals("You need to be logged in to see your goals.");
-        return;
-      }
-      setLoadingGoals(true);
-      setErrorGoals(null);
-      const goalsCollectionRef = collection(db, `users/${user.uid}/goals`);
-      const goalsQuery = query(
-        goalsCollectionRef,
-        orderBy("createdAt", "desc")
-      );
-      const unsubscribeGoals: Unsubscribe = onSnapshot(
-        goalsQuery,
-        (querySnapshot) => {
-          const fetchedGoals: SmartGoal[] = [];
-          querySnapshot.forEach((doc) => {
-            const goalData = doc.data() as SmartGoalData;
-            if (goalData.status === "active" && !goalData.completed) {
-              fetchedGoals.push({ ...goalData, id: doc.id });
+    if (goalId) {
+      constructedShareUrl = `${window.location.origin}/shared-goal/${goalId}`; // Link to a potential shared goal view page
+      setShareUrl(constructedShareUrl);
+      // Fetch goal description for context, if not already in incomingText
+      if (
+        auth.currentUser &&
+        (!incomingText || !incomingText.includes("goal:"))
+      ) {
+        const fetchGoal = async () => {
+          try {
+            const goalRef = doc(
+              db,
+              `users/${auth.currentUser!.uid}/goals`,
+              goalId
+            );
+            const goalSnap = await getDoc(goalRef);
+            if (goalSnap.exists()) {
+              const goalData = goalSnap.data();
+              setGoalDescription(goalData.description);
+              if (!incomingText) {
+                // Only set if no specific text was passed
+                setShareText(
+                  `Check out my progress on my goal: "${goalData.description}"! See it here: ${constructedShareUrl}`
+                );
+              }
+            } else {
+              console.log("No such goal to share details for!");
+              if (!incomingText)
+                setShareText(
+                  "I'm making great progress on my goals! #GoalMomentum"
+                );
             }
-          });
-          setSmartGoals(fetchedGoals);
-          setLoadingGoals(false);
-        },
-        (error) => {
-          console.error("Error fetching SMART goals for sharing:", error);
-          setErrorGoals("Failed to load goals. Please try again later.");
-          setLoadingGoals(false);
-        }
-      );
-      return () => {
-        unsubscribeGoals();
-      };
+          } catch (error) {
+            console.error("Error fetching goal for sharing: ", error);
+            if (!incomingText)
+              setShareText(
+                "I'm making great progress on my goals! #GoalMomentum"
+              );
+          }
+        };
+        fetchGoal();
+      }
+    } else {
+      setShareUrl(window.location.origin); // Default site URL if no specific goal
     }
+
+    if (incomingText) {
+      setShareText(incomingText);
+      setPageTitle("Share Your Milestone!");
+    } else if (milestone === "goalComplete") {
+      // This case is largely superseded if 'text' is provided by Dashboard, but kept as fallback
+      setPageTitle("Share Your Achievement!");
+      // A generic message if goalDescription isn't fetched/available yet, or no goalId was passed
+      setShareText(
+        "🏆 I just achieved one of my SMART goals! Feeling accomplished! #GoalAchieved #Productivity"
+      );
+    } else if (!goalId && !incomingText) {
+      // Default if no params
+      setShareText(
+        "I'm working on my goals with GoalMomentum! Join me! #GoalSetting #Motivation"
+      );
+    }
+    // If only goalId is present and incomingText is not, the useEffect for fetchGoal will set the text.
   }, [searchParams]);
 
   const generateShareMessage = (
@@ -124,7 +154,7 @@ const SocialSharePage: React.FC = () => {
         `#GoalPulse #AccountabilityCoach #Mentorship`
       );
     } else {
-      if (isMilestoneShare) return shareMessage; // Use the pre-formatted milestone message
+      if (isMilestoneShare) return shareText; // Use the pre-formatted milestone message
       return (
         `Working on my goal: "${goal.description}"! ` +
         `Aiming to complete it by ${new Date(
@@ -140,59 +170,85 @@ const SocialSharePage: React.FC = () => {
     setIsMilestoneShare(false);
     setShareType("progress");
     setPageTitle(`Share: ${goal.description}`);
-    setShareMessage(generateShareMessage(goal, "progress"));
+    setShareText(generateShareMessage(goal, "progress"));
   };
 
   const handleSetShareType = (type: "progress" | "coachInvitation") => {
     if (selectedGoal) {
       setShareType(type);
-      setShareMessage(generateShareMessage(selectedGoal, type));
+      setShareText(generateShareMessage(selectedGoal, type));
+    }
+  };
+
+  const recordShareActivity = async () => {
+    if (!auth.currentUser) return;
+    const userStatsRef = doc(
+      db,
+      `users/${auth.currentUser.uid}/userStats`,
+      "sharing"
+    );
+    try {
+      await setDoc(
+        userStatsRef,
+        {
+          count: increment(1),
+          lastSharedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      console.log("Share activity recorded.");
+    } catch (error) {
+      console.error("Error recording share activity:", error);
     }
   };
 
   const handleShare = (
     platform: "linkedin" | "twitter" | "facebook" | "copy"
   ) => {
-    if (!shareMessage.trim()) return;
+    if (!shareText.trim()) return;
 
     let url = "";
-    const encodedMessage = encodeURIComponent(shareMessage.trim());
-    // The shareUrl state currently holds the page's own URL. For some platforms,
-    // you might want to share a link TO the content, not just the text.
-    // For this iteration, we focus on text sharing where supported, or a general link.
+    const encodedMessage = encodeURIComponent(shareText.trim());
     const encodedPageUrl = encodeURIComponent(shareUrl);
+
+    let sharedSuccessfully = false;
 
     switch (platform) {
       case "linkedin":
         url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodedMessage}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+        sharedSuccessfully = true;
         break;
       case "twitter":
-        // Twitter (X) uses 'text' or 'url' and 'via' (your app's twitter handle)
         url = `https://twitter.com/intent/tweet?text=${encodedMessage}`;
-        // If you want to share a URL with the tweet: url = `https://twitter.com/intent/tweet?url=${encodedPageUrl}&text=${encodedMessage}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+        sharedSuccessfully = true;
         break;
       case "facebook":
-        // Facebook requires a URL to share. We use the current page URL as an example.
-        // For best results, ensure the shared URL has appropriate Open Graph meta tags.
         url = `https://www.facebook.com/sharer/sharer.php?u=${encodedPageUrl}&quote=${encodedMessage}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+        sharedSuccessfully = true;
         break;
       case "copy":
         navigator.clipboard
-          .writeText(shareMessage.trim())
+          .writeText(shareText.trim())
           .then(() => {
             alert("Message copied to clipboard!");
+            recordShareActivity(); // Record copy as a share action
           })
           .catch((err) => {
             console.error("Failed to copy message: ", err);
             alert("Failed to copy message.");
           });
-        return; // No need to open a window for copy
+        return; // Return early as window.open is not used here
       default:
         console.warn("Unsupported share platform:", platform);
         return;
     }
 
-    window.open(url, "_blank", "noopener,noreferrer");
+    if (sharedSuccessfully) {
+      recordShareActivity();
+    }
 
     if (isMilestoneShare) {
       navigate("/"); // Navigate to dashboard after sharing a milestone
@@ -200,7 +256,7 @@ const SocialSharePage: React.FC = () => {
       // Reset selection for non-milestone shares to allow sharing another goal
       // This block is reached if platform was LinkedIn, Twitter, or Facebook.
       setSelectedGoal(null);
-      setShareMessage("");
+      setShareText("");
       setShareType("progress");
       setPageTitle("Share Your Goals on LinkedIn"); // Reset title or make it more generic
     }
@@ -252,7 +308,7 @@ const SocialSharePage: React.FC = () => {
       {(selectedGoal || isMilestoneShare) && (
         <div className="share-preview-area">
           <h4>Share this message:</h4>
-          <textarea readOnly value={shareMessage} rows={6}></textarea>
+          <textarea readOnly value={shareText} rows={6}></textarea>
           {selectedGoal && !isMilestoneShare && (
             <div className="share-type-selector">
               <button

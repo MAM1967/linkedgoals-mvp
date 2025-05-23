@@ -1,0 +1,344 @@
+/* Dashboard.css */
+.dashboard-container {
+  padding: 1.5rem; /* 24px */
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: "Inter", sans-serif; /* Consistent font */
+  background-color: #f4f7f9; /* Light background for the page */
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  background-color: #0a66c2; /* LinkedIn Navy */
+  color: white;
+  padding: 2rem 1.5rem; /* More padding for header */
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header h1 {
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.streak-banner {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Space between icon and text */
+}
+
+.streak-banner .fa-fire {
+  color: #ffac33; /* Fire icon color */
+}
+
+.dashboard-section {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #0a66c2; /* LinkedIn Navy accent */
+  display: inline-block; /* So border only spans the text width */
+}
+
+/* Legacy check-in specific styling if needed, mostly uses card/section style */
+#checkins-legacy .text-2xl {
+  font-size: 1.25rem; /* Adjusting to fit the new section title style better */
+  color: #444;
+  border-bottom: none;
+  display: block; /* Override inline-block from .section-title if it was ever applied */
+}
+
+/* General card styling to be refined in later phases */
+.goal-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Pushes buttons to the bottom */
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.25rem; /* 20px */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+  min-height: 320px; /* Give cards a consistent minimum height */
+}
+
+.goal-card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+.goal-card h3 {
+  font-size: 1.125rem; /* 18px */
+  margin-bottom: 0.5rem;
+}
+
+.goal-card .text-xs {
+  font-size: 0.75rem; /* 12px */
+}
+
+.goal-card-progress .progress-bar-background {
+  width: 100%;
+  background-color: #e9ecef; /* Light grey background for the bar */
+  border-radius: 0.25rem; /* 4px */
+  height: 0.75rem; /* 12px, slightly thicker for visibility */
+  overflow: hidden; /* Ensures foreground doesn't spill out */
+}
+
+.goal-card-progress .progress-bar-foreground {
+  background-color: #28a745; /* Success green, or could be blue-500 */
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+  border-radius: 0.25rem; /* Match background */
+}
+
+.goal-card-progress .progress-text {
+  display: block;
+  text-align: right;
+  font-size: 0.7rem; /* Slightly smaller text for progress values */
+  color: #495057;
+  margin-top: 0.25rem;
+}
+
+.goal-card .border-t {
+  border-top-width: 1px;
+}
+
+.goal-card button {
+  padding: 0.6rem 1rem; /* Slightly more padding for better clickability */
+  font-size: 0.875rem; /* 14px */
+  border-radius: 6px;
+}
+
+/* Quick Add Goal Button Styling */
+.quick-add-goal-button-container {
+  margin-top: 1.5rem; /* Space above the button */
+  text-align: center; /* Center the button */
+}
+
+.quick-add-goal-button {
+  background-color: #1c7ed6; /* A nice blue */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: background-color 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+
+.quick-add-goal-button:hover {
+  background-color: #156cb3; /* Darker blue on hover */
+}
+
+/* Styling for Tailwind classes if not already globally available or being phased out */
+/* This ensures elements previously styled with Tailwind look okay during transition */
+.p-4 {
+  padding: 1rem;
+}
+.max-w-4xl {
+  max-width: 56rem;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.border {
+  border-width: 1px;
+}
+.rounded {
+  border-radius: 0.25rem;
+}
+.bg-white {
+  background-color: white;
+}
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.text-gray-500 {
+  color: #6b7280;
+}
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mt-3 {
+  margin-top: 0.75rem;
+}
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+.border-l-4 {
+  border-left-width: 4px;
+}
+.border-blue-400 {
+  border-color: #60a5fa;
+}
+.p-3 {
+  padding: 0.75rem;
+}
+.font-medium {
+  font-weight: 500;
+}
+.text-gray-700 {
+  color: #374151;
+}
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.text-green-600 {
+  color: #059669;
+}
+.text-red-500 {
+  color: #ef4444;
+}
+.text-blue-600 {
+  color: #2563eb;
+}
+.text-purple-600 {
+  color: #7c3aed;
+}
+
+.smart-goals-list .grid {
+  /* Ensures cards can grow if content is larger */
+}
+
+/* Achievements/Badges Section */
+#achievements {
+  margin-top: 2rem; /* Add some space above the achievements section */
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(280px, 1fr)
+  ); /* Responsive grid */
+  gap: 1.5rem;
+}
+
+.badge-card {
+  background-color: #f8f9fa; /* Light background for badge cards */
+  border: 1px solid #dee2e6; /* Subtle border */
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.badge-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.badge-icon {
+  font-size: 2.5rem; /* Slightly adjust icon size */
+  color: #0a66c2;
+  min-width: 60px; /* Ensure icon area has a minimum width */
+  height: 60px; /* Make it square for easier shaping */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px; /* Default rounded corners for all */
+  background-color: #e9ecef; /* Default light background */
+  padding: 0.5rem;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Consistency Champion: Shield-like (Gold icon, Navy-ish background) */
+.badge-icon.consistencyChampion-icon-bg {
+  background-color: #0a66c2; /* LinkedIn Navy */
+  /* border-radius: 15% 15% 50% 50% / 15% 15% 30% 30%; */ /* Attempt at shield, might be too complex */
+}
+.badge-icon .fa-shield-alt {
+  color: #ffd700; /* Gold */
+}
+
+/* Milestone Master: Star-like (Green icon, Light Green/Silver background) */
+.badge-icon.milestoneMaster-icon-bg {
+  background-color: #e0f2e0; /* Light green, or #C0C0C0 for silver */
+}
+.badge-icon .fa-star {
+  color: #4caf50; /* Bright Green */
+}
+
+/* Sharing Enthusiast: Circular (Royal Blue icon, White background with Blue border) */
+.badge-icon.sharingEnthusiast-icon-bg {
+  background-color: #ffffff;
+  border: 2px solid #1e90ff; /* Royal Blue border */
+  border-radius: 50%; /* Make it circular */
+}
+.badge-icon .fa-bullhorn {
+  color: #1e90ff; /* Royal Blue */
+}
+
+/* Default/fallback icon color */
+.badge-icon .fa-medal {
+  color: #6c757d;
+}
+
+.badge-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 0.25rem;
+}
+
+.badge-description {
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  flex-grow: 1;
+}
+
+.badge-count {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+
+.badge-earned-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+}

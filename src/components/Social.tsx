@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { db, auth } from "@/lib/firebase";
 import {
   collection,
@@ -8,24 +8,29 @@ import {
   doc, // Import doc for updating a document
   updateDoc, // Import updateDoc for updating a document
 } from "firebase/firestore";
-import { nanoid } from 'nanoid'; // Using nanoid for generating unique IDs (you might need to install this: npm install nanoid)
+import { nanoid } from "nanoid"; // Using nanoid for generating unique IDs (you might need to install this: npm install nanoid)
+
+// Define the new structure for the measurable field (consistent with Dashboard.tsx)
+interface MeasurableData {
+  type: string; // e.g., "Numeric", "Date", "DailyStreak", "Boolean"
+  targetValue: number | string | null;
+  currentValue: number | string | boolean | null;
+  unit?: string; // e.g., "pages", "days", "tasks" - for Numeric type
+}
 
 interface SmartGoal {
   id: string;
   specific: string;
-  measurable: {
-    type: string;
-    targetValue: number | string | boolean | null;
-    currentValue: number | string | boolean | null;
-  };
+  measurable: MeasurableData; // Updated to use the new MeasurableData interface
   achievable: string;
   relevant: string;
-  timeBound: string;
+  timeBound: string; // Corresponds to overall dueDate in Dashboard's SmartGoal
   userId: string;
   creationDate: string;
   lastUpdatedDate: string;
   isShareable?: boolean; // Add isShareable flag
   sharingId?: string; // Add sharingId field
+  category?: string; // Added category
 }
 
 const Social: React.FC = () => {
@@ -44,11 +49,11 @@ const Social: React.FC = () => {
 
       const fetchedGoals: SmartGoal[] = [];
       querySnapshot.forEach((doc) => {
-        const data = doc.data() as SmartGoal;
+        const data = doc.data() as Omit<SmartGoal, "id">; // Ensure data() doesn't conflict with explicit id
         fetchedGoals.push({
           id: doc.id,
           ...data,
-        });
+        } as SmartGoal); // Cast the final object to SmartGoal
       });
 
       setSmartGoals(fetchedGoals);
@@ -56,7 +61,6 @@ const Social: React.FC = () => {
 
     fetchSmartGoals();
   }, []);
-
 
   const handleShareToLinkedIn = () => {
     if (!selectedGoal) {
@@ -66,26 +70,50 @@ const Social: React.FC = () => {
 
     // Constructing sharing content based on the selected goal
     const goalTitle = `SMART Goal Progress: ${selectedGoal.specific}`;
-    let goalSummary = `I'm working on a goal: "${selectedGoal.specific}".\n`;
+    let goalSummary = `I\'m working on a goal: "${selectedGoal.specific}".\n`;
 
-    if (selectedGoal.measurable.type === 'Number') {
-        goalSummary += `Current progress: ${selectedGoal.measurable.currentValue} out of ${selectedGoal.measurable.targetValue}.\n`;
-    } else if (selectedGoal.measurable.type === 'Date') {
-        goalSummary += `Target completion date: ${new Date(selectedGoal.measurable.targetValue as string).toLocaleDateString()}.\n`;
-    } else if (selectedGoal.measurable.type === 'Yes/No') {
-        goalSummary += `Status: ${selectedGoal.measurable.currentValue === true ? 'Completed' : 'In Progress'}.\n`;
+    // Updated to use new measurable.type values and add DailyStreak
+    if (selectedGoal.measurable.type === "Numeric") {
+      goalSummary += `Current progress: ${
+        selectedGoal.measurable.currentValue ?? "N/A"
+      } / ${selectedGoal.measurable.targetValue || "N/A"} ${
+        selectedGoal.measurable.unit || ""
+      }.\n`;
+    } else if (selectedGoal.measurable.type === "Date") {
+      goalSummary += `Target completion date: ${
+        selectedGoal.measurable.targetValue
+          ? new Date(
+              selectedGoal.measurable.targetValue as string
+            ).toLocaleDateString()
+          : "N/A"
+      }.\n`;
+    } else if (selectedGoal.measurable.type === "Boolean") {
+      goalSummary += `Status: ${
+        selectedGoal.measurable.currentValue === true
+          ? "Completed"
+          : "In Progress"
+      }.\n`;
+    } else if (selectedGoal.measurable.type === "DailyStreak") {
+      goalSummary += `Current streak: ${
+        selectedGoal.measurable.currentValue ?? "0"
+      } / ${selectedGoal.measurable.targetValue || "N/A"} days.\n`;
     }
 
     goalSummary += `Achievability: ${selectedGoal.achievable}\n`;
     goalSummary += `Relevance: ${selectedGoal.relevant}\n`;
-    goalSummary += `Time-bound by: ${new Date(selectedGoal.timeBound).toLocaleDateString()}`;
-
+    goalSummary += `Time-bound by: ${new Date(
+      selectedGoal.timeBound
+    ).toLocaleDateString()}`;
 
     const appUrl = "YOUR_APP_URL"; // Replace with your application's URL or a specific goal view URL later
 
-    const linkedInShareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(appUrl)}&title=${encodeURIComponent(goalTitle)}&summary=${encodeURIComponent(goalSummary)}`;
+    const linkedInShareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+      appUrl
+    )}&title=${encodeURIComponent(goalTitle)}&summary=${encodeURIComponent(
+      goalSummary
+    )}`;
 
-    window.open(linkedInShareUrl, '_blank');
+    window.open(linkedInShareUrl, "_blank");
   };
 
   const handleMakeShareable = async () => {
@@ -95,39 +123,38 @@ const Social: React.FC = () => {
     }
 
     if (selectedGoal.isShareable && selectedGoal.sharingId) {
-        // Goal is already shareable, just display the link
-        const appBaseUrl = "YOUR_APP_BASE_URL"; // Replace with your application's base URL
-        setShareableLink(`${appBaseUrl}/shared-goal/${selectedGoal.sharingId}`);
-        return;
+      // Goal is already shareable, just display the link
+      const appBaseUrl = "YOUR_APP_BASE_URL"; // Replace with your application's base URL
+      setShareableLink(`${appBaseUrl}/shared-goal/${selectedGoal.sharingId}`);
+      return;
     }
 
     try {
-        // Generate a unique sharing ID
-        const newSharingId = nanoid(10); // Generates a 10-character unique ID
+      // Generate a unique sharing ID
+      const newSharingId = nanoid(10); // Generates a 10-character unique ID
 
-        // Update the goal document in Firebase
-        const goalRef = doc(db, "goals", selectedGoal.id);
-        await updateDoc(goalRef, {
-            isShareable: true,
-            sharingId: newSharingId,
-        });
+      // Update the goal document in Firebase
+      const goalRef = doc(db, "goals", selectedGoal.id);
+      await updateDoc(goalRef, {
+        isShareable: true,
+        sharingId: newSharingId,
+      });
 
-        // Update the local state
-        setSelectedGoal({
-            ...selectedGoal,
-            isShareable: true,
-            sharingId: newSharingId,
-        });
+      // Update the local state
+      setSelectedGoal({
+        ...selectedGoal,
+        isShareable: true,
+        sharingId: newSharingId,
+      });
 
-        // Generate and display the shareable link
-        const appBaseUrl = "YOUR_APP_BASE_URL"; // Replace with your application's base URL
-        setShareableLink(`${appBaseUrl}/shared-goal/${newSharingId}`);
+      // Generate and display the shareable link
+      const appBaseUrl = "YOUR_APP_BASE_URL"; // Replace with your application's base URL
+      setShareableLink(`${appBaseUrl}/shared-goal/${newSharingId}`);
 
-        alert("Goal is now shareable!");
-
+      alert("Goal is now shareable!");
     } catch (error) {
-        console.error("Error making goal shareable:", error);
-        alert("An error occurred while making the goal shareable.");
+      console.error("Error making goal shareable:", error);
+      alert("An error occurred while making the goal shareable.");
     }
   };
 
@@ -147,20 +174,23 @@ const Social: React.FC = () => {
             className="border rounded p-2"
             onChange={(e) => {
               const goalId = e.target.value;
-              const goal = smartGoals.find(g => g.id === goalId);
+              const goal = smartGoals.find((g) => g.id === goalId);
               setShareableLink(null); // Clear shareable link when selecting a new goal
               setSelectedGoal(goal || null);
             }}
             value={selectedGoal?.id || ""} // Control the select value
           >
-            <option value="" disabled>Select a goal</option>
-            {smartGoals.map(goal => (
-              <option key={goal.id} value={goal.id}>{goal.specific}</option>
+            <option value="" disabled>
+              Select a goal
+            </option>
+            {smartGoals.map((goal) => (
+              <option key={goal.id} value={goal.id}>
+                {goal.specific}
+              </option>
             ))}
           </select>
         )}
       </div>
-
 
       <button
         onClick={handleShareToLinkedIn}
@@ -172,32 +202,45 @@ const Social: React.FC = () => {
 
       {/* Placeholder for Watching and Commenting features */}
       <div className="mt-8 border-t pt-4">
-       <button
-        onClick={handleMakeShareable}
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-        disabled={!selectedGoal} // Disable button if no goal is selected
-      >
-        {selectedGoal?.isShareable ? "Get Shareable Link" : "Make Goal Shareable"}
-      </button>
+        <button
+          onClick={handleMakeShareable}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          disabled={!selectedGoal} // Disable button if no goal is selected
+        >
+          {selectedGoal?.isShareable
+            ? "Get Shareable Link"
+            : "Make Goal Shareable"}
+        </button>
 
-      {/* Display Shareable Link */}
-      {shareableLink && (
-        <div className="mt-4 p-3 bg-gray-100 rounded">
-          <p className="font-medium">Shareable Link:</p>
-          <a href={shareableLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{shareableLink}</a>
-          <button
-            onClick={() => navigator.clipboard.writeText(shareableLink)}
-            className="ml-2 text-sm text-gray-500 hover:text-gray-700"
-          >
-            (Copy)
-          </button>
-        </div>
-      )}
-        <h3 className="text-xl font-semibold">Invite Others to Watch and Comment (Coming Soon)</h3>
-        <p className="text-gray-600">Features for sharing goals with others and enabling comments are under development.</p>
-         {/* We will add UI elements for these features here later */}
+        {/* Display Shareable Link */}
+        {shareableLink && (
+          <div className="mt-4 p-3 bg-gray-100 rounded">
+            <p className="font-medium">Shareable Link:</p>
+            <a
+              href={shareableLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              {shareableLink}
+            </a>
+            <button
+              onClick={() => navigator.clipboard.writeText(shareableLink)}
+              className="ml-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              (Copy)
+            </button>
+          </div>
+        )}
+        <h3 className="text-xl font-semibold">
+          Invite Others to Watch and Comment (Coming Soon)
+        </h3>
+        <p className="text-gray-600">
+          Features for sharing goals with others and enabling comments are under
+          development.
+        </p>
+        {/* We will add UI elements for these features here later */}
       </div>
-
     </div>
   );
 };
