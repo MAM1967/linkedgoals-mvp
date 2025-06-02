@@ -24,7 +24,7 @@ jest.mock("react-router-dom", () => ({
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import GoalInputPage from "@components/GoalInputPage";
+import GoalInputPage from "../GoalInputPage";
 // auth will be the mocked version due to jest.mock above
 import { auth } from "../../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -285,16 +285,24 @@ describe("GoalInputPage", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /Next/i })); // To Due Date
 
-    // Enter an invalid due date
+    // Enter an invalid due date by directly setting the component state
     const dueDateInput = screen.getByLabelText(/Time-bound \(Due Date\):/i);
-    fireEvent.change(dueDateInput, { target: { value: "invalid-date" } });
+    // Since HTML date inputs reject invalid dates, we need to use a different approach
+    // Let's simulate setting the input to a clearly invalid format
+    Object.defineProperty(dueDateInput, "value", {
+      writable: true,
+      value: "invalid-date-format",
+    });
+    fireEvent.change(dueDateInput, {
+      target: { value: "invalid-date-format" },
+    });
 
     const saveButton = screen.getByRole("button", { name: /Save Goal/i });
     fireEvent.click(saveButton);
 
     expect(
       await screen.findByText(
-        /Invalid due date. Please ensure you have selected a valid date/i
+        /Invalid due date. Please ensure you have selected a valid date \(e\.g\., YYYY-MM-DD or MM\/DD\/YYYY\)\./i
       )
     ).toBeInTheDocument();
     expect(addDoc).not.toHaveBeenCalled();
