@@ -206,18 +206,28 @@ body {
 }
 
 .loading-container {
-  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
   background-color: #f0f2f5;
 }
 
+.loading-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+.loading-spinner-text {
+  font-size: 1.2rem;
+  color: #333;
+}
+
 .loading {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #666;
+  font-size: 1.2rem;
+  color: #333;
 }
 
 .loading:after {
@@ -265,4 +275,36 @@ body {
 
 .back-button:hover {
   background-color: #5a6268;
+}
+
+/* Welcome Banner for Plan Selection */
+.welcome-banner {
+  background-color: #e6f7ff; /* Light blue, LinkedIn-ish */
+  border: 1px solid #91d5ff; /* Lighter blue border */
+  color: #0050b3; /* Darker blue text for contrast */
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.welcome-banner p {
+  margin: 0;
+  flex-grow: 1;
+}
+
+.dismiss-button {
+  background: none;
+  border: none;
+  color: #0050b3;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.5rem;
+}
+
+.dismiss-button:hover {
+  color: #003a8c; /* Darker blue on hover */
 }

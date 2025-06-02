@@ -15,46 +15,74 @@ const LinkedInCallback = () => {
         setStatus("Processing LinkedIn callback...");
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code");
-        const state = urlParams.get("state");
-        const error = urlParams.get("error");
+        const receivedStateString = urlParams.get("state");
+        const errorParam = urlParams.get("error");
         const errorDescription = urlParams.get("error_description");
 
         // Add detailed logging
         console.log("🔁 LinkedIn callback started");
         console.log("URLSearchParams:", window.location.search);
         console.log("Extracted code:", code ? "present" : "missing");
-        console.log("Extracted state:", state);
+        console.log("Extracted state string:", receivedStateString);
 
         // Check for LinkedIn OAuth errors
-        if (error) {
-          console.error(`LinkedIn OAuth error: ${error} - ${errorDescription}`);
-          setError(`LinkedIn sign-in failed: ${errorDescription || error}`);
+        if (errorParam) {
+          console.error(
+            `LinkedIn OAuth error: ${errorParam} - ${errorDescription}`
+          );
+          setError(
+            `LinkedIn sign-in failed: ${errorDescription || errorParam}`
+          );
           return;
         }
 
-        if (!code || !state) {
+        if (!code || !receivedStateString) {
           console.error("Missing OAuth parameters", {
             code: !!code,
-            state: !!state,
+            state: !!receivedStateString,
           });
           setError("Missing OAuth parameters from LinkedIn");
           return;
         }
 
-        const savedState = sessionStorage.getItem("linkedin_oauth_state");
-        console.log("Saved state from session:", savedState);
+        const savedCSRFToken = sessionStorage.getItem(
+          "linkedin_oauth_state_csrf"
+        );
+        console.log("Saved CSRF token from session:", savedCSRFToken);
 
-        if (!savedState || savedState !== state) {
-          console.error("OAuth state mismatch", {
-            savedState,
-            receivedState: state,
-          });
-          setError("Security verification failed");
+        let parsedState: { rs: string; plan?: string } | null = null;
+        try {
+          parsedState = JSON.parse(receivedStateString);
+        } catch (e) {
+          console.error("Failed to parse state string:", e);
+          setError("Invalid state parameter received.");
           return;
         }
 
-        // Clear the state from session storage for security
-        sessionStorage.removeItem("linkedin_oauth_state");
+        if (!parsedState || typeof parsedState.rs !== "string") {
+          console.error("Invalid parsed state object:", parsedState);
+          setError("Invalid state structure received.");
+          return;
+        }
+
+        if (!savedCSRFToken || savedCSRFToken !== parsedState.rs) {
+          console.error("OAuth state CSRF mismatch", {
+            savedCSRFToken,
+            receivedCSRFToken: parsedState.rs,
+          });
+          setError("Security verification failed (CSRF token mismatch)");
+          return;
+        }
+
+        // Clear the CSRF token from session storage for security
+        sessionStorage.removeItem("linkedin_oauth_state_csrf");
+
+        // If a plan was passed, store it for the dashboard
+        if (parsedState && parsedState.plan) {
+          // Ensure parsedState is not null
+          console.log("Storing selected plan for dashboard:", parsedState.plan);
+          sessionStorage.setItem("linkedgoals_selected_plan", parsedState.plan);
+        }
 
         // Log the payload being sent to the backend
         console.log("Calling linkedinLogin with code");

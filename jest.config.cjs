@@ -1,23 +1,40 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "jsdom",
-  setupFilesAfterEnv: ["@testing-library/jest-dom"],
-  roots: ["<rootDir>/src"],
-  moduleDirectories: ["node_modules", "<rootDir>/src"],
   moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
-    "^@components/(.*)$": "<rootDir>/src/components/$1",
-    "^@lib/(.*)$": "<rootDir>/src/lib/$1",
   },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   transform: {
-    "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.json" }],
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.json",
+        useESM: true,
+      },
+    ],
   },
-  clearMocks: true,
-  testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[tj]s?(x)"],
+  testMatch: [
+    "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}",
+  ],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig.json",
+      useESM: true,
+    },
+  },
+  transformIgnorePatterns: [
+    "node_modules/(?!(react-router|@remix-run|react-router-dom)/)",
+  ],
   modulePathIgnorePatterns: [
-    "<rootDir>/functions/package.json",
-    "<rootDir>/myapp-lg/package.json",
-    "<rootDir>/frontend/package.json",
+    "<rootDir>/functions/",
+    "<rootDir>/myapp-lg/",
+    "<rootDir>/frontend/",
     "<rootDir>/dist/",
   ],
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
+  resolver: "jest-ts-webcompat-resolver",
 };

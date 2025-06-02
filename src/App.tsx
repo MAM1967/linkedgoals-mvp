@@ -23,13 +23,30 @@ import "./app.css";
 import "./Navbar.css";
 
 // Layout component for authenticated users
-const AuthenticatedLayout: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const AuthenticatedLayout: React.FC<{
+  children: React.ReactNode;
+  welcomePlan?: string | null; // Optional: To show a welcome message for a specific plan
+  onDismissWelcome?: () => void; // Optional: Callback to dismiss the welcome message
+}> = ({ children, welcomePlan, onDismissWelcome }) => {
   return (
     <div className="authenticated-layout">
       <Navbar />
-      <main className="main-content">{children}</main>
+      <main className="main-content">
+        {welcomePlan && (
+          <div className="welcome-banner">
+            <p>
+              Welcome! You're on the {welcomePlan} plan. Get started by setting
+              your first goal!
+            </p>
+            {onDismissWelcome && (
+              <button onClick={onDismissWelcome} className="dismiss-button">
+                &times;
+              </button>
+            )}
+          </div>
+        )}
+        {children}
+      </main>
     </div>
   );
 };
@@ -37,6 +54,7 @@ const AuthenticatedLayout: React.FC<{ children: React.ReactNode }> = ({
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [welcomePlan, setWelcomePlan] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -45,6 +63,16 @@ function App() {
         currentUser ? "logged in as " + currentUser.uid : "logged out"
       );
       setUser(currentUser);
+      if (currentUser) {
+        const plan = sessionStorage.getItem("linkedgoals_selected_plan");
+        if (plan) {
+          setWelcomePlan(plan);
+          sessionStorage.removeItem("linkedgoals_selected_plan");
+        }
+      } else {
+        // Clear welcome plan if user logs out
+        setWelcomePlan(null);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -53,7 +81,8 @@ function App() {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="loading">Loading...</div>
+        <img src={logo} alt="LinkedGoals Logo" className="loading-logo" />
+        <div className="loading-spinner-text">Loading...</div>
       </div>
     );
   }
@@ -91,7 +120,10 @@ function App() {
               <Route
                 path="/"
                 element={
-                  <AuthenticatedLayout>
+                  <AuthenticatedLayout
+                    welcomePlan={welcomePlan}
+                    onDismissWelcome={() => setWelcomePlan(null)}
+                  >
                     <Dashboard />
                   </AuthenticatedLayout>
                 }
@@ -99,7 +131,10 @@ function App() {
               <Route
                 path="/add-goal"
                 element={
-                  <AuthenticatedLayout>
+                  <AuthenticatedLayout
+                    welcomePlan={welcomePlan}
+                    onDismissWelcome={() => setWelcomePlan(null)}
+                  >
                     <GoalInputPage />
                   </AuthenticatedLayout>
                 }
@@ -107,7 +142,10 @@ function App() {
               <Route
                 path="/share-goal"
                 element={
-                  <AuthenticatedLayout>
+                  <AuthenticatedLayout
+                    welcomePlan={welcomePlan}
+                    onDismissWelcome={() => setWelcomePlan(null)}
+                  >
                     <SocialSharePage />
                   </AuthenticatedLayout>
                 }
