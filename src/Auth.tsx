@@ -11,7 +11,9 @@ import { FaLinkedin } from "react-icons/fa";
 import logo from "./assets/logo.svg";
 
 const LINKEDIN_CLIENT_ID = "7880c93kzzfsgj";
-const REDIRECT_URI = "https://linkedgoals-d7053.web.app/linkedin";
+const REDIRECT_URI =
+  import.meta.env.VITE_LINKEDIN_REDIRECT_URI ||
+  "https://app.linkedgoals.app/linkedin";
 
 // PKCE helper functions
 const generateRandomString = (length: number): string => {
