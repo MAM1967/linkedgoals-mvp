@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { auth } from "@/lib/firebase";
 import {
@@ -11,6 +12,27 @@ import logo from "./assets/logo.svg";
 
 const LINKEDIN_CLIENT_ID = "7880c93kzzfsgj";
 const REDIRECT_URI = "https://linkedgoals-d7053.web.app/linkedin";
+
+// PKCE helper functions
+const generateRandomString = (length: number): string => {
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return result;
+};
+
+const generateCodeChallenge = async (codeVerifier: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(codeVerifier);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return btoa(String.fromCharCode(...new Uint8Array(hash)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+};
 
 interface AuthProps {
   onAuth: (user: User) => void;
@@ -37,23 +59,25 @@ export default function Auth({ onAuth }: AuthProps) {
     }
   };
 
-  const handleLinkedInLogin = () => {
-    // Generate random state for security
-    const state = Math.random().toString(36).substring(7);
-    console.log("🌐 Generated OAuth state:", state);
-    sessionStorage.setItem("linkedin_oauth_state", state);
+  const handleLinkedInLogin = async () => {
+    const state = generateRandomString(16);
+    const codeVerifier = generateRandomString(48);
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-    // Define the scope - only request basic profile
-    const scope = "openid profile email";
-    console.log("🔐 Using LinkedIn scope:", scope);
+    // Store for later use
+    localStorage.setItem("linkedin_oauth_state", state);
+    localStorage.setItem("linkedin_code_verifier", codeVerifier);
 
-    // LinkedIn OAuth 2.0 authorization URL
-    const authUrl = new URL("https://www.linkedin.com/oauth/v2/authorization");
+    const authUrl = new URL(
+      "https://www.linkedin.com/oauth/native-pkce/authorization"
+    );
     authUrl.searchParams.append("response_type", "code");
     authUrl.searchParams.append("client_id", LINKEDIN_CLIENT_ID);
     authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
     authUrl.searchParams.append("state", state);
-    authUrl.searchParams.append("scope", scope);
+    authUrl.searchParams.append("scope", "openid profile email");
+    authUrl.searchParams.append("code_challenge", codeChallenge);
+    authUrl.searchParams.append("code_challenge_method", "S256");
 
     // Redirect to LinkedIn login
     window.location.href = authUrl.toString();
