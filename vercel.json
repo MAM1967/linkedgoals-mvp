@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/*.ts": {
+      "runtime": "@vercel/node@3.2.29"
+    }
+  },
+  "env": {
+    "LINKEDIN_CLIENT_ID": "@linkedin-client-id",
+    "LINKEDIN_CLIENT_SECRET": "@linkedin-client-secret",
+    "LINKEDIN_REDIRECT_URI": "@linkedin-redirect-uri",
+    "ALLOWED_ORIGIN": "@allowed-origin"
+  }
+}
