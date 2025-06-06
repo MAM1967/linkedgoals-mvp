@@ -17,6 +17,9 @@ body {
 
 .app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .login-container {
@@ -183,6 +186,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .dashboard h1 {
@@ -223,6 +227,7 @@ body {
 .loading-spinner-text {
   font-size: 1.2rem;
   color: #333;
+  text-align: center;
 }
 
 .loading {

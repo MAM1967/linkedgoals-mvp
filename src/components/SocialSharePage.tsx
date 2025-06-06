@@ -64,17 +64,21 @@ const SocialSharePage: React.FC = () => {
     const incomingText = searchParams.get("text");
     const goalId = searchParams.get("goalId");
     const milestone = searchParams.get("milestone");
+    const typeParam = searchParams.get("type") as
+      | "progress"
+      | "coachInvitation"
+      | null;
+
     let constructedShareUrl = window.location.origin;
 
+    // Logic to set initial share text and title based on URL parameters
     if (goalId) {
-      constructedShareUrl = `${window.location.origin}/shared-goal/${goalId}`; // Link to a potential shared goal view page
+      constructedShareUrl = `${window.location.origin}/shared-goal/${goalId}`; // Example link
       setShareUrl(constructedShareUrl);
-      // Fetch goal description for context, if not already in incomingText
-      if (
-        auth.currentUser &&
-        (!incomingText || !incomingText.includes("goal:"))
-      ) {
-        const fetchGoal = async () => {
+      setIsMilestoneShare(!!milestone); // If milestone param exists, it's a milestone share
+
+      if (auth.currentUser) {
+        const fetchGoalDetails = async () => {
           try {
             const goalRef = doc(
               db,
@@ -83,53 +87,104 @@ const SocialSharePage: React.FC = () => {
             );
             const goalSnap = await getDoc(goalRef);
             if (goalSnap.exists()) {
-              const goalData = goalSnap.data();
-              setGoalDescription(goalData.description);
-              if (!incomingText) {
-                // Only set if no specific text was passed
+              const goalData = goalSnap.data() as SmartGoalData;
+              const fetchedGoal = { id: goalSnap.id, ...goalData };
+              setSelectedGoal(fetchedGoal); // Pre-select the goal
+
+              if (typeParam === "coachInvitation") {
+                setShareType("coachInvitation");
+                setPageTitle(`Invite Coach for: ${fetchedGoal.description}`);
                 setShareText(
-                  `Check out my progress on my goal: "${goalData.description}"! See it here: ${constructedShareUrl}`
+                  generateShareMessage(fetchedGoal, "coachInvitation")
+                );
+              } else if (milestone) {
+                setPageTitle(
+                  milestone === "goalComplete"
+                    ? "Share Your Achievement!"
+                    : "Share Your Milestone!"
+                );
+                // If 'text' is also provided, it will override this
+                setShareText(
+                  incomingText || generateShareMessage(fetchedGoal, "progress")
+                );
+              } else {
+                setShareType("progress");
+                setPageTitle(`Share: ${fetchedGoal.description}`);
+                setShareText(
+                  incomingText || generateShareMessage(fetchedGoal, "progress")
                 );
               }
             } else {
-              console.log("No such goal to share details for!");
+              setErrorGoals("Could not find the specified goal to share.");
               if (!incomingText)
-                setShareText(
-                  "I'm making great progress on my goals! #GoalMomentum"
-                );
+                setShareText("I'm working on my goals! #GoalMomentum");
             }
           } catch (error) {
-            console.error("Error fetching goal for sharing: ", error);
+            console.error("Error fetching specific goal for sharing: ", error);
+            setErrorGoals("Error fetching goal details.");
             if (!incomingText)
-              setShareText(
-                "I'm making great progress on my goals! #GoalMomentum"
-              );
+              setShareText("I'm working on my goals! #GoalMomentum");
           }
+          // This specific fetch doesn't control the main 'loadingGoals' for the list
         };
-        fetchGoal();
+        fetchGoalDetails();
       }
-    } else {
-      setShareUrl(window.location.origin); // Default site URL if no specific goal
-    }
-
-    if (incomingText) {
+    } else if (incomingText) {
+      // If only text is provided (e.g. generic milestone not tied to a specific goal ID)
       setShareText(incomingText);
-      setPageTitle("Share Your Milestone!");
-    } else if (milestone === "goalComplete") {
-      // This case is largely superseded if 'text' is provided by Dashboard, but kept as fallback
-      setPageTitle("Share Your Achievement!");
-      // A generic message if goalDescription isn't fetched/available yet, or no goalId was passed
-      setShareText(
-        "🏆 I just achieved one of my SMART goals! Feeling accomplished! #GoalAchieved #Productivity"
-      );
-    } else if (!goalId && !incomingText) {
-      // Default if no params
+      setPageTitle(milestone ? "Share Your Milestone!" : "Share Your Progress");
+      setIsMilestoneShare(!!milestone);
+    } else {
+      // Default text if no parameters
+      setPageTitle("Share Your Progress");
       setShareText(
         "I'm working on my goals with GoalMomentum! Join me! #GoalSetting #Motivation"
       );
     }
-    // If only goalId is present and incomingText is not, the useEffect for fetchGoal will set the text.
-  }, [searchParams]);
+    // setLoadingGoals(false) should be handled by the effect fetching the list of goals
+  }, [searchParams]); // Keep searchParams, generateShareMessage might be added if it relies on state that changes
+
+  // useEffect to fetch the list of goals for selection
+  useEffect(() => {
+    if (!auth.currentUser) {
+      setErrorGoals("Please log in to see your goals.");
+      setLoadingGoals(false);
+      return;
+    }
+
+    // Only fetch all goals if no specific goal is selected via URL params
+    // and it's not a milestone share from URL (which might not need goal list)
+    if (selectedGoal || isMilestoneShare) {
+      setLoadingGoals(false); // A goal is already selected or it's a milestone from URL, no need to load list.
+      return;
+    }
+
+    setLoadingGoals(true);
+    const q = query(
+      collection(db, `users/${auth.currentUser.uid}/goals`),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const goalsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as SmartGoalData),
+        }));
+        setSmartGoals(goalsData.filter((goal) => !goal.completed)); // Only show active goals for sharing progress/inviting coach
+        setLoadingGoals(false);
+        setErrorGoals(null);
+      },
+      (error) => {
+        console.error("Error fetching SMART goals: ", error);
+        setErrorGoals("Failed to fetch your goals. Please try again.");
+        setLoadingGoals(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [auth.currentUser, selectedGoal, isMilestoneShare]); // Re-run if user changes or if a goal gets selected/isMilestoneShare changes (to stop loading list)
 
   const generateShareMessage = (
     goal: SmartGoal,

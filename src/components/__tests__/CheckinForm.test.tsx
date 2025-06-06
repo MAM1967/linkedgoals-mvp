@@ -1,16 +1,29 @@
-// Define mock types and objects
-interface MockAuth {
-  currentUser: { uid: string } | null;
-}
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
 
-const mockAuthObject: MockAuth = {
-  currentUser: { uid: "test-uid" },
-};
-
-// Mock dependencies
+// Mock dependencies first
 jest.mock("../../lib/firebase", () => ({
-  auth: mockAuthObject,
+  auth: {
+    currentUser: {
+      uid: "test-uid",
+      email: "test@example.com",
+      displayName: "Test User",
+    },
+  },
   db: {},
+}));
+
+jest.mock("firebase/firestore", () => ({
+  doc: jest.fn(),
+  updateDoc: jest.fn(),
+  getDoc: jest.fn(),
+  Timestamp: {
+    now: jest.fn(() => ({ toDate: () => new Date() })),
+  },
+  increment: jest.fn(),
+  setDoc: jest.fn(),
+  serverTimestamp: jest.fn(),
 }));
 
 jest.mock("@/lib/firestore", () => ({
@@ -22,11 +35,21 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => jest.fn(),
 }));
 
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import "@testing-library/jest-dom";
 import CheckinForm from "../CheckinForm";
 import { saveCheckin } from "@/lib/firestore";
+
+// Define mock types and objects
+interface MockAuth {
+  currentUser: { uid: string; email: string; displayName?: string } | null;
+}
+
+const mockAuthObject: MockAuth = {
+  currentUser: {
+    uid: "test-uid",
+    email: "test@example.com",
+    displayName: "Test User",
+  },
+};
 
 describe("CheckinForm", () => {
   const mockGoals = [

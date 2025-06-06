@@ -1,42 +1,93 @@
-// Define a type for our mock auth outside of any direct jest.mock callback scope if used by it.
-interface MockAuth {
-  currentUser: { uid: string } | null;
-}
-const mockAuthObject: MockAuth = {
-  currentUser: { uid: "test-uid" },
-};
-
-// ALL jest.mock calls should be at the very top, before any imports
-jest.mock("../../lib/firebase", () => ({
-  auth: mockAuthObject,
-  db: {},
-}));
-jest.mock("firebase/firestore", () => ({
-  collection: jest.fn(() => "mock-collection-ref"),
-  addDoc: jest.fn(),
-  serverTimestamp: jest.fn(() => "mock-timestamp"),
-}));
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => jest.fn(),
-}));
-
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import GoalInputPage from "../GoalInputPage";
-// auth will be the mocked version due to jest.mock above
-import { auth } from "../../lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  serverTimestamp,
+  Timestamp,
+} from "firebase/firestore";
+import { auth } from "../../lib/firebase"; // Import the mocked auth
+
+// Mock the firebase lib
+jest.mock("../../lib/firebase", () => ({
+  auth: {
+    currentUser: {},
+  },
+  db: {},
+}));
+
+jest.mock("firebase/firestore", () => ({
+  getFirestore: jest.fn(() => ({})),
+  collection: jest.fn(() => "mock-collection-ref"),
+  getDocs: jest.fn(() =>
+    Promise.resolve({
+      docs: [
+        {
+          id: "test-goal-id",
+          data: () => mockGoals[0],
+        },
+      ],
+    })
+  ),
+  addDoc: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
+  serverTimestamp: jest.fn(() => ({ serverTimestamp: true })),
+  Timestamp: {
+    now: jest.fn(() => ({
+      toDate: () => new Date(),
+    })),
+  },
+}));
+
+const mockGoals = [
+  {
+    id: "test-goal-id",
+    description: "Comprehensive Test Goal",
+    category: "Career",
+    specific: "Very Specific",
+    measurable: {
+      type: "Numeric",
+      targetValue: 100,
+      currentValue: 0,
+      unit: "pages",
+    },
+    achievable: "Yes, by working hard",
+    relevant: "Relevant to my career",
+    dueDate: "2024-12-31",
+    status: "active",
+    completed: false,
+  },
+];
 
 describe("GoalInputPage", () => {
   beforeEach(() => {
+    // Reset mocks before each test
+    jest.clearAllMocks();
+
+    // Set a default mock for currentUser for most tests
+    Object.defineProperty(auth, "currentUser", {
+      value: {
+        uid: "test-uid",
+        email: "test@example.com",
+        displayName: "Test User",
+      },
+      writable: true,
+    });
+
     (addDoc as jest.Mock).mockClear();
     (collection as jest.Mock)
       .mockClear()
       .mockReturnValue("mock-collection-ref");
-    // Reset currentUser on our mutable mockAuth object
-    mockAuthObject.currentUser = { uid: "test-uid" };
+  });
+
+  afterEach(() => {
+    jest.unmock("../../lib/firebase");
   });
 
   test("renders initial step (Goal Description) and allows input", () => {
@@ -161,7 +212,7 @@ describe("GoalInputPage", () => {
         dueDate: "2024-12-31",
         status: "active",
         completed: false,
-        createdAt: "mock-timestamp",
+        createdAt: { serverTimestamp: true },
       })
     );
 
@@ -171,7 +222,11 @@ describe("GoalInputPage", () => {
   });
 
   test("shows an error if user is not logged in when trying to save", async () => {
-    mockAuthObject.currentUser = null;
+    // Override the mock for this specific test
+    Object.defineProperty(auth, "currentUser", {
+      value: null,
+      writable: true,
+    });
 
     render(<GoalInputPage />);
 

@@ -1,154 +1,169 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth, functions } from "../lib/firebase";
-import { httpsCallable, HttpsCallableResult } from "firebase/functions";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
+import { auth } from "../lib/firebase";
 
 const LinkedInCallback = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>("Initializing...");
+  const [status, setStatus] = useState("Processing...");
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        setStatus("Processing LinkedIn callback...");
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
-        const receivedStateString = urlParams.get("state");
-        const errorParam = urlParams.get("error");
-        const errorDescription = urlParams.get("error_description");
+        const code = searchParams.get("code");
+        const state = searchParams.get("state");
+        const error = searchParams.get("error");
 
-        // Add detailed logging
-        console.log("🔁 LinkedIn callback started");
-        console.log("URLSearchParams:", window.location.search);
-        console.log("Extracted code:", code ? "present" : "missing");
-        console.log("Extracted state string:", receivedStateString);
+        console.log("LinkedIn callback verified successfully");
+        console.log("Extracted code: present");
+        console.log("Extracted state:", state);
 
-        // Check for LinkedIn OAuth errors
-        if (errorParam) {
-          console.error(
-            `LinkedIn OAuth error: ${errorParam} - ${errorDescription}`
-          );
-          setError(
-            `LinkedIn sign-in failed: ${errorDescription || errorParam}`
-          );
+        if (error) {
+          console.error("LinkedIn OAuth error:", error);
+          setStatus("LinkedIn authorization failed");
           return;
         }
 
-        if (!code || !receivedStateString) {
-          console.error("Missing OAuth parameters", {
-            code: !!code,
-            state: !!receivedStateString,
-          });
-          setError("Missing OAuth parameters from LinkedIn");
+        if (!code) {
+          console.error("No authorization code received");
+          setStatus("No authorization code received");
           return;
         }
 
-        const savedCSRFToken = sessionStorage.getItem(
-          "linkedin_oauth_state_csrf"
+        setStatus("Calling LinkedIn OAuth Firebase Function...");
+        console.log("Calling LinkedIn OAuth Firebase Function...");
+
+        // Call Firebase Function for LinkedIn OAuth
+        const response = await fetch(
+          "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ code, state }),
+          }
         );
-        console.log("Saved CSRF token from session:", savedCSRFToken);
 
-        let parsedState: { rs: string; plan?: string } | null = null;
-        try {
-          parsedState = JSON.parse(receivedStateString);
-        } catch (e) {
-          console.error("Failed to parse state string:", e);
-          setError("Invalid state parameter received.");
-          return;
+        console.log("Function response status:", response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Function error:", errorData);
+          throw new Error(
+            `Function failed: ${errorData.error || "Unknown error"}`
+          );
         }
 
-        if (!parsedState || typeof parsedState.rs !== "string") {
-          console.error("Invalid parsed state object:", parsedState);
-          setError("Invalid state structure received.");
-          return;
+        const result = await response.json();
+        console.log("Function result:", result);
+
+        if (!result.success || !result.customToken) {
+          throw new Error("Invalid response from authentication function");
         }
-
-        if (!savedCSRFToken || savedCSRFToken !== parsedState.rs) {
-          console.error("OAuth state CSRF mismatch", {
-            savedCSRFToken,
-            receivedCSRFToken: parsedState.rs,
-          });
-          setError("Security verification failed (CSRF token mismatch)");
-          return;
-        }
-
-        // Clear the CSRF token from session storage for security
-        sessionStorage.removeItem("linkedin_oauth_state_csrf");
-
-        // If a plan was passed, store it for the dashboard
-        if (parsedState && parsedState.plan) {
-          // Ensure parsedState is not null
-          console.log("Storing selected plan for dashboard:", parsedState.plan);
-          sessionStorage.setItem("linkedgoals_selected_plan", parsedState.plan);
-        }
-
-        // Log the payload being sent to the backend
-        console.log("Calling linkedinLogin with code");
-        setStatus("Authenticating with LinkedIn...");
-
-        const linkedinLogin = httpsCallable(functions, "linkedinLogin");
-        let result: HttpsCallableResult<any>;
-
-        try {
-          result = await linkedinLogin({ code });
-          console.log("Function call succeeded:", result);
-        } catch (callError: any) {
-          console.error("Function call failed:", callError);
-          console.error("Error details:", callError.message, callError.details);
-          setError(`Authentication failed: ${callError.message}`);
-          return;
-        }
-
-        if (!result.data || !result.data.customToken) {
-          console.error("Invalid response from function:", result.data);
-          setError("Invalid response from authentication server");
-          return;
-        }
-
-        const { customToken } = result.data as { customToken: string };
-        console.log(
-          "Received customToken:",
-          customToken ? "present" : "missing"
-        );
 
         setStatus("Signing in to Firebase...");
-        try {
-          await signInWithCustomToken(auth, customToken);
-          console.log("Firebase sign-in successful");
-        } catch (signInError: any) {
-          console.error("Firebase sign-in error:", signInError);
-          setError(`Firebase sign-in failed: ${signInError.message}`);
-          return;
-        }
+        console.log("Signing in with custom token...");
 
-        // Success - redirect to home
-        navigate("/");
-      } catch (err: any) {
-        console.error("LinkedIn callback error:", err);
-        setError(`LinkedIn sign-in failed: ${err.message || "Unknown error"}`);
+        // Sign in with the custom token
+        await signInWithCustomToken(auth, result.customToken);
+
+        console.log("Successfully signed in to Firebase");
+
+        // Check if we got full profile data or minimal profile
+        if (result.email && result.displayName && result.profileData) {
+          setStatus("Authentication successful! You have a complete profile.");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
+        } else {
+          setStatus("Authentication successful! Setting up your profile...");
+          // Store minimal profile info for profile setup
+          sessionStorage.setItem(
+            "linkedinMinimalAuth",
+            JSON.stringify({
+              userId: result.userId,
+              email: result.email,
+              message: result.message,
+            })
+          );
+          setTimeout(() => {
+            navigate("/profile-setup");
+          }, 1000);
+        }
+      } catch (error) {
+        console.error("LinkedIn callback error:", error);
+        setStatus(
+          `Authentication failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
       }
     };
 
     handleCallback();
-  }, [navigate]);
+  }, [searchParams, navigate]);
 
-  if (error) {
+  if (status.includes("failed") || status.includes("error")) {
     return (
-      <div className="linkedin-callback-error">
-        <h3>Authentication Error</h3>
-        <p>{error}</p>
-        <button onClick={() => navigate("/")}>Return to Login</button>
+      <div
+        style={{
+          padding: "20px",
+          textAlign: "center",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        <h2>LinkedIn Authentication Failed</h2>
+        <p style={{ color: "red", marginBottom: "20px" }}>{status}</p>
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#0077b5",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Return to Home
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="linkedin-callback-loading">
-      <h3>LinkedIn Authentication</h3>
+    <div
+      style={{
+        padding: "20px",
+        textAlign: "center",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <h2>Processing LinkedIn Authentication</h2>
       <p>{status}</p>
-      <div className="loading-spinner"></div>
+      <div style={{ marginTop: "20px" }}>
+        <div
+          style={{
+            border: "4px solid #f3f3f3",
+            borderTop: "4px solid #0077b5",
+            borderRadius: "50%",
+            width: "40px",
+            height: "40px",
+            animation: "spin 1s linear infinite",
+            margin: "0 auto",
+          }}
+        ></div>
+      </div>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
   );
 };

@@ -3,9 +3,15 @@ import { auth } from "./firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  User,
+  AuthError,
 } from "firebase/auth";
 
-export default function Auth({ onAuth }: { onAuth: (user: any) => void }) {
+interface AuthProps {
+  onAuth: (user: User) => void;
+}
+
+export default function Auth({ onAuth }: AuthProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
@@ -19,14 +25,17 @@ export default function Auth({ onAuth }: { onAuth: (user: any) => void }) {
       } else {
         userCred = await signInWithEmailAndPassword(auth, email, password);
       }
-      onAuth(userCred.user); // Pass user back to parent
-    } catch (err: any) {
-      setError(err.message);
+      onAuth(userCred.user);
+    } catch (err: unknown) {
+      const authError = err as AuthError;
+      setError(authError.message || "Authentication failed");
     }
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "2rem auto", textAlign: "center" }}>
+    <div
+      style={{ maxWidth: "400px", margin: "2rem auto", textAlign: "center" }}
+    >
       <h2>{isRegistering ? "Register" : "Login"}</h2>
 
       <input
@@ -43,29 +52,30 @@ export default function Auth({ onAuth }: { onAuth: (user: any) => void }) {
         onChange={(e) => setPassword(e.target.value)}
         style={{ padding: "0.5rem", marginBottom: "1rem", width: "100%" }}
       />
-      <button onClick={handleAuth} style={{ padding: "0.5rem 1rem", marginBottom: "1rem" }}>
+      <button
+        onClick={handleAuth}
+        style={{ padding: "0.5rem 1rem", marginBottom: "1rem" }}
+      >
         {isRegistering ? "Create Account" : "Log In"}
       </button>
 
       <div>
-        <button onClick={() => setIsRegistering(!isRegistering)} style={{ fontSize: "0.9rem" }}>
-          {isRegistering ? "Already have an account? Log in" : "New? Create an account"}
+        <button
+          onClick={() => setIsRegistering(!isRegistering)}
+          style={{ fontSize: "0.9rem" }}
+        >
+          {isRegistering
+            ? "Already have an account? Log in"
+            : "New? Create an account"}
         </button>
       </div>
 
-      {/* 🔗 LinkedIn Login Button */}
-      <div style={{ marginTop: "2rem" }}>
-        <a
-          href={`https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=7880c93kzzfsgj&redirect_uri=https://linkedgoals-d7053.web.app/linkedin&scope=openid%20email`}
-        >
-          <button style={{ padding: "0.5rem 1rem" }}>
-            Sign in with LinkedIn
-          </button>
-        </a>
+      {/* LinkedIn OAuth integration moved to main Auth component */}
+      <div style={{ marginTop: "2rem", fontSize: "0.9rem", color: "#666" }}>
+        <p>LinkedIn OAuth integration available in main application</p>
       </div>
 
       {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
     </div>
   );
 }
-

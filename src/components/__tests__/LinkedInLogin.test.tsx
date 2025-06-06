@@ -1,20 +1,3 @@
-// Mock the LinkedInLogin component to avoid import.meta issues
-jest.mock("../LinkedInLogin", () => {
-  return function MockLinkedInLogin() {
-    const handleClick = () => {
-      // Simulate LinkedIn OAuth redirect
-      window.location.href =
-        "https://www.linkedin.com/oauth/v2/authorization?client_id=test-client-id";
-    };
-
-    return (
-      <div>
-        <button onClick={handleClick}>Sign in with LinkedIn</button>
-      </div>
-    );
-  };
-});
-
 // Mock dependencies
 jest.mock("../../lib/firebase", () => ({
   auth: {
@@ -26,6 +9,26 @@ jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => jest.fn(),
 }));
+
+// Mock the LinkedInLogin component to avoid import.meta issues
+jest.mock("../LinkedInLogin", () => {
+  return function MockLinkedInLogin() {
+    const handleClick = () => {
+      // Simulate LinkedIn OAuth redirect - we'll test this in the actual test
+      const mockWindow = global.window as any;
+      if (mockWindow && mockWindow.location) {
+        mockWindow.location.href =
+          "https://www.linkedin.com/oauth/v2/authorization?client_id=test-client-id";
+      }
+    };
+
+    return (
+      <div>
+        <button onClick={handleClick}>Sign in with LinkedIn</button>
+      </div>
+    );
+  };
+});
 
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";

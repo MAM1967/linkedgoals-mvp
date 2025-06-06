@@ -1,3 +1,31 @@
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import { MemoryRouter } from "react-router-dom";
+import SocialSharePage from "../SocialSharePage";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  doc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
+
+// Mock dependencies
+jest.mock("../../lib/firebase", () => ({
+  auth: {
+    currentUser: {
+      uid: "test-uid",
+      email: "test@example.com",
+      displayName: "Test User",
+    },
+  },
+  db: {},
+}));
+
 // Define mock types and objects
 interface MockAuth {
   currentUser: { uid: string; email: string; displayName?: string } | null;
@@ -23,12 +51,6 @@ const mockGoal = {
   status: "active",
   completed: false,
 };
-
-// Mock dependencies
-jest.mock("../../lib/firebase", () => ({
-  auth: mockAuthObject,
-  db: {},
-}));
 
 const mockDocRef = {
   id: "test-goal-id",
@@ -101,22 +123,6 @@ jest.mock("@fortawesome/free-solid-svg-icons", () => ({
   faCopy: { iconName: "copy" },
 }));
 
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import { MemoryRouter } from "react-router-dom";
-import SocialSharePage from "../SocialSharePage";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  query,
-  where,
-  doc,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
-
 describe("SocialSharePage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -170,8 +176,8 @@ describe("SocialSharePage", () => {
       expect(getDoc).toHaveBeenCalled();
     });
 
-    // Component should be working properly
-    expect(screen.queryByText(/Loading/i)).toBeInTheDocument();
+    // Component should be working properly, so loading indicator should be gone
+    expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument();
   });
 
   test("validates email input when email functionality is present", async () => {

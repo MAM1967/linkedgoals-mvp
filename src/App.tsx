@@ -11,7 +11,6 @@ import { auth } from "./lib/firebase";
 // Page/Component Imports
 import LinkedInCallback from "./components/LinkedInCallback";
 import LinkedInLogin from "./components/LinkedInLogin";
-import EmailLogin from "./components/EmailLogin";
 import Dashboard from "./components/Dashboard";
 import Navbar from "./components/Navbar";
 import GoalInputPage from "./components/GoalInputPage";
@@ -58,16 +57,21 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("=== AUTH STATE CHANGED ===");
+      console.log("Timestamp:", new Date().toISOString());
       console.log(
         "Auth state changed:",
         currentUser ? "logged in as " + currentUser.uid : "logged out"
       );
+      console.log("Current user object:", currentUser);
+      console.log("========================");
+
       setUser(currentUser);
       if (currentUser) {
-        const plan = sessionStorage.getItem("linkedgoals_selected_plan");
+        const plan = localStorage.getItem("linkedgoals_selected_plan");
         if (plan) {
           setWelcomePlan(plan);
-          sessionStorage.removeItem("linkedgoals_selected_plan");
+          localStorage.removeItem("linkedgoals_selected_plan");
         }
       } else {
         // Clear welcome plan if user logs out
@@ -104,10 +108,6 @@ function App() {
                     <img src={logo} alt="Linkedgoals Logo" className="logo" />
                     <h2>Sign in to Linkedgoals</h2>
                     <LinkedInLogin />
-                    <div className="or-divider">
-                      <span>OR</span>
-                    </div>
-                    <EmailLogin />
                   </div>
                 </div>
               }

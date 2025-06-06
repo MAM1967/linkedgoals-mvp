@@ -1,14 +1,7 @@
+require("whatwg-fetch");
 require("@testing-library/jest-dom");
 
-// Mock TextEncoder/TextDecoder for react-router
-if (typeof TextEncoder === "undefined") {
-  global.TextEncoder = require("util").TextEncoder;
-}
-if (typeof TextDecoder === "undefined") {
-  global.TextDecoder = require("util").TextDecoder;
-}
-
-// Mock Vite's import.meta.env
+// Mock Vite's import.meta.env for all tests
 global.import = {
   meta: {
     env: {
@@ -18,6 +11,14 @@ global.import = {
     },
   },
 };
+
+// Mock TextEncoder/TextDecoder for react-router
+if (typeof TextEncoder === "undefined") {
+  global.TextEncoder = require("util").TextEncoder;
+}
+if (typeof TextDecoder === "undefined") {
+  global.TextDecoder = require("util").TextDecoder;
+}
 
 // Mock window.location
 Object.defineProperty(window, "location", {
