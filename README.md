@@ -21,7 +21,7 @@ A comprehensive goal management platform with LinkedIn integration and admin das
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 18 + TypeScript + Vite
+- **Frontend**: React 18 + TypeScript + Vite 
 - **Backend**: Firebase (Firestore, Authentication, Cloud Functions)
 - **Styling**: CSS3 with modern design patterns
 - **Authentication**: Firebase Auth + LinkedIn OAuth + Admin Email/Password
