@@ -1,10 +1,12 @@
-import { initializeApp } from "firebase-admin/app";
+import * as admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
-import { https } from "firebase-functions";
+import { onRequest, onCall, HttpsError } from "firebase-functions/v2/https";
+import { getFirestore } from "firebase-admin/firestore";
+import * as logger from "firebase-functions/logger";
 import { defineSecret } from "firebase-functions/params";
 import axios from "axios";
 
-initializeApp();
+admin.initializeApp();
 
 const LINKEDIN_CLIENT_SECRET = defineSecret("LINKEDIN_CLIENT_SECRET");
 
@@ -18,13 +20,16 @@ interface OpenIDUserInfo {
   picture: string;
 }
 
-export const linkedinlogin = https.onRequest(
+export const linkedinlogin = onRequest(
   {
     secrets: [LINKEDIN_CLIENT_SECRET],
     cors: "https://app.linkedgoals.app",
   },
   async (req, res) => {
     if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Methods", "POST");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.set("Access-Control-Max-Age", "3600");
       res.status(204).send("");
       return;
     }
@@ -41,7 +46,7 @@ export const linkedinlogin = https.onRequest(
         return;
       }
 
-      console.log("🔑 Received authorization code.");
+      logger.info("🔑 Received authorization code.");
 
       const tokenResponse = await axios.post(
         "https://www.linkedin.com/oauth/v2/accessToken",
@@ -60,12 +65,12 @@ export const linkedinlogin = https.onRequest(
       );
 
       const accessToken = tokenResponse.data.access_token;
-      console.log(
+      logger.info(
         "✅ Token exchange successful. Scope:",
         tokenResponse.data.scope
       );
 
-      console.log("👤 Fetching user info via OpenID Connect...");
+      logger.info("👤 Fetching user info via OpenID Connect...");
       const userInfoResponse = await axios.get<OpenIDUserInfo>(
         "https://api.linkedin.com/v2/userinfo",
         {
@@ -76,7 +81,7 @@ export const linkedinlogin = https.onRequest(
       );
 
       const userInfo = userInfoResponse.data;
-      console.log("✅ OpenID Connect userinfo fetched:", {
+      logger.info("✅ OpenID Connect userinfo fetched:", {
         sub: userInfo.sub,
         name: userInfo.name,
         email: userInfo.email,
@@ -86,30 +91,26 @@ export const linkedinlogin = https.onRequest(
         throw new Error("Missing user ID or email from LinkedIn.");
       }
 
-      // Step 3: Create or update Firebase user
       const auth = getAuth();
       const displayName = userInfo.name || userInfo.email.split("@")[0];
 
       let userRecord;
       try {
-        // Check if a user with this email already exists. This is the key to linking social logins.
         userRecord = await auth.getUserByEmail(userInfo.email);
-        console.log(
+        logger.info(
           "✅ Existing Firebase user found by email:",
           userRecord.uid
         );
 
-        // Optionally, update their profile with the latest data from LinkedIn
         await auth.updateUser(userRecord.uid, {
           displayName: userRecord.displayName || displayName,
           photoURL: userRecord.photoURL || userInfo.picture,
         });
-        console.log("✅ User profile updated with LinkedIn data.");
+        logger.info("✅ User profile updated with LinkedIn data.");
       } catch (error: any) {
         if (error.code === "auth/user-not-found") {
-          // If no user exists with this email, create a new one.
           const userId = `linkedin|${userInfo.sub}`;
-          console.log(
+          logger.info(
             "👤 No user found with email. Creating new Firebase user with UID:",
             userId
           );
@@ -120,16 +121,14 @@ export const linkedinlogin = https.onRequest(
             photoURL: userInfo.picture,
             emailVerified: userInfo.email_verified,
           });
-          console.log("✅ New Firebase user created:", userRecord.uid);
+          logger.info("✅ New Firebase user created:", userRecord.uid);
         } else {
-          // Another unexpected error occurred while fetching the user.
           throw error;
         }
       }
 
-      // Step 4: Create a custom token for the user to sign in
       const customToken = await auth.createCustomToken(userRecord.uid);
-      console.log(
+      logger.info(
         "🎫 Custom token created successfully for UID:",
         userRecord.uid
       );
@@ -145,13 +144,13 @@ export const linkedinlogin = https.onRequest(
         },
       });
     } catch (error: any) {
-      console.error(
+      logger.error(
         "🔥 LinkedIn authentication function failed:",
         error.message
       );
       if (error.response) {
-        console.error("📋 Status:", error.response.status);
-        console.error("📋 Data:", error.response.data);
+        logger.error("📋 Status:", error.response.status);
+        logger.error("📋 Data:", error.response.data);
         res.status(error.response.status).json({
           error: "Failed to authenticate with LinkedIn.",
           details: error.response.data,
@@ -165,3 +164,61 @@ export const linkedinlogin = https.onRequest(
     }
   }
 );
+
+export const manageUser = onCall(async (request) => {
+  // Ensure the user calling the function is authenticated
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "The function must be called while authenticated."
+    );
+  }
+
+  // Check if the user is an admin
+  const adminUid = request.auth.uid;
+  const firestore = getFirestore();
+  const adminUserDoc = await firestore.collection("users").doc(adminUid).get();
+
+  if (!adminUserDoc.exists || adminUserDoc.data()?.role !== "admin") {
+    throw new HttpsError(
+      "permission-denied",
+      "You must be an admin to perform this action."
+    );
+  }
+
+  const { uid, action } = request.data;
+  if (!uid || !action) {
+    throw new HttpsError(
+      "invalid-argument",
+      'The function must be called with a "uid" and "action" argument.'
+    );
+  }
+
+  const auth = getAuth();
+
+  try {
+    if (action === "disable") {
+      await auth.updateUser(uid, { disabled: true });
+      logger.info(`Admin ${adminUid} disabled user ${uid}`);
+      return { status: "success", message: `User ${uid} has been disabled.` };
+    } else if (action === "enable") {
+      await auth.updateUser(uid, { disabled: false });
+      logger.info(`Admin ${adminUid} enabled user ${uid}`);
+      return { status: "success", message: `User ${uid} has been enabled.` };
+    } else if (action === "delete") {
+      await auth.deleteUser(uid);
+      await firestore.collection("users").doc(uid).delete();
+      logger.info(`Admin ${adminUid} deleted user ${uid}`);
+      return { status: "success", message: `User ${uid} has been deleted.` };
+    } else {
+      throw new HttpsError("invalid-argument", "Invalid action specified.");
+    }
+  } catch (error: any) {
+    logger.error("Error managing user:", error);
+    throw new HttpsError(
+      "internal",
+      "An unexpected error occurred.",
+      error.message
+    );
+  }
+});

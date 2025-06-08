@@ -5,8 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "./lib/firebase";
+import { useAuth } from "./hooks/useAuth";
 
 // Page/Component Imports
 import LinkedInCallback from "./components/LinkedInCallback";
@@ -16,6 +15,12 @@ import Navbar from "./components/Navbar";
 import GoalInputPage from "./components/GoalInputPage";
 import SocialSharePage from "./components/SocialSharePage";
 import CoachOnboardingPage from "./components/CoachOnboardingPage";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import GoalManagement from "./pages/admin/GoalManagement";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
 
 import logo from "./assets/logo.svg";
 import "./app.css";
@@ -51,36 +56,21 @@ const AuthenticatedLayout: React.FC<{
 };
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [welcomePlan, setWelcomePlan] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("=== AUTH STATE CHANGED ===");
-      console.log("Timestamp:", new Date().toISOString());
-      console.log(
-        "Auth state changed:",
-        currentUser ? "logged in as " + currentUser.uid : "logged out"
-      );
-      console.log("Current user object:", currentUser);
-      console.log("========================");
-
-      setUser(currentUser);
-      if (currentUser) {
-        const plan = localStorage.getItem("linkedgoals_selected_plan");
-        if (plan) {
-          setWelcomePlan(plan);
-          localStorage.removeItem("linkedgoals_selected_plan");
-        }
-      } else {
-        // Clear welcome plan if user logs out
-        setWelcomePlan(null);
+    if (user) {
+      const plan = localStorage.getItem("linkedgoals_selected_plan");
+      if (plan) {
+        setWelcomePlan(plan);
+        localStorage.removeItem("linkedgoals_selected_plan");
       }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+    } else {
+      // Clear welcome plan if user logs out
+      setWelcomePlan(null);
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -95,27 +85,42 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
+          {/* Public routes that are always accessible */}
           <Route path="/linkedin" element={<LinkedInCallback />} />
           <Route path="/coach-onboarding" element={<CoachOnboardingPage />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
 
-          {/* Public route for login - if not logged in, show login page */}
+          {/* Admin Routes - This must come before the general redirects */}
+          <Route element={<AdminProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="goals" element={<GoalManagement />} />
+            </Route>
+          </Route>
+
+          {/* Routes for unauthenticated users */}
           {!user && (
-            <Route
-              path="/login"
-              element={
-                <div className="login-container">
-                  <div className="login-card">
-                    <img src={logo} alt="Linkedgoals Logo" className="logo" />
-                    <h2>Sign in to Linkedgoals</h2>
-                    <LinkedInLogin />
+            <>
+              <Route
+                path="/login"
+                element={
+                  <div className="login-container">
+                    <div className="login-card">
+                      <img src={logo} alt="Linkedgoals Logo" className="logo" />
+                      <h2>Sign in to Linkedgoals</h2>
+                      <LinkedInLogin />
+                    </div>
                   </div>
-                </div>
-              }
-            />
+                }
+              />
+              {/* Redirect any other path to /login */}
+              <Route path="*" element={<Navigate to="/login" />} />
+            </>
           )}
 
-          {/* Authenticated Routes */}
-          {user ? (
+          {/* Routes for authenticated users */}
+          {user && (
             <>
               <Route
                 path="/"
@@ -150,16 +155,12 @@ function App() {
                   </AuthenticatedLayout>
                 }
               />
-              {/* Any other authenticated routes can go here */}
-              {/* If user is logged in and tries to go to /login, redirect to dashboard */}
+              {/* Redirect authenticated users from /login to dashboard */}
               <Route path="/login" element={<Navigate to="/" />} />
+              {/* Fallback for authenticated users to redirect to home for any other unmatched route*/}
+              <Route path="*" element={<Navigate to="/" />} />
             </>
-          ) : (
-            // If not logged in, all paths (except /linkedin and /login) redirect to /login
-            <Route path="*" element={<Navigate to="/login" />} />
           )}
-          {/* Fallback for any unmatched routes when logged in (optional, could also be a 404 component) */}
-          {user && <Route path="*" element={<Navigate to="/" />} />}
         </Routes>
       </div>
     </Router>
