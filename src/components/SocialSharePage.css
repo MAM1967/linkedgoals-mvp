@@ -1,150 +1,351 @@
-/* SocialSharePage.css */
+/* SocialSharePage.css - Updated to match marketing site design */
 .social-share-page {
   max-width: 700px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  padding: var(--spacing-2xl);
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
   text-align: center;
 }
 
 .social-share-page h2 {
-  color: #333;
-  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
 }
 
 .social-share-page h3 {
-  color: #444;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
 }
 
+/* Goal Selection */
 .goal-selection-list ul {
   list-style-type: none;
   padding: 0;
+  margin: 0;
 }
 
 .goal-selection-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-  background-color: #f9f9f9;
+  padding: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  background-color: var(--color-background-light);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.goal-selection-list li:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.goal-selection-list li.selected {
+  border-color: var(--color-primary);
+  background-color: rgba(0, 119, 181, 0.05);
 }
 
 .goal-selection-list li span {
   flex-grow: 1;
   text-align: left;
+  color: var(--color-text-primary);
+  font-weight: 500;
 }
 
+/* Share Type Selector */
+.share-type-selector {
+  margin-bottom: var(--spacing-xl);
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.share-type-selector button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 2px solid var(--color-primary);
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+}
+
+.share-type-selector button:hover {
+  background-color: var(--color-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.share-type-selector button.active {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Share Preview Area */
 .share-preview-area {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  background-color: #f8f9fa;
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background-light);
+  text-align: left;
 }
 
 .share-preview-area h4 {
-  margin-bottom: 1rem;
-  color: #333;
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-align: center;
 }
 
 .share-preview-area textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 1.5rem;
-  min-height: 100px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-lg);
+  min-height: 120px;
   box-sizing: border-box;
   font-family: inherit;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
+  background-color: var(--color-secondary);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  transition: all 0.2s ease;
+  resize: vertical;
 }
 
-.share-type-selector {
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+.share-preview-area textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
 }
 
-.share-type-selector button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #007bff;
-  background-color: #fff;
-  color: #007bff;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.share-type-selector button.active {
-  background-color: #007bff;
-  color: #fff;
-}
-
+/* Share Buttons */
 .share-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem; /* Space between buttons */
-  align-items: stretch; /* Make buttons take full width available if needed */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
 }
 
 .share-buttons button {
-  padding: 0.75rem 1rem;
+  padding: var(--spacing-md) var(--spacing-lg);
   border: none;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   color: white;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
+  font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.share-buttons button i {
-  margin-right: 0.75rem;
+  gap: var(--spacing-sm);
+  min-height: 48px;
 }
 
 .share-buttons button:hover {
-  opacity: 0.85;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
+.share-buttons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.share-buttons button i {
+  font-size: var(--font-size-lg);
+}
+
+/* Platform-specific button colors */
 .btn-linkedin {
-  background-color: #0077b5; /* LinkedIn Blue */
+  background-color: #0077b5;
+}
+
+.btn-linkedin:hover {
+  background-color: #006097;
 }
 
 .btn-twitter {
-  background-color: #1da1f2; /* Twitter Blue */
+  background-color: #1da1f2;
+}
+
+.btn-twitter:hover {
+  background-color: #1991da;
 }
 
 .btn-facebook {
-  background-color: #1877f2; /* Facebook Blue */
+  background-color: #1877f2;
+}
+
+.btn-facebook:hover {
+  background-color: #166fe5;
 }
 
 .btn-copy {
-  background-color: #6c757d; /* Gray */
+  background-color: var(--color-text-secondary);
 }
 
-/* Assuming general .btn and .btn-secondary styles are defined elsewhere or add them */
-.btn.btn-secondary.mt-3 {
-  margin-top: 1rem; /* Ensure spacing for back button if it exists */
-  background-color: #6c757d;
+.btn-copy:hover {
+  background-color: #5a6268;
+}
+
+/* Success/Error States */
+.copy-success {
+  background-color: var(--color-success) !important;
+}
+
+.copy-success:hover {
+  background-color: #218838 !important;
+}
+
+/* General Button Styles */
+.btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--color-text-secondary);
   color: white;
 }
 
-.btn.btn-secondary.btn-small {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.8rem;
+.btn-secondary:hover {
+  background-color: #5a6268;
 }
 
+.btn-small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+/* Error Message */
 .error-message {
-  color: #dc3545;
-  margin: 1rem 0;
+  color: var(--color-error);
+  background-color: rgba(220, 53, 69, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--color-error);
+  margin: var(--spacing-md) 0;
+  font-size: var(--font-size-sm);
+}
+
+/* Success Message */
+.success-message {
+  color: var(--color-success);
+  background-color: rgba(40, 167, 69, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--color-success);
+  margin: var(--spacing-md) 0;
+  font-size: var(--font-size-sm);
+}
+
+/* Character Counter */
+.character-counter {
+  text-align: right;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+.character-counter.warning {
+  color: var(--color-warning);
+}
+
+.character-counter.error {
+  color: var(--color-error);
+}
+
+/* Loading State */
+.loading-overlay {
+  position: relative;
+}
+
+.loading-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .social-share-page {
+    padding: var(--spacing-xl);
+    margin: var(--spacing-md);
+  }
+
+  .share-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .share-type-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .share-type-selector button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-share-page {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-sm);
+  }
+
+  .social-share-page h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .social-share-page h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  .goal-selection-list li {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
 }

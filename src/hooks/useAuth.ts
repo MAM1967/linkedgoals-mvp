@@ -13,17 +13,23 @@ export function useAuth() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists() && userDoc.data().role === "admin") {
-          setUser({ ...currentUser, isAdmin: true });
+      try {
+        if (currentUser) {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists() && userDoc.data().role === "admin") {
+            setUser({ ...currentUser, isAdmin: true });
+          } else {
+            setUser(currentUser);
+          }
         } else {
-          setUser(currentUser);
+          setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error("Error in auth state change:", error);
         setUser(null);
       }
+
       setLoading(false);
     });
 

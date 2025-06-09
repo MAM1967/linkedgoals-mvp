@@ -19,7 +19,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  background-color: var(--color-background-light);
 }
 
 .login-container {
@@ -27,77 +27,91 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
+  padding: var(--spacing-md);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 100%
+  );
 }
 
 .login-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--color-secondary);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 400px;
   text-align: center;
 }
 
 .login-card .logo {
-  width: 200px;
+  width: 240px;
   height: auto;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto var(--spacing-xl);
 }
 
 .login-card h2 {
-  color: #1a1a1a;
-  font-size: 1.5rem;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
 }
 
 .login-card p {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xl);
+  line-height: 1.5;
 }
 
 .form-container {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .input-field {
   width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  transition: all 0.2s ease;
+  background-color: var(--color-secondary);
 }
 
 .input-field:focus {
   outline: none;
-  border-color: #0077b5;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
 }
 
 .auth-button {
   width: 100%;
-  padding: 0.75rem;
-  background-color: #0077b5;
+  padding: var(--spacing-md);
+  background-color: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .auth-button:hover {
-  background-color: #006097;
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .linkedin-login {
-  margin: 1.5rem 0;
+  margin: var(--spacing-xl) 0;
   position: relative;
 }
 
@@ -106,9 +120,9 @@ body {
   content: "";
   position: absolute;
   top: 50%;
-  width: 45%;
+  width: 42%;
   height: 1px;
-  background-color: #ddd;
+  background-color: var(--color-border);
 }
 
 .linkedin-login::before {
@@ -121,24 +135,25 @@ body {
 
 .linkedin-button {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: white;
-  border: 1px solid #0077b5;
-  border-radius: 6px;
-  color: #0077b5;
-  font-weight: 500;
-  font-size: 1rem;
+  padding: var(--spacing-md);
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: var(--font-size-base);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: var(--spacing-md);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .linkedin-button:hover {
-  background-color: #0077b5;
+  background-color: var(--color-primary);
   color: white;
+  transform: translateY(-1px);
 }
 
 .linkedin-button svg {
@@ -147,102 +162,104 @@ body {
 }
 
 .error-message {
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background-color: #ffebee;
-  border-radius: 4px;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--color-error);
 }
 
 .toggle-auth {
-  margin-top: 1.5rem;
-  color: #666;
-  font-size: 0.9rem;
+  margin-top: var(--spacing-xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .toggle-button {
   background: none;
   border: none;
-  color: #0077b5;
-  font-size: 0.9rem;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
   cursor: pointer;
   text-decoration: underline;
-  padding: 0 0.25rem;
+  padding: 0 var(--spacing-xs);
+  font-weight: 500;
 }
 
 .toggle-button:hover {
-  color: #006097;
+  color: var(--color-primary-dark);
 }
 
 .dashboard {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 0;
+  width: 100%;
 }
 
 .dashboard header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-xl);
   width: 100%;
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .dashboard h1 {
-  font-size: 2rem;
-  color: #1a1a1a;
+  font-size: var(--font-size-3xl);
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .logout {
-  padding: 0.5rem 1rem;
-  background-color: #dc3545;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-error);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .logout:hover {
-  background-color: #c82333;
+  background-color: #c0392b;
+  transform: translateY(-1px);
 }
 
 .loading-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background-color: #f0f2f5;
+  background-color: var(--color-background-light);
 }
 
 .loading-logo {
-  width: 150px;
+  width: 200px;
   height: auto;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.9;
 }
 
 .loading-spinner-text {
-  font-size: 1.2rem;
-  color: #333;
-  text-align: center;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .loading {
-  font-size: 1.2rem;
-  color: #333;
-}
-
-.loading:after {
-  content: "";
-  width: 16px;
-  height: 16px;
-  border: 2px solid #0077b5;
-  border-right-color: transparent;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-border);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
@@ -258,58 +275,113 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-lg);
   text-align: center;
-  padding: 2rem;
+  background-color: var(--color-background-light);
 }
 
 .callback-error h2 {
-  color: #dc3545;
-  margin-bottom: 1rem;
+  color: var(--color-error);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-2xl);
 }
 
 .back-button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #6c757d;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-primary);
   color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .back-button:hover {
-  background-color: #5a6268;
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: white;
 }
 
-/* Welcome Banner for Plan Selection */
 .welcome-banner {
-  background-color: #e6f7ff; /* Light blue, LinkedIn-ish */
-  border: 1px solid #91d5ff; /* Lighter blue border */
-  color: #0050b3; /* Darker blue text for contrast */
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 4px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-light)
+  );
+  color: white;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .welcome-banner p {
   margin: 0;
-  flex-grow: 1;
+  font-size: var(--font-size-base);
+  font-weight: 500;
 }
 
 .dismiss-button {
-  background: none;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: #0050b3;
-  font-size: 1.5rem;
-  line-height: 1;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
   cursor: pointer;
-  padding: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.2s ease;
 }
 
 .dismiss-button:hover {
-  color: #003a8c; /* Darker blue on hover */
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: var(--spacing-xl);
+    margin: var(--spacing-md);
+  }
+
+  .login-card .logo {
+    width: 200px;
+  }
+
+  .dashboard header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+  }
+
+  .welcome-banner {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-sm);
+  }
+
+  .login-card .logo {
+    width: 160px;
+  }
+
+  .login-card h2 {
+    font-size: var(--font-size-xl);
+  }
 }

@@ -1,154 +1,383 @@
-/* Dashboard.css */
+/* Dashboard.css - Updated to match marketing site design */
+
 .dashboard-container {
-  padding: 1.5rem; /* 24px */
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: "Inter", sans-serif; /* Consistent font */
-  background-color: #f4f7f9; /* Light background for the page */
-  min-height: 100vh;
+  padding: 0;
+  width: 100%;
+  background-color: var(--color-background-light);
+  min-height: calc(100vh - 80px); /* Account for navbar */
 }
 
+/* Hero Section */
 .dashboard-header {
-  background-color: #0a66c2; /* LinkedIn Navy */
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 100%
+  );
   color: white;
-  padding: 2rem 1.5rem; /* More padding for header */
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-xl);
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .dashboard-header h1 {
-  font-size: 2rem; /* 32px */
+  font-size: var(--font-size-3xl);
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-sm);
+  color: white;
 }
 
 .streak-banner {
-  font-size: 1.125rem; /* 18px */
+  font-size: var(--font-size-lg);
   font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem; /* Space between icon and text */
+  gap: var(--spacing-sm);
+  opacity: 0.95;
 }
 
 .streak-banner .fa-fire {
-  color: #ffac33; /* Fire icon color */
+  color: #ffac33;
 }
 
+/* Section Styling */
 .dashboard-section {
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  margin-bottom: 1.5rem;
+  background-color: var(--color-secondary);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--color-border-light);
 }
 
 .section-title {
-  font-size: 1.5rem; /* 24px */
+  font-size: var(--font-size-2xl);
   font-weight: 600;
-  color: #333;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #0a66c2; /* LinkedIn Navy accent */
-  display: inline-block; /* So border only spans the text width */
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--color-primary);
+  display: inline-block;
 }
 
-/* Legacy check-in specific styling if needed, mostly uses card/section style */
-#checkins-legacy .text-2xl {
-  font-size: 1.25rem; /* Adjusting to fit the new section title style better */
-  color: #444;
-  border-bottom: none;
-  display: block; /* Override inline-block from .section-title if it was ever applied */
-}
-
-/* General card styling to be refined in later phases */
+/* Goal Cards */
 .goal-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Pushes buttons to the bottom */
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 1.25rem; /* 20px */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
-  min-height: 320px; /* Give cards a consistent minimum height */
+  justify-content: space-between;
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-light);
+  transition: all 0.3s ease;
+  min-height: 320px;
+  position: relative;
 }
 
 .goal-card:hover {
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.08);
-  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
 }
 
 .goal-card h3 {
-  font-size: 1.125rem; /* 18px */
-  margin-bottom: 0.5rem;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text-primary);
+  line-height: 1.4;
 }
 
 .goal-card .text-xs {
-  font-size: 0.75rem; /* 12px */
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.goal-card .text-sm {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* Progress Bar */
+.goal-card-progress {
+  margin: var(--spacing-md) 0;
 }
 
 .goal-card-progress .progress-bar-background {
   width: 100%;
-  background-color: #e9ecef; /* Light grey background for the bar */
-  border-radius: 0.25rem; /* 4px */
-  height: 0.75rem; /* 12px, slightly thicker for visibility */
-  overflow: hidden; /* Ensures foreground doesn't spill out */
+  background-color: var(--color-border-light);
+  border-radius: var(--radius-sm);
+  height: 8px;
+  overflow: hidden;
 }
 
 .goal-card-progress .progress-bar-foreground {
-  background-color: #28a745; /* Success green, or could be blue-500 */
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-primary-light)
+  );
   height: 100%;
-  transition: width 0.5s ease-in-out;
-  border-radius: 0.25rem; /* Match background */
+  transition: width 0.5s ease;
+  border-radius: var(--radius-sm);
 }
 
 .goal-card-progress .progress-text {
   display: block;
   text-align: right;
-  font-size: 0.7rem; /* Slightly smaller text for progress values */
-  color: #495057;
-  margin-top: 0.25rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+  font-weight: 500;
 }
 
+/* Card Actions */
 .goal-card .border-t {
-  border-top-width: 1px;
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-md);
 }
 
 .goal-card button {
-  padding: 0.6rem 1rem; /* Slightly more padding for better clickability */
-  font-size: 0.875rem; /* 14px */
-  border-radius: 6px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  color: white !important;
 }
 
-/* Quick Add Goal Button Styling */
+.goal-card button:hover {
+  transform: translateY(-1px);
+}
+
+/* Primary Action Buttons */
+.goal-card button[style*="background-color: rgb(59, 130, 246)"],
+.goal-card button[style*="background-color:#3b82f6"] {
+  background-color: var(--color-primary) !important;
+  color: white;
+}
+
+.goal-card button[style*="background-color: rgb(59, 130, 246)"]:hover,
+.goal-card button[style*="background-color:#3b82f6"]:hover {
+  background-color: var(--color-primary-dark) !important;
+}
+
+/* Quick Add Goal Button */
 .quick-add-goal-button-container {
-  margin-top: 1.5rem; /* Space above the button */
-  text-align: center; /* Center the button */
+  margin-top: var(--spacing-xl);
+  text-align: center;
 }
 
 .quick-add-goal-button {
-  background-color: #1c7ed6; /* A nice blue */
+  background-color: var(--color-primary);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  transition: background-color 0.2s ease-in-out;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  transition: all 0.2s ease;
   border: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .quick-add-goal-button:hover {
-  background-color: #156cb3; /* Darker blue on hover */
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
 }
 
-/* Styling for Tailwind classes if not already globally available or being phased out */
-/* This ensures elements previously styled with Tailwind look okay during transition */
+/* Check-ins Section */
+#checkins-legacy .text-2xl {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  border-bottom: none;
+  display: block;
+}
+
+/* Status Indicators */
+.status-indicator {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: var(--color-success);
+}
+
+.status-completed {
+  background-color: rgba(0, 119, 181, 0.1);
+  color: var(--color-primary);
+}
+
+.status-overdue {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--color-error);
+}
+
+/* Achievement Badges */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.badge-card {
+  background-color: var(--color-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.badge-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-md);
+  font-size: 24px;
+  color: white;
+}
+
+.badge-icon.consistencyChampion-icon-bg {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.badge-icon.milestoneMaster-icon-bg {
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.badge-icon.sharingEnthusiast-icon-bg {
+  background: linear-gradient(135deg, #6f42c1, #e83e8c);
+}
+
+.badge-info {
+  text-align: center;
+}
+
+.badge-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.badge-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+}
+
+.badge-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.badge-earned-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+/* Grid Layouts */
+.smart-goals-list .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .dashboard-header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .dashboard-section {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .section-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .goal-card {
+    padding: var(--spacing-lg);
+    min-height: 280px;
+  }
+
+  .smart-goals-list .grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: var(--spacing-lg);
+  }
+
+  .dashboard-header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .dashboard-section {
+    padding: var(--spacing-md);
+  }
+
+  .goal-card {
+    padding: var(--spacing-md);
+    min-height: 250px;
+  }
+
+  .streak-banner {
+    font-size: var(--font-size-base);
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+}
+
+/* Utility Classes for Backward Compatibility */
 .p-4 {
-  padding: 1rem;
+  padding: var(--spacing-md);
 }
 .max-w-4xl {
   max-width: 56rem;
@@ -157,188 +386,72 @@
   margin-left: auto;
   margin-right: auto;
 }
-.space-y-6 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-}
 .text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
+  font-size: var(--font-size-2xl);
+  line-height: 1.2;
 }
 .font-semibold {
   font-weight: 600;
 }
 .mb-4 {
-  margin-bottom: 1rem;
-}
-.border {
-  border-width: 1px;
-}
-.rounded {
-  border-radius: 0.25rem;
-}
-.bg-white {
-  background-color: white;
-}
-.shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-.text-sm {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-.text-gray-500 {
-  color: #6b7280;
+  margin-bottom: var(--spacing-md);
 }
 .mt-1 {
-  margin-top: 0.25rem;
+  margin-top: var(--spacing-xs);
 }
 .mt-3 {
-  margin-top: 0.75rem;
+  margin-top: var(--spacing-md);
+}
+.border {
+  border: 1px solid var(--color-border);
+}
+.rounded {
+  border-radius: var(--radius-sm);
+}
+.bg-white {
+  background-color: var(--color-secondary);
+}
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+.text-sm {
+  font-size: var(--font-size-sm);
+  line-height: 1.25;
+}
+.text-gray-500 {
+  color: var(--color-text-secondary);
+}
+.text-gray-700 {
+  color: var(--color-text-primary);
+}
+.text-xs {
+  font-size: var(--font-size-xs);
+  line-height: 1.25;
+}
+.text-green-600 {
+  color: var(--color-success);
+}
+.text-red-500 {
+  color: var(--color-error);
+}
+.text-blue-600 {
+  color: var(--color-primary);
+}
+.text-purple-600 {
+  color: #6f42c1;
 }
 .bg-blue-50 {
-  background-color: #eff6ff;
+  background-color: rgba(0, 119, 181, 0.05);
 }
 .border-l-4 {
-  border-left-width: 4px;
+  border-left: 4px solid;
 }
 .border-blue-400 {
-  border-color: #60a5fa;
+  border-left-color: var(--color-primary);
 }
 .p-3 {
-  padding: 0.75rem;
+  padding: var(--spacing-md);
 }
 .font-medium {
   font-weight: 500;
-}
-.text-gray-700 {
-  color: #374151;
-}
-.text-xs {
-  font-size: 0.75rem;
-  line-height: 1rem;
-}
-.text-green-600 {
-  color: #059669;
-}
-.text-red-500 {
-  color: #ef4444;
-}
-.text-blue-600 {
-  color: #2563eb;
-}
-.text-purple-600 {
-  color: #7c3aed;
-}
-
-.smart-goals-list .grid {
-  /* Ensures cards can grow if content is larger */
-}
-
-/* Achievements/Badges Section */
-#achievements {
-  margin-top: 2rem; /* Add some space above the achievements section */
-}
-
-.badges-grid {
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(280px, 1fr)
-  ); /* Responsive grid */
-  gap: 1.5rem;
-}
-
-.badge-card {
-  background-color: #f8f9fa; /* Light background for badge cards */
-  border: 1px solid #dee2e6; /* Subtle border */
-  border-radius: 8px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.badge-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.badge-icon {
-  font-size: 2.5rem; /* Slightly adjust icon size */
-  color: #0a66c2;
-  min-width: 60px; /* Ensure icon area has a minimum width */
-  height: 60px; /* Make it square for easier shaping */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px; /* Default rounded corners for all */
-  background-color: #e9ecef; /* Default light background */
-  padding: 0.5rem;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Consistency Champion: Shield-like (Gold icon, Navy-ish background) */
-.badge-icon.consistencyChampion-icon-bg {
-  background-color: #0a66c2; /* LinkedIn Navy */
-  /* border-radius: 15% 15% 50% 50% / 15% 15% 30% 30%; */ /* Attempt at shield, might be too complex */
-}
-.badge-icon .fa-shield-alt {
-  color: #ffd700; /* Gold */
-}
-
-/* Milestone Master: Star-like (Green icon, Light Green/Silver background) */
-.badge-icon.milestoneMaster-icon-bg {
-  background-color: #e0f2e0; /* Light green, or #C0C0C0 for silver */
-}
-.badge-icon .fa-star {
-  color: #4caf50; /* Bright Green */
-}
-
-/* Sharing Enthusiast: Circular (Royal Blue icon, White background with Blue border) */
-.badge-icon.sharingEnthusiast-icon-bg {
-  background-color: #ffffff;
-  border: 2px solid #1e90ff; /* Royal Blue border */
-  border-radius: 50%; /* Make it circular */
-}
-.badge-icon .fa-bullhorn {
-  color: #1e90ff; /* Royal Blue */
-}
-
-/* Default/fallback icon color */
-.badge-icon .fa-medal {
-  color: #6c757d;
-}
-
-.badge-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.badge-name {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #343a40;
-  margin-bottom: 0.25rem;
-}
-
-.badge-description {
-  font-size: 0.9rem;
-  color: #495057;
-  margin-bottom: 0.5rem;
-  flex-grow: 1;
-}
-
-.badge-count {
-  font-size: 0.8rem;
-  color: #6c757d;
-  font-style: italic;
-  margin-bottom: 0.25rem;
-}
-
-.badge-earned-date {
-  font-size: 0.75rem;
-  color: #6c757d;
 }

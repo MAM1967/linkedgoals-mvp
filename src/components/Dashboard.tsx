@@ -1031,15 +1031,14 @@ export default function Dashboard() {
                           progressUpdateStatus[goal.id] === "Already done"
                         }
                       >
-                        {progressUpdateStatus[goal.id] ||
-                          "Update Progress (Check-in)"}
+                        {progressUpdateStatus[goal.id] || "📈 Update Progress"}
                       </button>
                     )}
                   <button
                     onClick={() => handleShareMilestone(goal)}
                     className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded text-sm transition duration-150 ease-in-out"
                   >
-                    Share Milestone
+                    📢 Share Progress
                   </button>
                   {/* Placeholder for Mark as Complete, Coach Invite etc. can be re-added here if needed */}
                   {!goal.completed && goal.status !== "completed" && (
@@ -1050,8 +1049,7 @@ export default function Dashboard() {
                       className="w-full text-sm bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out mt-2"
                       disabled={goalUpdateStatus[goal.id] === "Updating..."}
                     >
-                      {goalUpdateStatus[goal.id] ||
-                        "Mark as Complete (Overall)"}
+                      {goalUpdateStatus[goal.id] || "✅ Complete Goal"}
                     </button>
                   )}
                 </div>
