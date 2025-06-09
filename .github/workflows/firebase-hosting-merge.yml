@@ -24,4 +24,4 @@ jobs:
           channelId: live
           projectId: linkedgoals-d7053
           entryPoint: ./
-          targets: hosting
+          target: hosting
