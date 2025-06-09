@@ -25,11 +25,11 @@ export const CategoryProgressSummary: React.FC<
   }
 
   const getProgressColor = (percentage: number): string => {
-    if (percentage >= 80) return "#28a745"; // Green
-    if (percentage >= 60) return "#17a2b8"; // Teal
-    if (percentage >= 40) return "#ffc107"; // Yellow
-    if (percentage >= 20) return "#fd7e14"; // Orange
-    return "#dc3545"; // Red
+    if (percentage >= 80) return "var(--progress-excellent)"; // Green
+    if (percentage >= 60) return "var(--progress-good)"; // Teal
+    if (percentage >= 40) return "var(--progress-fair)"; // Yellow
+    if (percentage >= 20) return "var(--progress-needs-work)"; // Orange
+    return "var(--progress-started)"; // Red
   };
 
   const getProgressLabel = (percentage: number): string => {

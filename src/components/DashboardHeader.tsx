@@ -26,6 +26,17 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const needsAttention = stalledGoals.length + upcomingDeadlines.length;
   const hasNewCoachingFeedback = recentCoachingFeedback.length > 0;
 
+  // Get progress color for better contrast using CSS variables
+  const getProgressColor = (percentage: number): string => {
+    if (percentage >= 80) return "var(--progress-excellent)"; // Green
+    if (percentage >= 60) return "var(--progress-good)"; // Teal
+    if (percentage >= 40) return "var(--progress-fair)"; // Yellow
+    if (percentage >= 20) return "var(--progress-needs-work)"; // Orange
+    return "var(--progress-started)"; // Red
+  };
+
+  const progressColor = getProgressColor(averageProgress);
+
   return (
     <div className="dashboard-header">
       {/* Main Progress Section */}
@@ -42,6 +53,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <path
                 className="circle"
                 strokeDasharray={`${averageProgress}, 100`}
+                style={{ stroke: progressColor }}
                 d="M18 2.0845
                   a 15.9155 15.9155 0 0 1 0 31.831
                   a 15.9155 15.9155 0 0 1 0 -31.831"

@@ -18,15 +18,15 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 
 **User Story**: As a user, I want contextual help tooltips so that I can understand features without leaving the page or searching documentation.
 
-**Business Value**: Reduces support tickets, improves user onboarding, increases feature adoption
+**Business Value**: Reduces support tickets, improves user onboarding, increases feature adoption, improves accessibility
 
 **Acceptance Criteria**:
 
 - [ ] Create reusable Tooltip component with TypeScript support
 - [ ] Implement CSS-only tooltips with 4 positions (top, bottom, left, right)
-- [ ] Add tooltips to Dashboard action buttons (Update Progress, Share Goal, etc.)
+- [ ] Add tooltips to Dashboard action buttons and key UI elements
 - [ ] Add SMART criteria explanations in Goal Input form
-- [ ] Include admin dashboard tooltips for user management actions
+- [ ] Include coaching indicators and status explanations
 - [ ] Ensure WCAG 2.1 AA accessibility compliance
 - [ ] Add delay configuration (default 500ms)
 - [ ] Support keyboard navigation (Esc to close)
@@ -35,11 +35,59 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 **Technical Tasks**:
 
 - [ ] Create `src/components/common/Tooltip.tsx`
-- [ ] Add CSS variables to design system
+- [ ] Add CSS variables to design system (`src/styles/branding.css`)
 - [ ] Implement useTooltip hook for advanced interactions
-- [ ] Add 15-20 strategic tooltips across key features
+- [ ] Add 20-25 strategic tooltips across enhanced dashboard
 - [ ] Write unit tests for Tooltip component
-- [ ] Update Storybook documentation
+- [ ] Update component documentation
+
+**Current Dashboard Components to Enhance**:
+
+1. **DashboardHeader Component**:
+
+   - [ ] Progress circle explanation ("Your overall goal completion rate")
+   - [ ] Stat cards explanations ("Total goals you've created", "Goals you've completed", etc.)
+   - [ ] Notification badges ("Goals that need immediate attention")
+   - [ ] Motivational message context ("AI-generated encouragement based on your progress")
+
+2. **CategoryProgressSummary Component**:
+
+   - [ ] Category progress circles ("Average completion rate for this category")
+   - [ ] "View Goals" buttons ("Filter dashboard to show only this category")
+   - [ ] Coaching indicators ("💬 This category has active coaching feedback")
+   - [ ] Progress status badges ("Excellent", "Needs Attention", etc.)
+
+3. **GoalProgressCard Component**:
+
+   - [ ] Progress bars ("Current completion percentage based on measurable criteria")
+   - [ ] Status badges ("Completed", "Overdue", "Stalled", "Due Soon")
+   - [ ] Action buttons ("Update Progress", "Mark Complete", "View Details")
+   - [ ] Coaching notes toggle ("💬 View feedback from your coach")
+   - [ ] SMART breakdown sections ("Click to expand detailed goal criteria")
+   - [ ] Measurable data displays ("Your current progress vs target value")
+
+4. **InsightsPanel Component**:
+
+   - [ ] Tab navigation ("All insights", "Action items", "Achievements")
+   - [ ] Insight type icons ("🏆 Performance", "💡 Actionable", "🎉 Motivational")
+   - [ ] Priority badges ("High priority items need immediate attention")
+   - [ ] Action buttons in insights ("Take specific actions based on recommendations")
+
+5. **GoalInputPage Component (SMART Form)**:
+
+   - [ ] Specific field ("Be clear and precise about what you want to achieve")
+   - [ ] Measurable types dropdown ("Choose how you'll track progress: Numeric, Date, Streak, or Done/Not Done")
+   - [ ] Measurable target/unit fields ("Set your target value and measurement unit")
+   - [ ] Achievable field ("Ensure your goal is realistic and attainable given your resources")
+   - [ ] Relevant field ("Explain why this goal matters to you and aligns with your values")
+   - [ ] Time-bound/Due date ("Set a specific deadline to create urgency and focus")
+   - [ ] Category selection ("Choose from Career, Productivity, or Skills for better organization")
+
+6. **Enhanced Features**:
+   - [ ] Badge system explanations ("Achievements you've earned for consistent progress")
+   - [ ] Category filtering ("Show goals from specific categories only")
+   - [ ] Progress calculation tooltips ("How we calculate your completion percentage")
+   - [ ] Coaching status indicators ("Coach assigned", "Pending approval", etc.")
 
 **Testing Strategy**:
 
@@ -50,8 +98,9 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 - [ ] Keyboard navigation testing (Tab, Esc, Enter)
 - [ ] Performance testing (tooltip load time, memory usage)
 - [ ] Usability testing (tooltip effectiveness, user comprehension)
+- [ ] Integration testing with existing dashboard components
 
-**Definition of Done**: All tooltips render correctly, pass accessibility tests, improve user task completion in usability testing, and meet performance benchmarks.
+**Definition of Done**: All tooltips render correctly, pass accessibility tests, improve user task completion in usability testing, meet performance benchmarks, and integrate seamlessly with the enhanced dashboard design system.
 
 ---
 

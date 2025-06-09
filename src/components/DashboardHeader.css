@@ -42,14 +42,14 @@
 
 .circle {
   fill: none;
-  stroke: var(--text-on-dark-primary);
   stroke-width: 2.8;
   stroke-linecap: round;
   animation: progress 1s ease-in-out forwards;
+  /* Color will be set dynamically via inline style */
 }
 
 .percentage {
-  fill: var(--text-on-dark-primary);
+  fill: #ffffff !important; /* Pure white for maximum contrast on dark background */
   font-family: var(--font-family-primary);
   font-size: 0.5em;
   text-anchor: middle;
