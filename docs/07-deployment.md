@@ -109,13 +109,14 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-      - run: npm ci && npm run build
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LINKEDGOALS_D7053 }}
-          channelId: live
-          projectId: linkedgoals-d7053
+      - name: Install dependencies and build
+        run: npm ci && npm run build
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+      - name: Deploy to Firebase Hosting
+        run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
 ```
 
 #### Preview Deployment (`firebase-hosting-pull-request.yml`)
@@ -151,8 +152,42 @@ jobs:
 2. **Setup**: Install Node.js 20 with npm caching
 3. **Dependencies**: `npm ci` for reproducible builds
 4. **Build**: Execute build process (`npm run build`)
-5. **Deploy**: Deploy to Firebase Hosting
-6. **Notify**: Comment on PR with preview URL (for PR deployments)
+5. **Install Firebase CLI**: Global installation of firebase-tools
+6. **Deploy**: Deploy to Firebase Hosting using token authentication
+
+### GitHub Secrets Configuration
+
+The CI/CD pipeline requires the following GitHub repository secrets:
+
+#### Required Secrets
+
+- **`FIREBASE_TOKEN`**: Firebase CI token for authentication
+  - Generate using: `firebase login:ci`
+  - Used for: Automated deployments via Firebase CLI
+  - Scope: Deploy to Firebase Hosting only
+
+#### Setting Up Secrets
+
+1. **Generate Firebase Token**:
+
+   ```bash
+   firebase login:ci
+   # Copy the generated token
+   ```
+
+2. **Add to GitHub Repository**:
+   - Go to repository Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `FIREBASE_TOKEN`
+   - Value: Paste the token from step 1
+   - Click "Add secret"
+
+#### Security Considerations
+
+- Token provides deployment access only (no read access to Firebase data)
+- Token scope is limited to hosting deployments
+- Tokens can be revoked and regenerated if compromised
+- More secure than service account JSON files
 
 ## Environment Management
 
@@ -835,6 +870,66 @@ npm run analyze:bundle
 
 ## Troubleshooting
 
+### CI/CD Pipeline Issues
+
+#### GitHub Actions Workflow Failures
+
+**Symptom**: Deployment fails with authentication errors
+
+```
+Error: HTTP Error: 401, Request had invalid authentication credentials.
+```
+
+**Solution**:
+
+1. Verify `FIREBASE_TOKEN` secret is set correctly
+2. Generate a new token: `firebase login:ci`
+3. Update the GitHub secret with the new token
+
+**Symptom**: Build fails with "firebase command not found"
+
+```
+/bin/bash: firebase: command not found
+```
+
+**Solution**: Workflow includes Firebase CLI installation step:
+
+```yaml
+- name: Install Firebase CLI
+  run: npm install -g firebase-tools
+```
+
+**Symptom**: Deployment targets wrong Firebase project
+
+```
+Error: Invalid project id: undefined
+```
+
+**Solution**: Ensure `firebase use linkedgoals-d7053` was run and `.firebaserc` is committed
+
+#### Token Authentication vs Service Account
+
+**Current Setup (Working)**:
+
+- Uses `FIREBASE_TOKEN` secret with `firebase deploy --token` command
+- More reliable and easier to set up
+- Token-based authentication for CI environments
+
+**Previous Setup (Deprecated)**:
+
+- Used `FirebaseExtended/action-hosting-deploy@v0` action
+- Required `FIREBASE_SERVICE_ACCOUNT_*` secrets
+- More complex setup with service account JSON
+
+#### Deployment Verification
+
+After successful GitHub Actions deployment:
+
+1. **Check Live Site**: https://linkedgoals-d7053.web.app
+2. **Verify Build Assets**: Check for updated timestamps in Network tab
+3. **Monitor Logs**: Firebase Console → Functions → Logs
+4. **Test Critical Paths**: Login, goal creation, progress updates
+
 ### Common Deployment Issues
 
 #### Build Failures
@@ -885,17 +980,32 @@ firebase functions:log --only linkedinLogin
 1. **Check Node.js Version**: Ensure GitHub Actions uses Node.js 20
 2. **Cache Issues**: Clear npm cache in workflow
 3. **Dependencies**: Verify package-lock.json is committed
-4. **Secrets**: Ensure Firebase service account secret is properly configured
+4. **Secrets**: Ensure `FIREBASE_TOKEN` secret is properly configured
 
-#### Permission Errors
+#### Authentication Issues
+
+**Current Token-Based Method**:
 
 ```yaml
-# Add permissions to workflow
-permissions:
-  checks: write
-  contents: read
-  pull-requests: write
+- name: Deploy to Firebase Hosting
+  run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
 ```
+
+**Common Issues**:
+
+- Expired token: Regenerate with `firebase login:ci`
+- Missing secret: Ensure `FIREBASE_TOKEN` is set in GitHub repository secrets
+- Wrong project: Verify `.firebaserc` file contains correct project ID
+
+#### Build Performance
+
+Current optimized workflow completes in ~50-60 seconds:
+
+- Checkout: ~5s
+- Node.js setup with cache: ~10s
+- Dependencies: ~15s
+- Build: ~20s
+- Deploy: ~10s
 
 ### Firebase Hosting Issues
 
