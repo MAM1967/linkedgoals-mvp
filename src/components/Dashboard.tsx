@@ -165,6 +165,9 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
 
+  // Add category filter state
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -631,6 +634,16 @@ export default function Dashboard() {
     // Implementation of handleDeclineCoach function
   };
 
+  // Handle category click to filter goals
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(selectedCategory === category ? null : category);
+    // Scroll to goals section
+    const goalsSection = document.getElementById("smart-goals");
+    if (goalsSection) {
+      goalsSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   // Function to check and award badges
   const checkAndAwardBadges = async () => {
     if (!currentUser || !initialDataLoaded) return;
@@ -848,7 +861,10 @@ export default function Dashboard() {
       />
 
       {/* Phase 3: Category Progress Overview */}
-      <CategoryProgressSummary categoryProgress={enhancedCategoryProgress} />
+      <CategoryProgressSummary
+        categoryProgress={enhancedCategoryProgress}
+        onCategoryClick={handleCategoryClick}
+      />
 
       {/* Phase 5: Smart Insights Panel */}
       <InsightsPanel insights={insights} />
@@ -879,7 +895,23 @@ export default function Dashboard() {
       </section>
 
       <section id="smart-goals" className="dashboard-section">
-        <h2 className="section-title">Your SMART Goals</h2>
+        <div className="section-header">
+          <h2 className="section-title">
+            Your SMART Goals
+            {selectedCategory && (
+              <span className="filter-indicator">- {selectedCategory}</span>
+            )}
+          </h2>
+          {selectedCategory && (
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className="clear-filter-btn"
+              aria-label="Clear category filter"
+            >
+              ✕ Show All Goals
+            </button>
+          )}
+        </div>
 
         {sharePrompt && (
           <div className="p-3 mb-4 text-center bg-green-100 border border-green-300 rounded-md">
@@ -910,36 +942,42 @@ export default function Dashboard() {
           <p>No SMART goals found. Why not add one?</p>
         )}
         <div className="goals-grid">
-          {smartGoals.map((goal) => {
-            const goalCoachingNotes = coachingNotes.filter(
-              (note) => note.goalId === goal.id
-            );
-            const goalProgress = goalProgressMap.get(goal.id) || {
-              goalId: goal.id,
-              percentage: calculateGoalProgress(goal.measurable),
-              status: goal.completed
-                ? ("completed" as const)
-                : ("in-progress" as const),
-              lastUpdated: new Date(),
-              hasUnreadCoachNotes: goalCoachingNotes.some(
-                (note) => !note.isRead
-              ),
-              coachingNotes: goalCoachingNotes,
-            };
+          {smartGoals
+            .filter(
+              (goal) =>
+                !selectedCategory ||
+                (goal.category || "Uncategorized") === selectedCategory
+            )
+            .map((goal) => {
+              const goalCoachingNotes = coachingNotes.filter(
+                (note) => note.goalId === goal.id
+              );
+              const goalProgress = goalProgressMap.get(goal.id) || {
+                goalId: goal.id,
+                percentage: calculateGoalProgress(goal.measurable),
+                status: goal.completed
+                  ? ("completed" as const)
+                  : ("in-progress" as const),
+                lastUpdated: new Date(),
+                hasUnreadCoachNotes: goalCoachingNotes.some(
+                  (note) => !note.isRead
+                ),
+                coachingNotes: goalCoachingNotes,
+              };
 
-            return (
-              <GoalProgressCard
-                key={goal.id}
-                goal={goal}
-                progress={goalProgress}
-                onUpdateProgress={() => handleUpdateProgress(goal)}
-                onMarkComplete={() =>
-                  handleMarkAsComplete(goal.id, goal.description)
-                }
-                onViewDetails={() => console.log("View details for", goal.id)}
-              />
-            );
-          })}
+              return (
+                <GoalProgressCard
+                  key={goal.id}
+                  goal={goal}
+                  progress={goalProgress}
+                  onUpdateProgress={() => handleUpdateProgress(goal)}
+                  onMarkComplete={() =>
+                    handleMarkAsComplete(goal.id, goal.description)
+                  }
+                  onViewDetails={() => console.log("View details for", goal.id)}
+                />
+              );
+            })}
         </div>
 
         {/* Quick Add Goal Button */}
