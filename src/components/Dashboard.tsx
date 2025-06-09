@@ -23,7 +23,7 @@ import { User, onAuthStateChanged } from "firebase/auth";
 import "./Dashboard.css";
 
 // Import Chart.js components
-import { Doughnut } from "react-chartjs-2";
+
 import {
   Chart as ChartJS,
   ArcElement,
@@ -136,13 +136,6 @@ export default function Dashboard() {
   const [loadingBadges, setLoadingBadges] = useState(true);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
-  // State for chart data
-  const [progressChartData, setProgressChartData] = useState<any>(null);
-  const [overallProgressMessage, setOverallProgressMessage] =
-    useState<string>("");
-  const [categoryProgress, setCategoryProgress] = useState<{
-    [key: string]: { completed: number; total: number; percentage: number };
-  }>({});
   const [overallProgress, setOverallProgress] = useState<{
     completed: number;
     total: number;
@@ -252,24 +245,13 @@ export default function Dashboard() {
     };
   }, [currentUser]);
 
-  // Enhanced progress calculation
+  // Overall progress calculation
   useEffect(() => {
     if (smartGoals.length > 0) {
-      // Calculate category-based progress
-      const categoryData: {
-        [key: string]: { goals: SmartGoal[]; completed: number; total: number };
-      } = {};
       let totalCompleted = 0;
       let totalGoals = smartGoals.length;
 
       smartGoals.forEach((goal) => {
-        const category = goal.category || "Uncategorized";
-        if (!categoryData[category]) {
-          categoryData[category] = { goals: [], completed: 0, total: 0 };
-        }
-        categoryData[category].goals.push(goal);
-        categoryData[category].total++;
-
         // Check if goal is completed or has high progress
         let isCompleted = goal.completed;
         if (!isCompleted && goal.measurable) {
@@ -278,101 +260,18 @@ export default function Dashboard() {
         }
 
         if (isCompleted) {
-          categoryData[category].completed++;
           totalCompleted++;
         }
       });
 
-      // Calculate percentages for each category
-      const categoryProgressData: {
-        [key: string]: { completed: number; total: number; percentage: number };
-      } = {};
-      Object.keys(categoryData).forEach((category) => {
-        const data = categoryData[category];
-        categoryProgressData[category] = {
-          completed: data.completed,
-          total: data.total,
-          percentage:
-            data.total > 0
-              ? Math.round((data.completed / data.total) * 100)
-              : 0,
-        };
-      });
-
-      setCategoryProgress(categoryProgressData);
       setOverallProgress({
         completed: totalCompleted,
         total: totalGoals,
         percentage:
           totalGoals > 0 ? Math.round((totalCompleted / totalGoals) * 100) : 0,
       });
-
-      // Create enhanced chart data showing progress, not just counts
-      const labels = Object.keys(categoryData);
-      const completedData = labels.map(
-        (label) => categoryProgressData[label].completed
-      );
-      const totalData = labels.map(
-        (label) => categoryProgressData[label].total
-      );
-
-      setProgressChartData({
-        labels,
-        datasets: [
-          {
-            label: "Completed Goals",
-            data: completedData,
-            backgroundColor: "#4CAF50",
-            borderColor: "#388E3C",
-            borderWidth: 1,
-          },
-          {
-            label: "Remaining Goals",
-            data: labels.map((label, i) => totalData[i] - completedData[i]),
-            backgroundColor: "#E0E0E0",
-            borderColor: "#BDBDBD",
-            borderWidth: 1,
-          },
-        ],
-      });
-
-      // Enhanced progress message
-      if (totalGoals > 0) {
-        if (totalCompleted === totalGoals) {
-          setOverallProgressMessage(
-            `🎉 Amazing! You've completed all ${totalGoals} goals!`
-          );
-        } else if (overallProgress.percentage >= 80) {
-          setOverallProgressMessage(
-            `🔥 You're crushing it! ${overallProgress.percentage}% of your goals are done!`
-          );
-        } else if (overallProgress.percentage >= 50) {
-          setOverallProgressMessage(
-            `💪 Great progress! You're ${overallProgress.percentage}% of the way there!`
-          );
-        } else if (overallProgress.percentage > 0) {
-          setOverallProgressMessage(
-            `🚀 You've started strong! ${totalCompleted} of ${totalGoals} goals completed.`
-          );
-        } else {
-          setOverallProgressMessage(
-            `⭐ ${totalGoals} goals ready to conquer! Time to make some progress!`
-          );
-        }
-      } else {
-        setOverallProgressMessage(
-          "No SMART goals yet. Create your first goal to see it on the chart!"
-        );
-        setStreakCount(0);
-      }
     } else {
-      setProgressChartData(null);
-      setCategoryProgress({});
       setOverallProgress({ completed: 0, total: 0, percentage: 0 });
-      setOverallProgressMessage(
-        "No SMART goals yet. Create your first goal to see it on the chart!"
-      );
-      setStreakCount(0);
     }
   }, [smartGoals]);
 
@@ -868,31 +767,6 @@ export default function Dashboard() {
 
       {/* Phase 5: Smart Insights Panel */}
       <InsightsPanel insights={insights} />
-
-      {/* Enhanced Chart Section */}
-      <section className="chart-section">
-        <h2 className="section-title">Your Goals Snapshot</h2>
-        {progressChartData && (
-          <div className="chart-container">
-            <Doughnut
-              data={progressChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: "right" as const,
-                  },
-                  title: {
-                    display: true,
-                    text: "Goal Completion by Category",
-                  },
-                },
-              }}
-            />
-          </div>
-        )}
-      </section>
 
       <section id="smart-goals" className="dashboard-section">
         <div className="section-header">
