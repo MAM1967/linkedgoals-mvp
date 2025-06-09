@@ -23,3 +23,5 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LINKEDGOALS_D7053 }}
           channelId: live
           projectId: linkedgoals-d7053
+          entryPoint: ./
+          targets: hosting
