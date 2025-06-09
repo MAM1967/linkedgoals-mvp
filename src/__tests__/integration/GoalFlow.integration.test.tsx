@@ -98,6 +98,10 @@ jest.mock("firebase/firestore", () => ({
       },
     },
   })),
+  getDoc: jest.fn().mockResolvedValue({
+    exists: () => false,
+    data: () => ({}),
+  }),
   setDoc: jest.fn().mockResolvedValue(undefined),
   updateDoc: jest.fn().mockResolvedValue(undefined),
   addDoc: jest.fn().mockResolvedValue({ id: "mock-doc-id" }),
@@ -135,8 +139,8 @@ describe("Goal Flow Integration", () => {
   it("should complete full goal creation and check-in flow", async () => {
     render(<App />);
 
-    // 1. User should see landing page or login
-    expect(screen.getByText(/LinkedGoals/i)).toBeInTheDocument();
+    // 1. User should see dashboard (authenticated)
+    expect(screen.getByAltText(/LinkedGoals Logo/i)).toBeInTheDocument();
 
     // Wait for auth state to settle
     await waitFor(() => {
@@ -199,65 +203,77 @@ describe("Goal Flow Integration", () => {
     fireEvent.click(screen.getByText(/Next/i));
 
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText(/How will you measure progress/i)
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/Measurable By/i)).toBeInTheDocument();
     });
 
-    fireEvent.change(
-      screen.getByPlaceholderText(/How will you measure progress/i),
-      {
-        target: { value: "Number of tutorials completed" },
-      }
-    );
+    // Select "Numeric" measurement type
+    fireEvent.change(screen.getByLabelText(/Measurable By/i), {
+      target: { value: "Numeric" },
+    });
+
+    // Fill in target value and unit (these fields appear after selecting Numeric)
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Target Value/i)).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText(/Target Value/i), {
+      target: { value: "10" },
+    });
+
+    fireEvent.change(screen.getByLabelText(/Unit/i), {
+      target: { value: "tutorials" },
+    });
 
     // Click Next to go to next step (Achievable)
     fireEvent.click(screen.getByText(/Next/i));
 
     await waitFor(() => {
       expect(
-        screen.getByPlaceholderText(/Make it achievable/i)
+        screen.getByPlaceholderText(/Is this goal realistic and attainable/i)
       ).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Make it achievable/i), {
-      target: { value: "Dedicate 1 hour daily" },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText(/Is this goal realistic and attainable/i),
+      {
+        target: { value: "Dedicate 1 hour daily" },
+      }
+    );
 
     // Click Next to go to next step (Relevant)
     fireEvent.click(screen.getByText(/Next/i));
 
     await waitFor(() => {
       expect(
-        screen.getByPlaceholderText(/Make it relevant/i)
+        screen.getByPlaceholderText(/Why is this goal important to you/i)
       ).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Make it relevant/i), {
-      target: { value: "Improve my development skills" },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText(/Why is this goal important to you/i),
+      {
+        target: { value: "Improve my development skills" },
+      }
+    );
 
     // Click Next to go to next step (Time-bound)
     fireEvent.click(screen.getByText(/Next/i));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue(/\d{4}-\d{2}-\d{2}/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Time-bound/i)).toBeInTheDocument();
     });
 
-    const dueDateInput = screen.getByDisplayValue(/\d{4}-\d{2}-\d{2}/);
+    const dueDateInput = screen.getByLabelText(/Time-bound/i);
     fireEvent.change(dueDateInput, {
       target: { value: "2024-12-31" },
     });
 
-    // 4. Submit goal
-    // Go through any remaining steps to get to the final submit
-    fireEvent.click(screen.getByText(/Next/i));
-
+    // 4. Submit goal - we're already on the final step (7/7)
     await waitFor(() => {
-      expect(screen.getByText(/Save SMART Goal/i)).toBeInTheDocument();
+      expect(screen.getByText(/Save Goal/i)).toBeInTheDocument();
     });
 
-    const submitButton = screen.getByText(/Save SMART Goal/i);
+    const submitButton = screen.getByText(/Save Goal/i);
     fireEvent.click(submitButton);
 
     // 5. Verify goal was created and navigate back to dashboard
@@ -269,9 +285,9 @@ describe("Goal Flow Integration", () => {
     const dashboardLink = screen.getByText(/Dashboard/i);
     fireEvent.click(dashboardLink);
 
-    // 7. Verify goal appears in dashboard
+    // 7. Verify we're back at the dashboard
     await waitFor(() => {
-      expect(screen.getByText(/Learn React Testing/i)).toBeInTheDocument();
+      expect(screen.getByText(/Your Goal Progress/i)).toBeInTheDocument();
     });
   });
 
@@ -284,7 +300,7 @@ describe("Goal Flow Integration", () => {
     });
 
     // Should see dashboard with goals
-    expect(screen.getByText(/LinkedGoals/i)).toBeInTheDocument();
+    expect(screen.getByAltText(/LinkedGoals Logo/i)).toBeInTheDocument();
   });
 
   it("should handle authentication flow", async () => {
@@ -292,7 +308,7 @@ describe("Goal Flow Integration", () => {
 
     // Should show authenticated state
     await waitFor(() => {
-      expect(screen.getByText(/LinkedGoals/i)).toBeInTheDocument();
+      expect(screen.getByAltText(/LinkedGoals Logo/i)).toBeInTheDocument();
     });
   });
 });

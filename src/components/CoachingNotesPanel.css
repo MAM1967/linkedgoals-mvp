@@ -1,0 +1,223 @@
+/* Coaching Notes Panel Styles */
+.coaching-notes-panel {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.coaching-notes-panel.empty {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.notes-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.notes-count {
+  font-size: 0.8rem;
+  color: #6c757d;
+  background: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Individual Coaching Note */
+.coaching-note {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.coaching-note:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+}
+
+.coaching-note.unread {
+  border-left: 4px solid #007bff;
+  background: #f8f9ff;
+}
+
+.coaching-note.unread:hover {
+  background: #f0f4ff;
+}
+
+/* Note Types */
+.coaching-note.feedback {
+  border-left-color: #6f42c1;
+}
+
+.coaching-note.encouragement {
+  border-left-color: #28a745;
+}
+
+.coaching-note.suggestion {
+  border-left-color: #ffc107;
+}
+
+.coaching-note.milestone {
+  border-left-color: #dc3545;
+}
+
+/* Note Header */
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.note-icon {
+  font-size: 1rem;
+}
+
+.note-type {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #495057;
+}
+
+.unread-indicator {
+  color: #007bff;
+  font-size: 0.6rem;
+  margin-left: 0.25rem;
+}
+
+.note-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.coach-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.note-date {
+  font-size: 0.7rem;
+  color: #6c757d;
+}
+
+/* Note Content */
+.note-content {
+  margin-top: 0.5rem;
+}
+
+.note-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #212529;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .coaching-notes-panel {
+    padding: 0.75rem;
+  }
+
+  .notes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .note-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .note-info {
+    align-items: flex-start;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .coaching-note {
+    padding: 0.5rem;
+  }
+}
+
+/* Animation for new notes */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coaching-note.unread {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Accessibility */
+.coaching-note:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coaching-note {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .coaching-notes-panel {
+    border: 2px solid #000;
+  }
+
+  .coaching-note {
+    border: 2px solid #000;
+  }
+
+  .coaching-note.unread {
+    background: #ffff00;
+    border-left: 6px solid #000;
+  }
+}

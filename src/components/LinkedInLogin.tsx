@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import "./LinkedInLogin.css";
 
-// Get LinkedIn configuration from environment variables (Vite uses import.meta.env)
+// Get LinkedIn configuration from environment variables (Jest compatible)
 const LINKEDIN_CLIENT_ID =
-  import.meta.env.VITE_LINKEDIN_CLIENT_ID || "7880c93kzzfsgj";
+  (typeof process !== "undefined" && process.env?.VITE_LINKEDIN_CLIENT_ID) ||
+  (typeof window !== "undefined" && (window as any)?.VITE_LINKEDIN_CLIENT_ID) ||
+  "7880c93kzzfsgj";
 const REDIRECT_URI =
-  import.meta.env.VITE_LINKEDIN_REDIRECT_URI ||
+  (typeof process !== "undefined" && process.env?.VITE_LINKEDIN_REDIRECT_URI) ||
+  (typeof window !== "undefined" &&
+    (window as any)?.VITE_LINKEDIN_REDIRECT_URI) ||
   "https://app.linkedgoals.app/linkedin";
 // Use correct LinkedIn v2 scopes (not OpenID Connect scopes)
 const LINKEDIN_SCOPES = "openid profile email";

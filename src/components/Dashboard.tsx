@@ -35,6 +35,14 @@ import {
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
+// Enhanced Dashboard Components
+import { DashboardHeader } from "./DashboardHeader";
+import { GoalProgressCard } from "./GoalProgressCard";
+import { CategoryProgressSummary } from "./CategoryProgressSummary";
+import { InsightsPanel } from "./InsightsPanel";
+import { useGoalProgress } from "../hooks/useGoalProgress";
+import { CoachingNote } from "../types/Dashboard";
+
 interface Goal {
   name: string;
   description: string;
@@ -132,6 +140,28 @@ export default function Dashboard() {
   const [progressChartData, setProgressChartData] = useState<any>(null);
   const [overallProgressMessage, setOverallProgressMessage] =
     useState<string>("");
+  const [categoryProgress, setCategoryProgress] = useState<{
+    [key: string]: { completed: number; total: number; percentage: number };
+  }>({});
+  const [overallProgress, setOverallProgress] = useState<{
+    completed: number;
+    total: number;
+    percentage: number;
+  }>({ completed: 0, total: 0, percentage: 0 });
+
+  // Enhanced Dashboard State
+  const [coachingNotes, setCoachingNotes] = useState<CoachingNote[]>([]);
+
+  // Enhanced Progress Hook
+  const {
+    categoryProgress: enhancedCategoryProgress,
+    overallProgress: enhancedOverallProgress,
+    insights,
+    motivationalMessage,
+    goalProgressMap,
+    loading: progressLoading,
+    error: progressError,
+  } = useGoalProgress(smartGoals, coachingNotes);
 
   const navigate = useNavigate();
 
@@ -219,88 +249,175 @@ export default function Dashboard() {
     };
   }, [currentUser]);
 
-  // Process SMART goals for chart data and motivational message
+  // Enhanced progress calculation
   useEffect(() => {
     if (smartGoals.length > 0) {
-      const categoryCounts: { [key: string]: number } = {};
-      let todayStreakCount = 0;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Start of today
+      // Calculate category-based progress
+      const categoryData: {
+        [key: string]: { goals: SmartGoal[]; completed: number; total: number };
+      } = {};
+      let totalCompleted = 0;
+      let totalGoals = smartGoals.length;
 
       smartGoals.forEach((goal) => {
-        const category = goal.category?.trim()
-          ? goal.category.trim()
-          : "Uncategorized";
-        if (!categoryCounts[category]) {
-          categoryCounts[category] = 0;
+        const category = goal.category || "Uncategorized";
+        if (!categoryData[category]) {
+          categoryData[category] = { goals: [], completed: 0, total: 0 };
         }
-        categoryCounts[category]++;
+        categoryData[category].goals.push(goal);
+        categoryData[category].total++;
 
-        if (goal.lastProgressUpdateAt) {
-          const updateDate = goal.lastProgressUpdateAt.toDate();
-          updateDate.setHours(0, 0, 0, 0); // Start of the update day
-          if (updateDate.getTime() === today.getTime()) {
-            todayStreakCount++;
-          }
+        // Check if goal is completed or has high progress
+        let isCompleted = goal.completed;
+        if (!isCompleted && goal.measurable) {
+          const progress = calculateGoalProgress(goal.measurable);
+          isCompleted = progress >= 100;
+        }
+
+        if (isCompleted) {
+          categoryData[category].completed++;
+          totalCompleted++;
         }
       });
-      setStreakCount(todayStreakCount);
 
-      const labels = Object.keys(categoryCounts);
-      const data = labels.map((label) => categoryCounts[label]);
-      // Example colors, can be customized
-      const backgroundColors = [
-        "#4CAF50",
-        "#2196F3",
-        "#FFC107",
-        "#E91E63",
-        "#9C27B0",
-      ];
-      const borderColors = [
-        "#388E3C",
-        "#1976D2",
-        "#FFA000",
-        "#C2185B",
-        "#7B1FA2",
-      ];
+      // Calculate percentages for each category
+      const categoryProgressData: {
+        [key: string]: { completed: number; total: number; percentage: number };
+      } = {};
+      Object.keys(categoryData).forEach((category) => {
+        const data = categoryData[category];
+        categoryProgressData[category] = {
+          completed: data.completed,
+          total: data.total,
+          percentage:
+            data.total > 0
+              ? Math.round((data.completed / data.total) * 100)
+              : 0,
+        };
+      });
+
+      setCategoryProgress(categoryProgressData);
+      setOverallProgress({
+        completed: totalCompleted,
+        total: totalGoals,
+        percentage:
+          totalGoals > 0 ? Math.round((totalCompleted / totalGoals) * 100) : 0,
+      });
+
+      // Create enhanced chart data showing progress, not just counts
+      const labels = Object.keys(categoryData);
+      const completedData = labels.map(
+        (label) => categoryProgressData[label].completed
+      );
+      const totalData = labels.map(
+        (label) => categoryProgressData[label].total
+      );
 
       setProgressChartData({
         labels,
         datasets: [
           {
-            label: "SMART Goals by Category", // Updated label
-            data,
-            backgroundColor: labels.map(
-              (_, i) => backgroundColors[i % backgroundColors.length]
-            ),
-            borderColor: labels.map(
-              (_, i) => borderColors[i % borderColors.length]
-            ),
+            label: "Completed Goals",
+            data: completedData,
+            backgroundColor: "#4CAF50",
+            borderColor: "#388E3C",
+            borderWidth: 1,
+          },
+          {
+            label: "Remaining Goals",
+            data: labels.map((label, i) => totalData[i] - completedData[i]),
+            backgroundColor: "#E0E0E0",
+            borderColor: "#BDBDBD",
             borderWidth: 1,
           },
         ],
       });
 
-      // Update motivational message based on goal counts
-      const totalGoals = smartGoals.length;
+      // Enhanced progress message
       if (totalGoals > 0) {
-        setOverallProgressMessage(
-          `You have ${totalGoals} SMART goal(s) in progress. Keep up the momentum!`
-        );
+        if (totalCompleted === totalGoals) {
+          setOverallProgressMessage(
+            `🎉 Amazing! You've completed all ${totalGoals} goals!`
+          );
+        } else if (overallProgress.percentage >= 80) {
+          setOverallProgressMessage(
+            `🔥 You're crushing it! ${overallProgress.percentage}% of your goals are done!`
+          );
+        } else if (overallProgress.percentage >= 50) {
+          setOverallProgressMessage(
+            `💪 Great progress! You're ${overallProgress.percentage}% of the way there!`
+          );
+        } else if (overallProgress.percentage > 0) {
+          setOverallProgressMessage(
+            `🚀 You've started strong! ${totalCompleted} of ${totalGoals} goals completed.`
+          );
+        } else {
+          setOverallProgressMessage(
+            `⭐ ${totalGoals} goals ready to conquer! Time to make some progress!`
+          );
+        }
       } else {
         setOverallProgressMessage(
-          "No SMART goals yet. Add one to get started!"
+          "No SMART goals yet. Create your first goal to see it on the chart!"
         );
         setStreakCount(0);
       }
     } else {
-      setProgressChartData(null); // Clear chart data if no goals
+      setProgressChartData(null);
+      setCategoryProgress({});
+      setOverallProgress({ completed: 0, total: 0, percentage: 0 });
       setOverallProgressMessage(
         "No SMART goals yet. Create your first goal to see it on the chart!"
       );
       setStreakCount(0);
     }
-  }, [smartGoals]); // Depend on smartGoals now
+  }, [smartGoals]);
+
+  // Helper function to calculate goal progress percentage
+  const calculateGoalProgress = (measurable: MeasurableData): number => {
+    if (!measurable) return 0;
+
+    const { type, currentValue, targetValue } = measurable;
+
+    switch (type) {
+      case "Numeric":
+      case "DailyStreak":
+        if (
+          typeof currentValue === "number" &&
+          typeof targetValue === "number" &&
+          targetValue > 0
+        ) {
+          return Math.min(Math.round((currentValue / targetValue) * 100), 100);
+        }
+        return 0;
+      case "Boolean":
+        return currentValue === true ? 100 : 0;
+      case "Date":
+        if (targetValue) {
+          const targetDate = new Date((targetValue as string) + "T00:00:00");
+          const today = new Date();
+          const createdDate = new Date(); // You might want to use goal.createdAt here
+
+          if (today >= targetDate) return 100;
+
+          const totalDays = Math.ceil(
+            (targetDate.getTime() - createdDate.getTime()) /
+              (1000 * 60 * 60 * 24)
+          );
+          const daysPassed = Math.ceil(
+            (today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          return Math.max(
+            0,
+            Math.min(Math.round((daysPassed / totalDays) * 100), 100)
+          );
+        }
+        return 0;
+      default:
+        return 0;
+    }
+  };
 
   const handleMarkAsComplete = async (goalId: string, description: string) => {
     if (!currentUser) {
@@ -721,151 +838,44 @@ export default function Dashboard() {
     }
   }, [initialDataLoaded, smartGoals, earnedBadges]); // Re-check if goals or badges change after initial load
 
-  // useEffect for chart data and streak count (based on smartGoals)
-  useEffect(() => {
-    if (smartGoals.length > 0) {
-      const categoryCounts: { [key: string]: number } = {};
-      let todayStreakCount = 0;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Start of today
-
-      smartGoals.forEach((goal) => {
-        const category = goal.category?.trim()
-          ? goal.category.trim()
-          : "Uncategorized";
-        if (!categoryCounts[category]) {
-          categoryCounts[category] = 0;
-        }
-        categoryCounts[category]++;
-
-        if (goal.lastProgressUpdateAt) {
-          const updateDate = goal.lastProgressUpdateAt.toDate();
-          updateDate.setHours(0, 0, 0, 0); // Start of the update day
-          if (updateDate.getTime() === today.getTime()) {
-            todayStreakCount++;
-          }
-        }
-      });
-      setStreakCount(todayStreakCount);
-
-      const labels = Object.keys(categoryCounts);
-      const data = labels.map((label) => categoryCounts[label]);
-      // Example colors, can be customized
-      const backgroundColors = [
-        "#4CAF50",
-        "#2196F3",
-        "#FFC107",
-        "#E91E63",
-        "#9C27B0",
-      ];
-      const borderColors = [
-        "#388E3C",
-        "#1976D2",
-        "#FFA000",
-        "#C2185B",
-        "#7B1FA2",
-      ];
-
-      setProgressChartData({
-        labels,
-        datasets: [
-          {
-            label: "SMART Goals by Category", // Updated label
-            data,
-            backgroundColor: labels.map(
-              (_, i) => backgroundColors[i % backgroundColors.length]
-            ),
-            borderColor: labels.map(
-              (_, i) => borderColors[i % borderColors.length]
-            ),
-            borderWidth: 1,
-          },
-        ],
-      });
-
-      // Update motivational message based on goal counts
-      const totalGoals = smartGoals.length;
-      if (totalGoals > 0) {
-        setOverallProgressMessage(
-          `You have ${totalGoals} SMART goal(s) in progress. Keep up the momentum!`
-        );
-      } else {
-        setOverallProgressMessage(
-          "No SMART goals yet. Add one to get started!"
-        );
-        setStreakCount(0);
-      }
-    } else {
-      setProgressChartData(null); // Clear chart data if no goals
-      setOverallProgressMessage(
-        "No SMART goals yet. Create your first goal to see it on the chart!"
-      );
-      setStreakCount(0);
-    }
-  }, [smartGoals]); // This effect is solely for chart/UI elements derived from smartGoals
-
   return (
     <div className="dashboard-container space-y-6">
-      {currentUser && (
-        <header className="dashboard-header">
-          <h1>
-            Hey {currentUser.displayName || "User"}, Let's Keep the Momentum
-            Going! 🚀
-          </h1>
-          {streakCount > 0 && (
-            <div className="streak-banner">
-              <i className="fas fa-fire"></i>
-              <span>{streakCount} Goal(s) Updated Today! Keep it Up!</span>
-            </div>
-          )}
-          {streakCount === 0 && currentUser && (
-            <div className="streak-banner inactive">
-              <i className="fas fa-seedling"></i>
-              <span>Make progress on a goal today to start a streak!</span>
-            </div>
-          )}
-        </header>
-      )}
+      {/* Phase 3: Enhanced Dashboard Header */}
+      <DashboardHeader
+        overallProgress={enhancedOverallProgress}
+        motivationalMessage={motivationalMessage}
+        insights={insights}
+      />
 
-      <section className="dashboard-section progress-overview">
-        <h2 className="section-title">Your Goals Snapshot</h2>{" "}
-        {/* Changed title */}
-        {loadingGoals && <p>Loading goals snapshot...</p>}{" "}
-        {/* Changed text, ensure loadingGoals is used for this section if snapshot depends on goals */}
-        {errorGoals && <p className="error-message">{errorGoals}</p>}{" "}
-        {/* Ensure errorGoals is used */}
-        {!loadingGoals && !errorGoals && progressChartData && (
-          <div style={{ maxWidth: "400px", margin: "0 auto" }}>
-            {/* Limit chart size - removed extraneous characters that caused linting error */}
+      {/* Phase 3: Category Progress Overview */}
+      <CategoryProgressSummary categoryProgress={enhancedCategoryProgress} />
+
+      {/* Phase 5: Smart Insights Panel */}
+      <InsightsPanel insights={insights} />
+
+      {/* Enhanced Chart Section */}
+      <section className="chart-section">
+        <h2 className="section-title">Your Goals Snapshot</h2>
+        {progressChartData && (
+          <div className="chart-container">
             <Doughnut
               data={progressChartData}
               options={{
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: "top" as const,
+                    position: "right" as const,
                   },
                   title: {
                     display: true,
-                    text: "SMART Goal Categories", // Updated chart title
+                    text: "Goal Completion by Category",
                   },
                 },
               }}
             />
-            {overallProgressMessage && (
-              <p className="motivational-message text-center mt-4">
-                {overallProgressMessage}
-              </p>
-            )}
           </div>
         )}
-        {!loadingGoals &&
-          !errorGoals &&
-          !progressChartData &&
-          smartGoals.length === 0 && ( // Check smartGoals length here
-            <p>No SMART goals data yet to display the progress chart.</p>
-          )}
       </section>
 
       <section id="smart-goals" className="dashboard-section">
@@ -899,161 +909,35 @@ export default function Dashboard() {
         {!loadingGoals && smartGoals.length === 0 && (
           <p>No SMART goals found. Why not add one?</p>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="goals-grid">
           {smartGoals.map((goal) => {
-            let formattedDueDate = "Date not set";
-            if (goal.dueDate) {
-              const date = new Date(goal.dueDate + "T00:00:00");
-              if (!isNaN(date.getTime())) {
-                formattedDueDate = date.toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                });
-              } else {
-                formattedDueDate = "Invalid date format";
-              }
-            } else {
-              formattedDueDate = "Due date not set";
-            }
-
-            // Visual Progress Indicator Logic
-            let progressElement = null;
-            if (goal.measurable && goal.measurable.type) {
-              const { type, currentValue, targetValue, unit } = goal.measurable;
-              if (type === "Numeric" || type === "DailyStreak") {
-                const current =
-                  typeof currentValue === "number" ? currentValue : 0;
-                const target =
-                  typeof targetValue === "number" && targetValue > 0
-                    ? targetValue
-                    : 0;
-                const percentage =
-                  target > 0 ? Math.min((current / target) * 100, 100) : 0;
-                progressElement = (
-                  <div className="goal-card-progress mt-2">
-                    <div className="progress-bar-background">
-                      <div
-                        className="progress-bar-foreground"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="progress-text text-xs">
-                      {current}/{target}{" "}
-                      {unit || (type === "DailyStreak" ? "days" : "")}
-                    </span>
-                  </div>
-                );
-              } else if (type === "Boolean") {
-                progressElement = (
-                  <p className="text-xs mt-1">
-                    Status: {currentValue ? "Completed" : "In Progress"}
-                  </p>
-                );
-              } else if (type === "Date" && targetValue) {
-                progressElement = (
-                  <p className="text-xs mt-1">
-                    Target:{" "}
-                    {new Date(
-                      (targetValue as string) + "T00:00:00"
-                    ).toLocaleDateString()}
-                  </p>
-                );
-              }
-            }
+            const goalCoachingNotes = coachingNotes.filter(
+              (note) => note.goalId === goal.id
+            );
+            const goalProgress = goalProgressMap.get(goal.id) || {
+              goalId: goal.id,
+              percentage: calculateGoalProgress(goal.measurable),
+              status: goal.completed
+                ? ("completed" as const)
+                : ("in-progress" as const),
+              lastUpdated: new Date(),
+              hasUnreadCoachNotes: goalCoachingNotes.some(
+                (note) => !note.isRead
+              ),
+              coachingNotes: goalCoachingNotes,
+            };
 
             return (
-              <div
+              <GoalProgressCard
                 key={goal.id}
-                className="goal-card bg-white shadow-lg rounded-lg p-5 flex flex-col justify-between"
-              >
-                <div>
-                  <h3
-                    className={`text-lg font-semibold mb-2 ${
-                      goal.completed
-                        ? "text-gray-500 line-through"
-                        : "text-blue-700"
-                    }`}
-                  >
-                    {goal.description}
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-1">
-                    Category: {goal.category || "N/A"}
-                  </p>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Overall Due: {formattedDueDate}
-                  </p>
-
-                  {progressElement}
-
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <h4 className="text-xs font-semibold mb-1 text-gray-600">
-                      S.M.A.R.T. Breakdown:
-                    </h4>
-                    <ul className="text-xs list-disc list-inside space-y-0.5 pl-1 text-gray-700">
-                      <li>
-                        <strong>S:</strong>{" "}
-                        {goal.specific?.trim() || <em>Not provided</em>}
-                      </li>
-                      <li>
-                        <strong>M:</strong>{" "}
-                        {goal.measurable ? (
-                          formatMeasurableData(goal.measurable)
-                        ) : (
-                          <em>Not provided</em>
-                        )}
-                      </li>
-                      <li>
-                        <strong>A:</strong>{" "}
-                        {goal.achievable?.trim() || <em>Not provided</em>}
-                      </li>
-                      <li>
-                        <strong>R:</strong>{" "}
-                        {goal.relevant?.trim() || <em>Not provided</em>}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-300 space-y-2">
-                  {!goal.completed &&
-                    goal.measurable &&
-                    (goal.measurable.type === "Numeric" ||
-                      goal.measurable.type === "DailyStreak" ||
-                      goal.measurable.type === "Boolean") && (
-                      <button
-                        onClick={() => handleUpdateProgress(goal)}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded text-sm transition duration-150 ease-in-out"
-                        disabled={
-                          progressUpdateStatus[goal.id] === "Updating..." ||
-                          progressUpdateStatus[goal.id] ===
-                            "Progress Updated!" ||
-                          progressUpdateStatus[goal.id] === "Already done"
-                        }
-                      >
-                        {progressUpdateStatus[goal.id] || "📈 Update Progress"}
-                      </button>
-                    )}
-                  <button
-                    onClick={() => handleShareMilestone(goal)}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded text-sm transition duration-150 ease-in-out"
-                  >
-                    📢 Share Progress
-                  </button>
-                  {/* Placeholder for Mark as Complete, Coach Invite etc. can be re-added here if needed */}
-                  {!goal.completed && goal.status !== "completed" && (
-                    <button
-                      onClick={() =>
-                        handleMarkAsComplete(goal.id, goal.description)
-                      }
-                      className="w-full text-sm bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded transition duration-150 ease-in-out mt-2"
-                      disabled={goalUpdateStatus[goal.id] === "Updating..."}
-                    >
-                      {goalUpdateStatus[goal.id] || "✅ Complete Goal"}
-                    </button>
-                  )}
-                </div>
-              </div>
+                goal={goal}
+                progress={goalProgress}
+                onUpdateProgress={() => handleUpdateProgress(goal)}
+                onMarkComplete={() =>
+                  handleMarkAsComplete(goal.id, goal.description)
+                }
+                onViewDetails={() => console.log("View details for", goal.id)}
+              />
             );
           })}
         </div>
