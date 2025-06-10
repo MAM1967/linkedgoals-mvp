@@ -490,7 +490,99 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 
 ## 🔔 Epic 6: Notifications & Engagement (Medium Priority)
 
-### 6.1 Smart Notifications
+### 6.1 Welcome Email with SendGrid
+
+**Priority**: Medium | **Effort**: 8 story points | **Sprint**: Sprint +5
+
+**User Story**: As a new user, I want to receive a professional welcome email when I sign up so that I feel welcomed and understand how to get started with the platform.
+
+**Business Value**: Improves user onboarding experience, increases user activation rates, establishes professional brand presence, provides important getting-started information
+
+**Acceptance Criteria**:
+
+- [ ] Integrate SendGrid API for email delivery
+- [ ] Create branded welcome email template with LinkedGoals styling
+- [ ] Trigger welcome email automatically upon user registration
+- [ ] Include personalized greeting with user's name
+- [ ] Provide quick start guide and key feature highlights
+- [ ] Add links to dashboard, goal creation, and help resources
+- [ ] Implement email delivery tracking and analytics
+- [ ] Handle email delivery failures gracefully
+- [ ] Support HTML and text email formats
+- [ ] Include unsubscribe link for compliance
+
+**Technical Tasks**:
+
+- [ ] Set up SendGrid account and API keys
+- [ ] Create `EmailService` class for SendGrid integration
+- [ ] Design responsive HTML email template
+- [ ] Add welcome email trigger to user registration flow
+- [ ] Implement email template variables (name, dashboard link, etc.)
+- [ ] Add email delivery status logging
+- [ ] Create email preference management system
+- [ ] Write unit tests for email service
+- [ ] Add email delivery monitoring
+
+**Testing Strategy**:
+
+- [ ] Unit tests for EmailService integration
+- [ ] Email template rendering tests (HTML/text)
+- [ ] Registration flow integration testing
+- [ ] Email delivery success/failure handling
+- [ ] Cross-client email template testing (Gmail, Outlook, etc.)
+- [ ] Mobile email client testing
+- [ ] Spam filter testing and deliverability optimization
+
+---
+
+### 6.2 Weekly Email Updates with SendGrid
+
+**Priority**: Medium | **Effort**: 13 story points | **Sprint**: Sprint +6
+
+**User Story**: As a user, I want to receive weekly email updates about my goal progress so that I stay engaged and motivated to continue working on my goals.
+
+**Business Value**: Increases user retention, drives weekly re-engagement, provides value outside the app, reduces churn through consistent touchpoints
+
+**Acceptance Criteria**:
+
+- [ ] Create weekly email digest with goal progress summary
+- [ ] Include completed goals, overdue goals, and upcoming deadlines
+- [ ] Show progress statistics and achievement highlights
+- [ ] Add personalized motivational content and tips
+- [ ] Include links to specific goals requiring attention
+- [ ] Provide goal completion trends and insights
+- [ ] Allow users to customize email frequency preferences
+- [ ] Smart scheduling based on user timezone and activity patterns
+- [ ] Include coaching updates if user has coaches
+- [ ] Add one-click goal update options in email
+
+**Technical Tasks**:
+
+- [ ] Create weekly email template with progress data
+- [ ] Build automated email scheduling system
+- [ ] Implement goal progress calculation for email digest
+- [ ] Add email preference management (frequency, content types)
+- [ ] Create personalization engine for motivational content
+- [ ] Implement smart sending time optimization
+- [ ] Add email analytics and engagement tracking
+- [ ] Build email template with goal action buttons
+- [ ] Create coaching digest section for relevant users
+- [ ] Implement batch email processing for performance
+
+**Testing Strategy**:
+
+- [ ] Weekly digest generation testing with various user scenarios
+- [ ] Email scheduling and timezone handling tests
+- [ ] Progress calculation accuracy testing
+- [ ] Email personalization and content relevance testing
+- [ ] Performance testing for batch email processing
+- [ ] User preference management testing
+- [ ] Email engagement tracking validation
+- [ ] A/B testing for email content optimization
+
+---
+
+### 6.3 Smart Notifications
 
 **Priority**: Medium | **Effort**: 13 story points | **Sprint**: Sprint +8
 
@@ -507,7 +599,7 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 
 ---
 
-### 6.2 Social Features Enhancement
+### 6.4 Social Features Enhancement
 
 **Priority**: Low | **Effort**: 21 story points | **Sprint**: Future
 
