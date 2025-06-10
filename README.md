@@ -8,7 +8,7 @@
 
 LinkedGoals is a professional goal-setting and progress tracking platform designed with LinkedIn's aesthetic and user experience principles. Built for ambitious professionals who want to systematically achieve their career and personal objectives using the proven SMART goals framework.
 
-**Live Demo**: [https://linkedgoals-d7053.web.app](https://linkedgoals-d7053.web.app)
+**Live Demo**: [https://app.linkedgoals.app](https://app.linkedgoals.app)
 
 ---
 
@@ -177,7 +177,7 @@ LinkedGoals is a professional goal-setting and progress tracking platform design
 
 ## 🚀 **Deployment & Access**
 
-**Production URL**: [https://linkedgoals-d7053.web.app](https://linkedgoals-d7053.web.app)
+**Production URL**: [https://app.linkedgoals.app](https://app.linkedgoals.app)
 
 ### **Quick Start for Users**
 
@@ -272,7 +272,7 @@ This MVP represents a solid foundation for professional goal setting and trackin
 
 For questions, feedback, or support regarding LinkedGoals MVP:
 
-- **Platform**: [LinkedGoals Web App](https://linkedgoals-d7053.web.app)
+- **Platform**: [LinkedGoals Web App](https://app.linkedgoals.app)
 - **Issues**: Use the feedback systems within the application
 - **Documentation**: This README and in-app tooltips
 
