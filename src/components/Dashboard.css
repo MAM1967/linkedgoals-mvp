@@ -602,7 +602,7 @@
 }
 
 .text-purple-600 {
-  color: var(--brand-secondary);
+  color: var(--brand-primary) !important;
 }
 
 .bg-blue-50 {

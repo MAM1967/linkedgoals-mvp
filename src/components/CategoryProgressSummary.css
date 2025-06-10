@@ -59,10 +59,13 @@
   background: var(--gradient-card);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-5);
+  padding: var(--spacing-6);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
 }
 
 .category-card::before {
@@ -138,13 +141,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
 }
 
 .progress-circle-container {
-  width: 80px;
-  height: 80px;
-  margin-bottom: var(--spacing-2);
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--spacing-3);
 }
 
 .circular-chart {
@@ -161,7 +164,7 @@
 
 .circle {
   fill: none;
-  stroke-width: 2.8;
+  stroke-width: 3.2;
   stroke-linecap: round;
   animation: progress-draw 1.5s ease-in-out forwards;
 }
@@ -169,7 +172,7 @@
 .percentage {
   fill: var(--color-text-primary);
   font-family: var(--font-family-primary);
-  font-size: 0.5em;
+  font-size: 0.65em;
   text-anchor: middle;
   font-weight: var(--font-weight-bold);
 }
@@ -185,11 +188,11 @@
 }
 
 .label-text {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   font-family: var(--font-family-primary);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 /* Category Stats */
@@ -375,9 +378,31 @@
   border-color: var(--color-info);
 }
 
+/* Category Actions */
 .category-actions {
   margin-top: var(--spacing-4);
   text-align: center;
+}
+
+/* Category Goals Summary */
+.category-goals {
+  margin: var(--spacing-3) 0;
+}
+
+.goals-summary {
+  text-align: center;
+  padding: var(--spacing-3);
+  background: var(--brand-primary-pale);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--brand-primary-light);
+}
+
+.goals-summary-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-primary);
+  color: var(--brand-primary-dark);
+  line-height: var(--line-height-normal);
 }
 
 .view-goals-btn {
@@ -444,8 +469,18 @@
   }
 
   .progress-circle-container {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
+  }
+
+  .percentage {
+    font-size: 0.55em;
+  }
+
+  .label-text {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.5px;
   }
 
   .category-name {
@@ -459,6 +494,11 @@
   .category-indicators {
     flex-direction: column;
     gap: var(--spacing-1);
+  }
+
+  .category-card {
+    min-height: 360px;
+    padding: var(--spacing-4);
   }
 }
 

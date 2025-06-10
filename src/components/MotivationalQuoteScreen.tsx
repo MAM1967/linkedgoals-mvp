@@ -3,6 +3,7 @@ import {
   getNextMotivationalQuote,
   MotivationalQuote,
 } from "../data/motivationalQuotes";
+import logo from "../assets/logo.svg";
 import "../styles/MotivationalQuoteScreen.css";
 
 interface MotivationalQuoteScreenProps {
@@ -76,7 +77,7 @@ const MotivationalQuoteScreen: React.FC<MotivationalQuoteScreenProps> = ({
       <div className="quote-container">
         {/* LinkedGoals logo */}
         <div className="quote-logo">
-          <img src="/logo.png" alt="LinkedGoals" className="logo-image" />
+          <img src={logo} alt="LinkedGoals" className="logo-image" />
         </div>
 
         {/* Quote content */}

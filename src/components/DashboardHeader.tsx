@@ -11,13 +11,11 @@ interface DashboardHeaderProps {
     averageProgress: number;
   };
   insights: DashboardInsights;
-  motivationalMessage: string;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   overallProgress,
   insights,
-  motivationalMessage,
 }) => {
   const { completed, total, averageProgress } = overallProgress;
   const { stalledGoals, upcomingDeadlines, recentCoachingFeedback } = insights;
@@ -40,57 +38,29 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
   return (
     <div className="dashboard-header">
-      {/* Main Progress Section */}
-      <div className="dashboard-header__main">
-        <div className="dashboard-header__progress">
-          <Tooltip text="Your overall goal completion rate" position="bottom">
-            <div className="progress-circle">
-              <svg viewBox="0 0 36 36" className="circular-chart">
-                <path
-                  className="circle-bg"
-                  d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="circle"
-                  strokeDasharray={`${averageProgress}, 100`}
-                  style={{ stroke: progressColor }}
-                  d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <text x="18" y="20.35" className="percentage">
-                  {averageProgress}%
-                </text>
-              </svg>
-            </div>
-          </Tooltip>
+      {/* Simple Header with Linear Progress */}
+      <div className="header-content">
+        <h1 className="dashboard-title">Your Goal Progress</h1>
 
-          <div className="progress-details">
-            <h1 className="dashboard-title">Your Goal Progress</h1>
-            <p className="progress-summary">
-              {completed} of {total} goals completed
-            </p>
-            {activeGoals > 0 && (
-              <p className="active-goals">
-                {activeGoals} goal{activeGoals !== 1 ? "s" : ""} in progress
-              </p>
-            )}
+        <div className="linear-progress-section">
+          <div className="progress-info">
+            <span className="progress-percentage">{averageProgress}%</span>
+            <span className="progress-text">Overall Progress</span>
+          </div>
+
+          <div className="linear-progress-bar">
+            <div
+              className="linear-progress-fill"
+              style={{
+                width: `${averageProgress}%`,
+                backgroundColor: progressColor,
+              }}
+            />
           </div>
         </div>
-
-        <Tooltip
-          text="AI-generated encouragement based on your progress"
-          position="left"
-        >
-          <div className="motivational-message">
-            <p>{motivationalMessage}</p>
-          </div>
-        </Tooltip>
       </div>
 
-      {/* Quick Stats */}
+      {/* Stats Cards */}
       <div className="dashboard-header__stats">
         <Tooltip text="Total goals you've created" position="top">
           <div className="stat-card">
@@ -132,7 +102,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {stalledGoals.length > 0 && (
             <Tooltip
               text="Goals that have not seen progress recently"
-              position="bottom"
+              position="top"
             >
               <div className="notification warning">
                 <span className="notification-icon">⚠️</span>
@@ -147,7 +117,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {upcomingDeadlines.length > 0 && (
             <Tooltip
               text="Goals with deadlines in the next 7 days"
-              position="bottom"
+              position="top"
             >
               <div className="notification info">
                 <span className="notification-icon">📅</span>
@@ -162,7 +132,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           {hasNewCoachingFeedback && (
             <Tooltip
               text="You have unread feedback from your coach"
-              position="bottom"
+              position="top"
             >
               <div className="notification success">
                 <span className="notification-icon">💬</span>

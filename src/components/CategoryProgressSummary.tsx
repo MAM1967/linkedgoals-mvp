@@ -64,12 +64,6 @@ export const CategoryProgressSummary: React.FC<
         {categories.map((category) => {
           const progressColor = getProgressColor(category.averageProgress);
           const progressLabel = getProgressLabel(category.averageProgress);
-          const completionRate =
-            category.totalGoals > 0
-              ? Math.round(
-                  (category.completedGoals / category.totalGoals) * 100
-                )
-              : 0;
 
           return (
             <div
@@ -107,7 +101,7 @@ export const CategoryProgressSummary: React.FC<
               {/* Progress Circle */}
               <Tooltip
                 text={`Average completion rate for ${category.category}`}
-                position="right"
+                position="top"
               >
                 <div className="category-progress">
                   <div className="progress-circle-container">
@@ -135,7 +129,7 @@ export const CategoryProgressSummary: React.FC<
                   <div className="progress-label">
                     <Tooltip
                       text={`Status based on average progress: ${progressLabel}`}
-                      position="bottom"
+                      position="top"
                     >
                       <span
                         className="label-text"
@@ -153,28 +147,18 @@ export const CategoryProgressSummary: React.FC<
                 <div className="stat-row">
                   <span className="stat-label">Goals:</span>
                   <span className="stat-value">
-                    {category.completedGoals}/{category.totalGoals} goals
-                    completed
+                    {category.completedGoals}/{category.totalGoals} completed
                   </span>
                 </div>
 
-                <div className="progress-percentage-display">
-                  <span className="progress-text">
-                    {category.averageProgress}%
-                  </span>
-                </div>
-
-                <div className="stat-row">
-                  <span className="stat-label">Completion:</span>
-                  <span className="stat-value">{completionRate}%</span>
-                </div>
-
-                <div className="stat-row">
-                  <span className="stat-label">Avg Progress:</span>
-                  <span className="stat-value">
-                    {category.averageProgress}%
-                  </span>
-                </div>
+                {category.averageProgress < 100 && (
+                  <div className="stat-row">
+                    <span className="stat-label">Progress:</span>
+                    <span className="stat-value">
+                      {category.averageProgress}%
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Progress Bar */}
@@ -200,7 +184,7 @@ export const CategoryProgressSummary: React.FC<
                 {category.averageProgress < 30 && (
                   <Tooltip
                     text="This category may need more focus"
-                    position="bottom"
+                    position="top"
                   >
                     <span className="indicator needs-attention">
                       ⚠️ Needs Focus
@@ -212,7 +196,7 @@ export const CategoryProgressSummary: React.FC<
                   category.averageProgress >= 80 && (
                     <Tooltip
                       text="You're doing great in this category!"
-                      position="bottom"
+                      position="top"
                     >
                       <span className="indicator excellent">🌟 Excellent</span>
                     </Tooltip>
@@ -221,18 +205,31 @@ export const CategoryProgressSummary: React.FC<
                 {category.hasCoachingAttention && (
                   <Tooltip
                     text="A coach has left feedback in this category"
-                    position="bottom"
+                    position="top"
                   >
                     <span className="indicator coaching">💬 Coach Notes</span>
                   </Tooltip>
                 )}
               </div>
 
+              {/* Goals Summary */}
+              <div className="category-goals">
+                <div className="goals-summary">
+                  <span className="goals-summary-text">
+                    This category contains {category.totalGoals} goal
+                    {category.totalGoals !== 1 ? "s" : ""}
+                    {category.completedGoals > 0 && (
+                      <> ({category.completedGoals} completed)</>
+                    )}
+                  </span>
+                </div>
+              </div>
+
               {/* Action Button */}
               <div className="category-actions">
                 <Tooltip
                   text={`Filter dashboard to show only ${category.category} goals`}
-                  position="bottom"
+                  position="top"
                 >
                   <button
                     className="view-goals-btn"
