@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth } from "../lib/firebase";
+import MotivationalQuoteScreen from "./MotivationalQuoteScreen";
 
 const LinkedInCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("Processing...");
+  const [showMotivationalQuote, setShowMotivationalQuote] = useState(false);
+  const [authenticationComplete, setAuthenticationComplete] = useState(false);
+  const [redirectTo, setRedirectTo] = useState<string>("/dashboard");
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -71,12 +75,10 @@ const LinkedInCallback = () => {
 
         console.log("Successfully signed in to Firebase");
 
-        // Check if we got full profile data or minimal profile
+        // Determine redirect destination based on authentication result
         if (result.email && result.displayName && result.profileData) {
           setStatus("Authentication successful! You have a complete profile.");
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1000);
+          setRedirectTo("/dashboard");
         } else {
           setStatus("Authentication successful! Setting up your profile...");
           // Store minimal profile info for profile setup
@@ -88,10 +90,12 @@ const LinkedInCallback = () => {
               message: result.message,
             })
           );
-          setTimeout(() => {
-            navigate("/profile-setup");
-          }, 1000);
+          setRedirectTo("/profile-setup");
         }
+
+        // Mark authentication as complete and show motivational quote
+        setAuthenticationComplete(true);
+        setShowMotivationalQuote(true);
       } catch (error) {
         console.error("LinkedIn callback error:", error);
         setStatus(
@@ -105,6 +109,24 @@ const LinkedInCallback = () => {
     handleCallback();
   }, [searchParams, navigate]);
 
+  const handleQuoteComplete = () => {
+    setShowMotivationalQuote(false);
+    // Navigate to the appropriate destination
+    navigate(redirectTo);
+  };
+
+  // Show motivational quote screen after successful authentication
+  if (showMotivationalQuote && authenticationComplete) {
+    return (
+      <MotivationalQuoteScreen
+        onComplete={handleQuoteComplete}
+        duration={5000} // 5 seconds
+        showSkipButton={true}
+      />
+    );
+  }
+
+  // Error states
   if (status.includes("failed") || status.includes("error")) {
     return (
       <div
@@ -133,6 +155,7 @@ const LinkedInCallback = () => {
     );
   }
 
+  // Loading state during authentication
   return (
     <div
       style={{
