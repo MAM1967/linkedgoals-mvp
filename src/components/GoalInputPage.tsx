@@ -1,6 +1,12 @@
 import React, { useState } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  FieldValue,
+} from "firebase/firestore";
 import { auth, db } from "../lib/firebase"; // Corrected path
+import Tooltip from "./common/Tooltip"; // Import Tooltip
 import "./GoalInputPage.css"; // We will create this CSS file
 
 // Define the allowed categories for the MVP
@@ -143,7 +149,7 @@ const GoalInputPage: React.FC = () => {
     let targetVal: number | string | null = null;
 
     switch (measurableType) {
-      case "Numeric":
+      case "Numeric": {
         targetVal = parseFloat(measurableTarget);
         if (isNaN(targetVal)) {
           setError("Numeric target value must be a number.");
@@ -151,7 +157,8 @@ const GoalInputPage: React.FC = () => {
         }
         currentVal = 0; // Default current value for numeric
         break;
-      case "Date":
+      }
+      case "Date": {
         const validatedMeasurableDate = isValidDateString(
           measurableTarget.trim()
         );
@@ -162,7 +169,8 @@ const GoalInputPage: React.FC = () => {
         targetVal = validatedMeasurableDate; // Now definitely a string
         currentVal = null; // Or perhaps today's date string if needed for comparison later
         break;
-      case "DailyStreak":
+      }
+      case "DailyStreak": {
         targetVal = parseInt(measurableTarget, 10);
         if (isNaN(targetVal) || targetVal <= 0) {
           setError("Daily streak target must be a positive number of days.");
@@ -170,10 +178,12 @@ const GoalInputPage: React.FC = () => {
         }
         currentVal = 0; // Default current streak
         break;
-      case "Boolean":
+      }
+      case "Boolean": {
         targetVal = null; // No specific target value for boolean
         currentVal = false; // Default to not done
         break;
+      }
       default:
         setError("Invalid measurable type selected.");
         return;
@@ -188,7 +198,7 @@ const GoalInputPage: React.FC = () => {
       relevant: string;
       dueDate: string; // Overall goal due date
       category: string;
-      createdAt: any; // Firebase ServerTimestamp placeholder
+      createdAt: FieldValue; // Correct type for serverTimestamp
       status: string;
       completed: boolean;
     }
@@ -237,7 +247,7 @@ const GoalInputPage: React.FC = () => {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1:
+      case 1: {
         return (
           <div className="form-step">
             <label htmlFor="goalDescription">Goal Description:</label>
@@ -245,150 +255,172 @@ const GoalInputPage: React.FC = () => {
               id="goalDescription"
               value={goalDescription}
               onChange={(e) => setGoalDescription(e.target.value)}
-              placeholder="What is the overall goal you want to achieve?"
+              placeholder="e.g., I want to become a better public speaker"
             />
           </div>
         );
-      case 2:
+      }
+      case 2: {
         return (
           <div className="form-step">
             <label htmlFor="category">Category:</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+            <Tooltip
+              text="Choose from Career, Productivity, or Skills for better organization"
+              position="right"
             >
-              {MVP_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+              <select
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {MVP_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </Tooltip>
           </div>
         );
-      case 3:
+      }
+      case 3: {
         return (
           <div className="form-step">
             <label htmlFor="specific">Specific:</label>
-            <textarea
-              id="specific"
-              value={specific}
-              onChange={(e) => setSpecific(e.target.value)}
-              placeholder="What exactly do you want to achieve? Be precise."
-            />
+            <Tooltip
+              text="Be clear and precise about what you want to achieve"
+              position="right"
+            >
+              <textarea
+                id="specific"
+                value={specific}
+                onChange={(e) => setSpecific(e.target.value)}
+                placeholder="What exactly do you want to achieve? Be precise."
+              />
+            </Tooltip>
           </div>
         );
-      case 4:
+      }
+      case 4: {
         return (
           <div className="form-step">
-            <label htmlFor="measurableType">Measurable By:</label>
-            <select
-              id="measurableType"
-              value={measurableType}
-              onChange={(e) => {
-                setMeasurableType(e.target.value);
-                setMeasurableTarget(""); // Reset target and unit on type change
-                setMeasurableUnit("");
-              }}
+            <label>Measurable</label>
+            <Tooltip
+              text="Choose how you'll track progress: Numeric, Date, Streak, or Done/Not Done"
+              position="right"
             >
-              {MEASURABLE_TYPES.map((mType) => (
-                <option key={mType.value} value={mType.value}>
-                  {mType.label}
-                </option>
-              ))}
-            </select>
+              <select
+                value={measurableType}
+                onChange={(e) => {
+                  setMeasurableType(e.target.value);
+                  setMeasurableTarget(""); // Reset target and unit on type change
+                  setMeasurableUnit("");
+                }}
+              >
+                {MEASURABLE_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </Tooltip>
 
-            {measurableType === "Numeric" && (
-              <>
-                <div>
-                  <label htmlFor="measurableTargetNumeric">Target Value:</label>
+            <Tooltip
+              text="Set your target value and measurement unit"
+              position="right"
+            >
+              <div>
+                {measurableType === "Numeric" && (
+                  <>
+                    <input
+                      type="number"
+                      value={measurableTarget}
+                      onChange={(e) => setMeasurableTarget(e.target.value)}
+                      placeholder="e.g., 10"
+                    />
+                    <input
+                      type="text"
+                      value={measurableUnit}
+                      onChange={(e) => setMeasurableUnit(e.target.value)}
+                      placeholder="Unit (e.g., chapters, tasks)"
+                    />
+                  </>
+                )}
+                {measurableType === "Date" && (
                   <input
-                    type="number"
-                    id="measurableTargetNumeric"
+                    type="date"
                     value={measurableTarget}
                     onChange={(e) => setMeasurableTarget(e.target.value)}
-                    placeholder="e.g., 20"
                   />
-                </div>
-                <div>
-                  <label htmlFor="measurableUnit">Unit:</label>
+                )}
+                {measurableType === "DailyStreak" && (
                   <input
-                    type="text"
-                    id="measurableUnit"
-                    value={measurableUnit}
-                    onChange={(e) => setMeasurableUnit(e.target.value)}
-                    placeholder="e.g., pages, tasks, hours"
+                    type="number"
+                    value={measurableTarget}
+                    onChange={(e) => setMeasurableTarget(e.target.value)}
+                    placeholder="Target streak (e.g., 30 days)"
                   />
-                </div>
-              </>
-            )}
-
-            {measurableType === "Date" && (
-              <div>
-                <label htmlFor="measurableTargetDate">Target Date:</label>
-                <input
-                  type="date"
-                  id="measurableTargetDate"
-                  value={measurableTarget}
-                  onChange={(e) => setMeasurableTarget(e.target.value)}
-                />
+                )}
               </div>
-            )}
-
-            {measurableType === "DailyStreak" && (
-              <div>
-                <label htmlFor="measurableTargetStreak">
-                  Target Streak (days):
-                </label>
-                <input
-                  type="number"
-                  id="measurableTargetStreak"
-                  value={measurableTarget}
-                  onChange={(e) => setMeasurableTarget(e.target.value)}
-                  placeholder="e.g., 21"
-                />
-              </div>
-            )}
-            {/* Boolean type needs no additional input for target value */}
+            </Tooltip>
           </div>
         );
-      case 5:
+      }
+      case 5: {
         return (
           <div className="form-step">
             <label htmlFor="achievable">Achievable:</label>
-            <textarea
-              id="achievable"
-              value={achievable}
-              onChange={(e) => setAchievable(e.target.value)}
-              placeholder="Is this goal realistic and attainable for you? How?"
-            />
+            <Tooltip
+              text="Ensure your goal is realistic and attainable given your resources"
+              position="right"
+            >
+              <textarea
+                id="achievable"
+                value={achievable}
+                onChange={(e) => setAchievable(e.target.value)}
+                placeholder="Is this goal realistic and attainable for you? How?"
+              />
+            </Tooltip>
           </div>
         );
-      case 6:
+      }
+      case 6: {
         return (
           <div className="form-step">
             <label htmlFor="relevant">Relevant:</label>
-            <textarea
-              id="relevant"
-              value={relevant}
-              onChange={(e) => setRelevant(e.target.value)}
-              placeholder="Why is this goal important to you? Does it align with other objectives?"
-            />
+            <Tooltip
+              text="Explain why this goal matters to you and aligns with your values"
+              position="right"
+            >
+              <textarea
+                id="relevant"
+                value={relevant}
+                onChange={(e) => setRelevant(e.target.value)}
+                placeholder="Why is this goal important to you? Does it align with other objectives?"
+              />
+            </Tooltip>
           </div>
         );
-      case 7:
+      }
+      case 7: {
         return (
           <div className="form-step">
             <label htmlFor="dueDate">Time-bound (Due Date):</label>
-            <input
-              type="date"
-              id="dueDate"
-              value={dueDate} // This should be YYYY-MM-DD for the input to be controlled correctly if possible
-              onChange={(e) => setDueDate(e.target.value)} // e.target.value is what we get
-              placeholder="YYYY-MM-DD or MM/DD/YYYY"
-            />
+            <Tooltip
+              text="Set a specific deadline to create urgency and focus"
+              position="right"
+            >
+              <input
+                type="date"
+                id="dueDate"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                placeholder="YYYY-MM-DD"
+              />
+            </Tooltip>
           </div>
         );
+      }
       default:
         return null;
     }

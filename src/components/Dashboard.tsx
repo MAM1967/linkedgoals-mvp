@@ -38,6 +38,8 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
 // Enhanced Dashboard Components
 import { DashboardHeader } from "./DashboardHeader";
 import { GoalProgressCard } from "./GoalProgressCard";
+import { GoalDetailsModal } from "./GoalDetailsModal";
+import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
 import { useGoalProgress } from "../hooks/useGoalProgress";
@@ -125,6 +127,12 @@ export default function Dashboard() {
     goalId: string;
     description: string;
   } | null>(null);
+
+  // Modal state
+  const [selectedGoal, setSelectedGoal] = useState<SmartGoal | null>(null);
+  const [goalProgress, setGoalProgress] = useState<GoalProgress | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showProgressModal, setShowProgressModal] = useState(false);
   const [declineCoachStatus, setDeclineCoachStatus] = useState<{
     [key: string]: string;
   }>({});
@@ -361,6 +369,56 @@ export default function Dashboard() {
       console.error("Error updating goal status:", error);
       setGoalUpdateStatus({ ...goalUpdateStatus, [goalId]: "Error updating" });
     }
+  };
+
+  // Enhanced modal handlers
+  const handleViewDetails = (goal: SmartGoal) => {
+    const progress = goalProgressMap.get(goal.id) || {
+      goalId: goal.id,
+      percentage: calculateGoalProgress(goal.measurable),
+      status: goal.completed
+        ? ("completed" as const)
+        : ("in-progress" as const),
+      lastUpdated: new Date(),
+      hasUnreadCoachNotes: false,
+      coachingNotes: coachingNotes.filter((note) => note.goalId === goal.id),
+    };
+
+    setSelectedGoal(goal);
+    setGoalProgress(progress);
+    setShowDetailsModal(true);
+  };
+
+  const handleShowProgressModal = (goal: SmartGoal) => {
+    setSelectedGoal(goal);
+    setShowProgressModal(true);
+  };
+
+  const handleEnhancedProgressUpdate = (
+    goalId: string,
+    newValue: number | string | boolean
+  ) => {
+    const goal = smartGoals.find((g) => g.id === goalId);
+    if (!goal) return;
+
+    // Update the goal with the new value
+    const updatedGoal = {
+      ...goal,
+      measurable: {
+        ...goal.measurable,
+        currentValue: newValue,
+      },
+    };
+
+    // Call the original update function
+    handleUpdateProgress(updatedGoal);
+  };
+
+  const handleGoalUpdate = (updatedGoal: SmartGoal) => {
+    // Update the goal in the local state
+    setSmartGoals((prevGoals) =>
+      prevGoals.map((g) => (g.id === updatedGoal.id ? updatedGoal : g))
+    );
   };
 
   const handleUpdateProgress = async (goal: SmartGoal) => {
@@ -844,11 +902,11 @@ export default function Dashboard() {
                   key={goal.id}
                   goal={goal}
                   progress={goalProgress}
-                  onUpdateProgress={() => handleUpdateProgress(goal)}
+                  onUpdateProgress={() => handleShowProgressModal(goal)}
                   onMarkComplete={() =>
                     handleMarkAsComplete(goal.id, goal.description)
                   }
-                  onViewDetails={() => console.log("View details for", goal.id)}
+                  onViewDetails={() => handleViewDetails(goal)}
                 />
               );
             })}
@@ -897,6 +955,26 @@ export default function Dashboard() {
           </div>
         )}
       </section>
+
+      {/* Enhanced Modals */}
+      {selectedGoal && goalProgress && (
+        <GoalDetailsModal
+          goal={selectedGoal}
+          progress={goalProgress}
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          onGoalUpdate={handleGoalUpdate}
+        />
+      )}
+
+      {selectedGoal && (
+        <ProgressUpdateModal
+          goal={selectedGoal}
+          isOpen={showProgressModal}
+          onClose={() => setShowProgressModal(false)}
+          onUpdate={handleEnhancedProgressUpdate}
+        />
+      )}
     </div>
   );
 }

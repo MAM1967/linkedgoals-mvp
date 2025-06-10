@@ -1,5 +1,6 @@
 import React from "react";
 import { CategoryProgress } from "../types/Dashboard";
+import Tooltip from "./common/Tooltip";
 import "./CategoryProgressSummary.css";
 
 interface CategoryProgressSummaryProps {
@@ -94,40 +95,58 @@ export const CategoryProgressSummary: React.FC<
               <div className="category-header">
                 <h4 className="category-name">{category.category}</h4>
                 {category.hasCoachingAttention && (
-                  <span className="coaching-indicator">💬</span>
+                  <Tooltip
+                    text="This category has active coaching feedback"
+                    position="top"
+                  >
+                    <span className="coaching-indicator">💬</span>
+                  </Tooltip>
                 )}
               </div>
 
               {/* Progress Circle */}
-              <div className="category-progress">
-                <div className="progress-circle-container">
-                  <svg viewBox="0 0 36 36" className="circular-chart">
-                    <path
-                      className="circle-bg"
-                      d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <path
-                      className="circle"
-                      strokeDasharray={`${category.averageProgress}, 100`}
-                      style={{ stroke: progressColor }}
-                      d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <text x="18" y="20.35" className="percentage">
-                      {category.averageProgress}%
-                    </text>
-                  </svg>
-                </div>
+              <Tooltip
+                text={`Average completion rate for ${category.category}`}
+                position="right"
+              >
+                <div className="category-progress">
+                  <div className="progress-circle-container">
+                    <svg viewBox="0 0 36 36" className="circular-chart">
+                      <path
+                        className="circle-bg"
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        className="circle"
+                        strokeDasharray={`${category.averageProgress}, 100`}
+                        style={{ stroke: progressColor }}
+                        d="M18 2.0845
+                          a 15.9155 15.9155 0 0 1 0 31.831
+                          a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <text x="18" y="20.35" className="percentage">
+                        {category.averageProgress}%
+                      </text>
+                    </svg>
+                  </div>
 
-                <div className="progress-label">
-                  <span className="label-text" style={{ color: progressColor }}>
-                    {progressLabel}
-                  </span>
+                  <div className="progress-label">
+                    <Tooltip
+                      text={`Status based on average progress: ${progressLabel}`}
+                      position="bottom"
+                    >
+                      <span
+                        className="label-text"
+                        style={{ color: progressColor }}
+                      >
+                        {progressLabel}
+                      </span>
+                    </Tooltip>
+                  </div>
                 </div>
-              </div>
+              </Tooltip>
 
               {/* Stats */}
               <div className="category-stats">
@@ -179,33 +198,53 @@ export const CategoryProgressSummary: React.FC<
               {/* Action Indicators */}
               <div className="category-indicators">
                 {category.averageProgress < 30 && (
-                  <span className="indicator needs-attention">
-                    ⚠️ Needs Focus
-                  </span>
+                  <Tooltip
+                    text="This category may need more focus"
+                    position="bottom"
+                  >
+                    <span className="indicator needs-attention">
+                      ⚠️ Needs Focus
+                    </span>
+                  </Tooltip>
                 )}
 
                 {category.completedGoals > 0 &&
                   category.averageProgress >= 80 && (
-                    <span className="indicator excellent">🌟 Excellent</span>
+                    <Tooltip
+                      text="You're doing great in this category!"
+                      position="bottom"
+                    >
+                      <span className="indicator excellent">🌟 Excellent</span>
+                    </Tooltip>
                   )}
 
                 {category.hasCoachingAttention && (
-                  <span className="indicator coaching">💬 Coach Notes</span>
+                  <Tooltip
+                    text="A coach has left feedback in this category"
+                    position="bottom"
+                  >
+                    <span className="indicator coaching">💬 Coach Notes</span>
+                  </Tooltip>
                 )}
               </div>
 
               {/* Action Button */}
               <div className="category-actions">
-                <button
-                  className="view-goals-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCategoryClick(category.category);
-                  }}
-                  aria-label={`View goals in ${category.category} category`}
+                <Tooltip
+                  text={`Filter dashboard to show only ${category.category} goals`}
+                  position="bottom"
                 >
-                  View Goals
-                </button>
+                  <button
+                    className="view-goals-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCategoryClick(category.category);
+                    }}
+                    aria-label={`View goals in ${category.category} category`}
+                  >
+                    View Goals
+                  </button>
+                </Tooltip>
               </div>
             </div>
           );

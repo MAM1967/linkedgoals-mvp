@@ -5,6 +5,7 @@ import {
   CoachingNote,
   Achievement,
 } from "../types/Dashboard";
+import Tooltip from "./common/Tooltip";
 import "./InsightsPanel.css";
 
 interface InsightsPanelProps {
@@ -262,138 +263,124 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({
   }
 
   return (
-    <div
-      className="insights-panel expanded"
-      role="region"
-      aria-label="Smart Insights"
+    <section
+      className={`insights-panel ${isExpanded ? "expanded" : "collapsed"}`}
+      aria-labelledby="insights-panel-title"
     >
-      <div className="insights-header">
-        <div className="header-content">
-          <h3>Smart Insights</h3>
-          <p>Personalized recommendations to help you succeed</p>
-        </div>
-        {onToggleExpanded && (
-          <button
-            className="collapse-btn"
-            onClick={onToggleExpanded}
-            aria-label="Collapse insights panel"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      <div className="insights-tabs" role="tablist">
-        <button
-          className={`tab ${activeTab === "all" ? "active" : ""}`}
-          onClick={() => setActiveTab("all")}
-          role="tab"
-          aria-selected={activeTab === "all"}
-          aria-controls="insights-content"
-        >
-          All Insights
-        </button>
-        <button
-          className={`tab ${activeTab === "actions" ? "active" : ""}`}
-          onClick={() => setActiveTab("actions")}
-          role="tab"
-          aria-selected={activeTab === "actions"}
-          aria-controls="insights-content"
-        >
-          Actions
-        </button>
-        <button
-          className={`tab ${activeTab === "achievements" ? "active" : ""}`}
-          onClick={() => setActiveTab("achievements")}
-          role="tab"
-          aria-selected={activeTab === "achievements"}
-          aria-controls="insights-content"
-        >
-          Achievements
-        </button>
-      </div>
-
-      <div className="insights-list" id="insights-content" role="tabpanel">
-        {filteredInsights.length === 0 ? (
-          <div className="empty-insights">
-            <p>No insights available for this filter.</p>
-          </div>
-        ) : (
-          filteredInsights.map((insight) => (
-            <div
-              key={insight.id}
-              className={`insight-item ${getPriorityClass(
-                insight.priority
-              )} ${getTypeClass(insight.type)}`}
-              data-testid={`insight-item-${insight.id}`}
-              aria-describedby={`insight-desc-${insight.id}`}
+      <header className="insights-panel-header">
+        <h3 id="insights-panel-title">
+          <span className="panel-icon" aria-hidden="true">
+            💡
+          </span>
+          Smart Insights
+        </h3>
+        <div className="panel-actions">
+          {onToggleExpanded && (
+            <button
+              className="toggle-expand-btn"
+              onClick={onToggleExpanded}
+              aria-expanded={isExpanded}
             >
-              <div className="insight-icon">{insight.icon}</div>
+              {isExpanded ? "Collapse" : "Expand"}
+            </button>
+          )}
+        </div>
+      </header>
 
-              <div className="insight-content">
-                <h4 className="insight-title">{insight.title}</h4>
-                <p
-                  className="insight-description"
-                  id={`insight-desc-${insight.id}`}
+      {isExpanded && (
+        <div className="insights-panel-content">
+          <div className="insights-tabs">
+            <Tooltip text="Show all insights" position="top">
+              <button
+                className={`tab-btn ${activeTab === "all" ? "active" : ""}`}
+                onClick={() => setActiveTab("all")}
+                aria-controls="insights-list"
+              >
+                All Insights
+              </button>
+            </Tooltip>
+            <Tooltip text="Show only actionable items" position="top">
+              <button
+                className={`tab-btn ${activeTab === "actions" ? "active" : ""}`}
+                onClick={() => setActiveTab("actions")}
+                aria-controls="insights-list"
+              >
+                Action Items
+              </button>
+            </Tooltip>
+            <Tooltip
+              text="Show your recent achievements and performance highlights"
+              position="top"
+            >
+              <button
+                className={`tab-btn ${
+                  activeTab === "achievements" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("achievements")}
+                aria-controls="insights-list"
+              >
+                Achievements
+              </button>
+            </Tooltip>
+          </div>
+
+          <ul id="insights-list" className="insights-list">
+            {isLoading && <li className="loading-item">Loading insights...</li>}
+            {!isLoading && filteredInsights.length === 0 && (
+              <li className="empty-state">
+                <p>No insights to display at the moment.</p>
+                <p>Keep making progress to see new insights here!</p>
+              </li>
+            )}
+            {!isLoading &&
+              filteredInsights.map((insight) => (
+                <li
+                  key={insight.id}
+                  className={`insight-item ${getTypeClass(insight.type)}`}
                 >
-                  {insight.description}
-                </p>
-
-                {insight.actionable && insight.actionText && (
-                  <div className="insight-actions">
-                    <button
-                      className="insight-action"
-                      onClick={() => handleInsightAction(insight)}
-                      aria-label={`${insight.actionText} for ${insight.title}`}
-                    >
-                      {insight.actionText} →
-                    </button>
-                    {insight.id === "stalled-goals" && insight.actionData ? (
-                      <React.Fragment>
-                        <button
-                          className="action-btn update-progress"
-                          onClick={() =>
-                            onInsightAction?.(
-                              "update_progress",
-                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              (insight.actionData as Record<string, any>)
-                                .goals?.[0]?.id
-                            )
-                          }
-                          aria-label="Update progress"
-                        >
-                          Update Progress
-                        </button>
-                        <button
-                          className="action-btn view-goal"
-                          onClick={() =>
-                            onInsightAction?.(
-                              "view_goal",
-                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              (insight.actionData as Record<string, any>)
-                                .goals?.[0]?.id
-                            )
-                          }
-                          aria-label="View goal"
-                        >
-                          View Goal
-                        </button>
-                      </React.Fragment>
-                    ) : null}
+                  <div className="insight-icon">
+                    <Tooltip text={`Type: ${insight.type}`} position="left">
+                      <span>{insight.icon}</span>
+                    </Tooltip>
                   </div>
-                )}
-              </div>
-
-              <div className="insight-meta">
-                <span className={`priority-badge ${insight.priority}`}>
-                  {insight.priority === "high" ? "🔥" : ""}
-                  {insight.priority}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+                  <div className="insight-content">
+                    <div className="insight-header">
+                      <h4 className="insight-title">{insight.title}</h4>
+                      <Tooltip
+                        text={`Priority: ${insight.priority}`}
+                        position="top"
+                      >
+                        <span
+                          className={`priority-badge ${getPriorityClass(
+                            insight.priority
+                          )}`}
+                        >
+                          {insight.priority}
+                        </span>
+                      </Tooltip>
+                    </div>
+                    <p className="insight-description">{insight.description}</p>
+                  </div>
+                  {insight.actionable && (
+                    <div className="insight-action">
+                      <Tooltip
+                        text={insight.actionText || "Take action"}
+                        position="left"
+                      >
+                        <button
+                          className="action-btn"
+                          onClick={() => handleInsightAction(insight)}
+                        >
+                          {insight.actionText || "View"}
+                        </button>
+                      </Tooltip>
+                    </div>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+    </section>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { SmartGoal, GoalProgress } from "../types/Dashboard";
 import { CoachingNotesPanel } from "./CoachingNotesPanel";
+import Tooltip from "./common/Tooltip";
 import "./GoalProgressCard.css";
 
 interface GoalProgressCardProps {
@@ -91,46 +92,63 @@ export const GoalProgressCard: React.FC<GoalProgressCardProps> = ({
         </div>
 
         <div className="goal-badges">
-          <span className={`status-badge ${statusBadge.class}`}>
-            {statusBadge.text}
-          </span>
+          <Tooltip text={`Current status: ${statusBadge.text}`} position="top">
+            <span className={`status-badge ${statusBadge.class}`}>
+              {statusBadge.text}
+            </span>
+          </Tooltip>
           {hasUnreadCoachNotes && (
-            <span className="coaching-badge unread">💬 New</span>
+            <Tooltip
+              text="You have unread feedback from your coach"
+              position="top"
+            >
+              <span className="coaching-badge unread">💬 New</span>
+            </Tooltip>
           )}
         </div>
       </div>
 
       {/* Progress Section */}
-      <div className="goal-progress-card__progress">
-        <div className="progress-header">
-          <span className="progress-label">Progress</span>
-          <span className="progress-percentage">{percentage}%</span>
-        </div>
+      <Tooltip
+        text="Current completion percentage based on measurable criteria"
+        position="top"
+      >
+        <div className="goal-progress-card__progress">
+          <div className="progress-header">
+            <span className="progress-label">Progress</span>
+            <span className="progress-percentage">{percentage}%</span>
+          </div>
 
-        <div
-          className="progress-bar"
-          role="progressbar"
-          aria-valuenow={percentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`Progress: ${percentage}%`}
-        >
           <div
-            className="progress-bar-fill"
-            style={{
-              width: `${percentage}%`,
-              backgroundColor: getProgressColor(),
-            }}
-          />
-        </div>
+            className="progress-bar"
+            role="progressbar"
+            aria-valuenow={percentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Progress: ${percentage}%`}
+          >
+            <div
+              className="progress-bar-fill"
+              style={{
+                width: `${percentage}%`,
+                backgroundColor: getProgressColor(),
+              }}
+            />
+          </div>
 
-        <div className="progress-details">
-          <span className="measurable-progress">
-            {formatMeasurableProgress()}
-          </span>
-          <span className="due-date">Due: {dueDateFormatted}</span>
+          <div className="progress-details">
+            <Tooltip
+              text="Your current progress vs target value"
+              position="bottom"
+            >
+              <span className="measurable-progress">
+                {formatMeasurableProgress()}
+              </span>
+            </Tooltip>
+            <span className="due-date">Due: {dueDateFormatted}</span>
+          </div>
         </div>
-      </div>
+      </Tooltip>
 
       {/* Goal Description */}
       {goal.description && (
@@ -142,20 +160,22 @@ export const GoalProgressCard: React.FC<GoalProgressCardProps> = ({
       {/* Coaching Notes Preview */}
       {coachingNotes && coachingNotes.length > 0 && (
         <div className="coaching-preview">
-          <button
-            className="coaching-toggle"
-            onClick={() => setShowCoachingNotes(!showCoachingNotes)}
-          >
-            <span>💬</span>
-            <span>
-              {coachingNotes.length} coaching note
-              {coachingNotes.length !== 1 ? "s" : ""}
-              {hasUnreadCoachNotes && " (new)"}
-            </span>
-            <span className={`chevron ${showCoachingNotes ? "open" : ""}`}>
-              ▼
-            </span>
-          </button>
+          <Tooltip text="View feedback from your coach" position="left">
+            <button
+              className="coaching-toggle"
+              onClick={() => setShowCoachingNotes(!showCoachingNotes)}
+            >
+              <span>💬</span>
+              <span>
+                {coachingNotes.length} coaching note
+                {coachingNotes.length !== 1 ? "s" : ""}
+                {hasUnreadCoachNotes && " (new)"}
+              </span>
+              <span className={`chevron ${showCoachingNotes ? "open" : ""}`}>
+                ▼
+              </span>
+            </button>
+          </Tooltip>
 
           {showCoachingNotes && <CoachingNotesPanel notes={coachingNotes} />}
         </div>
@@ -164,59 +184,70 @@ export const GoalProgressCard: React.FC<GoalProgressCardProps> = ({
       {/* Actions */}
       <div className="goal-progress-card__actions">
         {!isCompleted && onUpdateProgress && (
-          <button
-            className="action-btn primary"
-            onClick={() => onUpdateProgress(goal.id)}
+          <Tooltip
+            text="Update your current progress for this goal"
+            position="bottom"
           >
-            Update Progress
-          </button>
+            <button
+              className="action-btn primary"
+              onClick={() => onUpdateProgress(goal.id)}
+            >
+              Update Progress
+            </button>
+          </Tooltip>
         )}
 
         {!isCompleted && onMarkComplete && percentage >= 90 && (
-          <button
-            className="action-btn success"
-            onClick={() => onMarkComplete(goal.id)}
-          >
-            Mark Complete
-          </button>
+          <Tooltip text="Mark this goal as 100% complete" position="bottom">
+            <button
+              className="action-btn success"
+              onClick={() => onMarkComplete(goal.id)}
+            >
+              Mark Complete
+            </button>
+          </Tooltip>
         )}
 
         {onViewDetails && (
-          <button
-            className="action-btn secondary"
-            onClick={() => onViewDetails(goal.id)}
-          >
-            View Details
-          </button>
+          <Tooltip text="See the detailed view of this goal" position="bottom">
+            <button
+              className="action-btn secondary"
+              onClick={() => onViewDetails(goal.id)}
+            >
+              View Details
+            </button>
+          </Tooltip>
         )}
       </div>
 
       {/* Smart Criteria Breakdown (Collapsible) */}
-      <details className="smart-breakdown">
-        <summary>SMART Breakdown</summary>
-        <div className="smart-details">
-          <div className="smart-item">
-            <strong>S - Specific:</strong>
-            <span>{goal.specific}</span>
+      <Tooltip text="Click to expand detailed goal criteria" position="bottom">
+        <details className="smart-breakdown">
+          <summary>SMART Breakdown</summary>
+          <div className="smart-details">
+            <div className="smart-item">
+              <strong>S - Specific:</strong>
+              <span>{goal.specific}</span>
+            </div>
+            <div className="smart-item">
+              <strong>M - Measurable:</strong>
+              <span>{formatMeasurableProgress()}</span>
+            </div>
+            <div className="smart-item">
+              <strong>A - Achievable:</strong>
+              <span>{goal.achievable}</span>
+            </div>
+            <div className="smart-item">
+              <strong>R - Relevant:</strong>
+              <span>{goal.relevant}</span>
+            </div>
+            <div className="smart-item">
+              <strong>T - Time-bound:</strong>
+              <span>Due {dueDateFormatted}</span>
+            </div>
           </div>
-          <div className="smart-item">
-            <strong>M - Measurable:</strong>
-            <span>{formatMeasurableProgress()}</span>
-          </div>
-          <div className="smart-item">
-            <strong>A - Achievable:</strong>
-            <span>{goal.achievable}</span>
-          </div>
-          <div className="smart-item">
-            <strong>R - Relevant:</strong>
-            <span>{goal.relevant}</span>
-          </div>
-          <div className="smart-item">
-            <strong>T - Time-bound:</strong>
-            <span>Due {dueDateFormatted}</span>
-          </div>
-        </div>
-      </details>
+        </details>
+      </Tooltip>
     </div>
   );
 };
