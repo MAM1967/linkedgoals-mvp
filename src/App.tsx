@@ -18,7 +18,6 @@ import CoachOnboardingPage from "./components/CoachOnboardingPage";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
-import GoalManagement from "./pages/admin/GoalManagement";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
 
@@ -95,7 +94,6 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<UserManagement />} />
-              <Route path="goals" element={<GoalManagement />} />
             </Route>
           </Route>
 

@@ -86,24 +86,4 @@ export const getUsers = async (
   return { users, last };
 };
 
-export const getGoals = async (
-  lastVisible: QueryDocumentSnapshot<DocumentData> | null
-) => {
-  // Use a collectionGroup query to get goals from all users
-  const goalsCollection = collectionGroup(db, "goals");
-  const q = query(
-    goalsCollection,
-    orderBy("createdAt", "desc"),
-    ...(lastVisible ? [startAfter(lastVisible)] : []),
-    limit(10)
-  );
-  const goalSnapshot = await getDocs(q);
-  const last = goalSnapshot.docs[goalSnapshot.docs.length - 1];
-  const goals = goalSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return { goals, last };
-};
-
 export default app;

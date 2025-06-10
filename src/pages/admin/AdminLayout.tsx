@@ -16,9 +16,6 @@ const AdminLayout: React.FC = () => {
           <li>
             <NavLink to="/admin/users">Users</NavLink>
           </li>
-          <li>
-            <NavLink to="/admin/goals">Goals</NavLink>
-          </li>
         </ul>
       </nav>
       <main className="admin-content">
