@@ -283,6 +283,8 @@
   flex-wrap: wrap;
   gap: var(--spacing-1);
   margin-bottom: var(--spacing-3);
+  justify-content: center;
+  align-items: center;
 }
 
 .indicator {
@@ -387,6 +389,8 @@
 /* Category Goals Summary */
 .category-goals {
   margin: var(--spacing-3) 0;
+  display: flex;
+  justify-content: center;
 }
 
 .goals-summary {
@@ -395,6 +399,7 @@
   background: var(--brand-primary-pale);
   border-radius: var(--radius-md);
   border: 1px solid var(--brand-primary-light);
+  max-width: 90%;
 }
 
 .goals-summary-text {

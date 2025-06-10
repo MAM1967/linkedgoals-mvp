@@ -17,8 +17,13 @@ const Tooltip: React.FC<TooltipProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const showTooltip = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     timeoutRef.current = window.setTimeout(() => {
       setIsVisible(true);
     }, delay);
@@ -40,8 +45,6 @@ const Tooltip: React.FC<TooltipProps> = ({
 
     if (isVisible) {
       document.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.removeEventListener("keydown", handleKeyDown);
     }
 
     return () => {
@@ -54,6 +57,7 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <div
+      ref={containerRef}
       className="tooltip-container"
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
@@ -64,7 +68,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       {isVisible && (
         <div
           ref={tooltipRef}
-          className={`tooltip-box tooltip-${position}`}
+          className={`tooltip-box tooltip-${position} tooltip-visible`}
           role="tooltip"
         >
           {text}

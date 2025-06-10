@@ -16,8 +16,11 @@
   font-weight: var(--font-weight-medium, 500);
   line-height: var(--line-height-tight, 1.25);
   z-index: 1000;
-  width: max-content;
-  max-width: 250px;
+  /* Allow text wrapping for better readability */
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 280px;
+  min-width: 120px;
   box-shadow: var(
     --shadow-lg,
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -26,7 +29,31 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+/* Tooltip States */
+.tooltip-measuring {
+  /* Invisible state for measurement */
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.tooltip-visible {
+  /* Fully visible state */
+  opacity: 1 !important;
+  visibility: visible !important;
   animation: fadeIn 0.2s forwards;
+}
+
+/* Mobile responsive sizing */
+@media (max-width: 480px) {
+  .tooltip-box {
+    max-width: min(260px, calc(100vw - 24px));
+    font-size: var(--font-size-xs, 12px);
+    padding: var(--spacing-1) var(--spacing-2);
+  }
 }
 
 @keyframes fadeIn {
@@ -40,13 +67,13 @@
   }
 }
 
-.tooltip-container:hover .tooltip-box,
-.tooltip-container:focus-within .tooltip-box {
+.tooltip-container:hover .tooltip-box.tooltip-visible,
+.tooltip-container:focus-within .tooltip-box.tooltip-visible {
   opacity: 1;
   visibility: visible;
 }
 
-/* Positioning */
+/* Smart Positioning - Always keep tooltip within viewport */
 .tooltip-top {
   bottom: 100%;
   left: 50%;
@@ -75,7 +102,25 @@
   margin-left: 8px;
 }
 
-/* Arrow */
+/* Force tooltips to stay within viewport bounds */
+.tooltip-top,
+.tooltip-bottom {
+  /* Ensure horizontal centering doesn't cause overflow */
+  left: max(8px, min(50%, calc(100vw - 8px - 140px)));
+  transform: translateX(-50%);
+}
+
+.tooltip-left {
+  /* Ensure left tooltips don't go off-screen */
+  right: max(8px, 100%);
+}
+
+.tooltip-right {
+  /* Ensure right tooltips don't go off-screen */
+  left: min(calc(100vw - 288px), 100%);
+}
+
+/* Arrow Positioning */
 .tooltip-box::after {
   content: "";
   position: absolute;
@@ -113,4 +158,60 @@
   margin-top: -5px;
   border-color: transparent var(--color-gray-800, #2d3748) transparent
     transparent;
+}
+
+/* Enhanced Mobile Support */
+@media (max-width: 768px) {
+  .tooltip-box {
+    max-width: min(250px, calc(100vw - 16px));
+    font-size: var(--font-size-xs, 12px);
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  /* On mobile, always prefer top positioning to avoid keyboard issues */
+  .tooltip-left,
+  .tooltip-right {
+    bottom: 100%;
+    top: auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    margin: 0 0 8px 0;
+  }
+
+  .tooltip-left::after,
+  .tooltip-right::after {
+    top: 100%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    margin-left: -5px;
+    margin-top: 0;
+    border-color: var(--color-gray-800, #2d3748) transparent transparent
+      transparent;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tooltip-box {
+    border: 1px solid var(--color-white, #ffffff);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-box {
+    animation: none;
+    transition: opacity 0.1s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1749557349701" clover="3.2.0">
+  <project timestamp="1749557349701" name="All files">
+    <metrics statements="57" coveredstatements="57" conditionals="15" coveredconditionals="15" methods="15" coveredmethods="15" elements="87" coveredelements="87" complexity="0" loc="57" ncloc="57" packages="2" files="2" classes="2"/>
+    <package name="components">
+      <metrics statements="33" coveredstatements="33" conditionals="9" coveredconditionals="9" methods="10" coveredmethods="10"/>
+      <file name="MotivationalQuoteScreen.tsx" path="/Users/michaelmcdermott/app/my-typescript-project/app/linkedgoals-mvp/src/components/MotivationalQuoteScreen.tsx">
+        <metrics statements="33" coveredstatements="33" conditionals="9" coveredconditionals="9" methods="10" coveredmethods="10"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="19" count="69" type="stmt"/>
+        <line num="20" count="69" type="stmt"/>
+        <line num="21" count="69" type="stmt"/>
+        <line num="23" count="69" type="stmt"/>
+        <line num="25" count="26" type="stmt"/>
+        <line num="26" count="26" type="stmt"/>
+        <line num="29" count="26" type="stmt"/>
+        <line num="30" count="24" type="stmt"/>
+        <line num="34" count="26" type="stmt"/>
+        <line num="35" count="2217" type="stmt"/>
+        <line num="36" count="378" type="stmt"/>
+        <line num="37" count="378" type="stmt"/>
+        <line num="38" count="378" type="cond" truecount="2" falsecount="0"/>
+        <line num="43" count="26" type="stmt"/>
+        <line num="44" count="24" type="stmt"/>
+        <line num="47" count="26" type="stmt"/>
+        <line num="48" count="26" type="stmt"/>
+        <line num="49" count="26" type="stmt"/>
+        <line num="50" count="26" type="stmt"/>
+        <line num="54" count="69" type="stmt"/>
+        <line num="55" count="27" type="stmt"/>
+        <line num="57" count="27" type="stmt"/>
+        <line num="58" count="8" type="stmt"/>
+        <line num="62" count="69" type="stmt"/>
+        <line num="63" count="3" type="stmt"/>
+        <line num="66" count="69" type="cond" truecount="1" falsecount="0"/>
+        <line num="67" count="26" type="stmt"/>
+        <line num="70" count="43" type="stmt"/>
+        <line num="120" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="data">
+      <metrics statements="24" coveredstatements="24" conditionals="6" coveredconditionals="6" methods="5" coveredmethods="5"/>
+      <file name="motivationalQuotes.ts" path="/Users/michaelmcdermott/app/my-typescript-project/app/linkedgoals-mvp/src/data/motivationalQuotes.ts">
+        <metrics statements="24" coveredstatements="24" conditionals="6" coveredconditionals="6" methods="5" coveredmethods="5"/>
+        <line num="6" count="2" type="stmt"/>
+        <line num="257" count="2" type="stmt"/>
+        <line num="258" count="55" type="stmt"/>
+        <line num="259" count="55" type="stmt"/>
+        <line num="262" count="55" type="stmt"/>
+        <line num="263" count="55" type="stmt"/>
+        <line num="265" count="55" type="stmt"/>
+        <line num="271" count="2" type="stmt"/>
+        <line num="272" count="61" type="stmt"/>
+        <line num="273" count="61" type="stmt"/>
+        <line num="274" count="5" type="cond" truecount="1" falsecount="0"/>
+        <line num="276" count="4" type="stmt"/>
+        <line num="278" count="4" type="cond" truecount="5" falsecount="0"/>
+        <line num="283" count="56" type="stmt"/>
+        <line num="284" count="56" type="stmt"/>
+        <line num="291" count="2" type="stmt"/>
+        <line num="292" count="59" type="stmt"/>
+        <line num="293" count="59" type="stmt"/>
+        <line num="296" count="58" type="stmt"/>
+        <line num="303" count="2" type="stmt"/>
+        <line num="304" count="2" type="stmt"/>
+        <line num="310" count="2" type="stmt"/>
+        <line num="311" count="11" type="stmt"/>
+        <line num="312" count="11" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
