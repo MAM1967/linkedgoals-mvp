@@ -633,7 +633,42 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 
 ---
 
-### 7.2 Mobile App Development
+### 7.2 Conditional Coaching Navigation
+
+**Priority**: Low | **Effort**: 3 story points | **Sprint**: Sprint +8
+
+**User Story**: As a regular user, I want to only see coaching-related navigation if I'm actually a coach so that my interface is clean and relevant to my role.
+
+**Business Value**: Improves user experience by reducing interface clutter, makes navigation more intuitive, prevents confusion for non-coaching users
+
+**Acceptance Criteria**:
+
+- [ ] Hide "Coaching" link in navbar for users who are not coaches
+- [ ] Show "Coaching" link only for users with coach role or active coaching assignments
+- [ ] Apply conditional logic to both desktop and mobile navigation
+- [ ] Maintain current coaching functionality for actual coaches
+- [ ] Add role detection logic to determine coach status
+
+**Technical Tasks**:
+
+- [ ] Add coach detection utility function in `src/utils/userUtils.ts`
+- [ ] Modify `src/components/Navbar.tsx` to conditionally render coaching link
+- [ ] Update mobile navigation menu with same conditional logic
+- [ ] Add Firestore query to check if user has any coached goals
+- [ ] Consider caching coach status to improve performance
+
+**Testing Strategy**:
+
+- [ ] Unit tests for coach detection logic
+- [ ] Integration tests for navbar rendering with different user roles
+- [ ] Test navigation behavior for coaches vs non-coaches
+- [ ] Accessibility testing for dynamic navigation changes
+
+**Definition of Done**: Coaching navigation link only appears for users who are actively coaching goals or have coach role, reducing interface complexity for regular users while maintaining full functionality for coaches.
+
+---
+
+### 7.3 Mobile App Development
 
 **Priority**: Low | **Effort**: 55 story points | **Sprint**: Future Epic
 
@@ -649,7 +684,7 @@ This document contains the prioritized product backlog for LinkedGoals MVP, orga
 
 ---
 
-### 7.3 API & Integration Platform
+### 7.4 API & Integration Platform
 
 **Priority**: Low | **Effort**: 34 story points | **Sprint**: Future Epic
 
