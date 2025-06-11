@@ -20,7 +20,9 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   collectionGroup,
+  connectFirestoreEmulator,
 } from "firebase/firestore";
+import { connectAuthEmulator } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD2q7PxQoZykMIih6-8fCeNhxBjPxVpBpc",
@@ -38,6 +40,20 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
+
+// Connect to emulators if running locally
+if (
+  typeof window !== "undefined" &&
+  (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+) {
+  try {
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectAuthEmulator(auth, "http://127.0.0.1:9099");
+    console.log("🔧 Connected to Firebase emulators");
+  } catch (error) {
+    console.log("⚠️ Emulators already connected or not available:", error);
+  }
+}
 
 export { auth, db, functions };
 

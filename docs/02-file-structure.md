@@ -14,6 +14,11 @@ linkedgoals-mvp/
 │   │   ├── Dashboard.tsx     # Main dashboard component
 │   │   ├── GoalInputPage.tsx # Goal creation interface
 │   │   ├── SocialSharePage.tsx # Goal sharing functionality
+│   │   ├── CoachOnboardingPage.tsx # Coach invitation onboarding
+│   │   ├── CoachingDashboard.tsx # Coach dashboard interface
+│   │   ├── CoachOverview.tsx # Coach overview component
+│   │   ├── CoachOnboardingDemo.tsx # Demo component for testing
+│   │   ├── DataSeeder.tsx   # Test data seeding utility
 │   │   ├── AdminProtectedRoute.tsx # Route protection
 │   │   └── ...              # Other UI components
 │   ├── pages/               # Route-specific page components
@@ -26,6 +31,8 @@ linkedgoals-mvp/
 │   ├── lib/                 # Core libraries and configurations
 │   │   ├── firebase.ts      # Firebase configuration & utils
 │   │   └── firestore.ts     # Firestore helper functions
+│   ├── utils/               # Utility functions and helpers
+│   │   └── seedTestData.ts  # Test data seeding utilities
 │   ├── types/               # TypeScript type definitions
 │   │   └── index.ts         # Shared types and interfaces
 │   ├── assets/              # Images, icons, and static content
@@ -48,6 +55,7 @@ linkedgoals-mvp/
 │   └── workflows/           # CI/CD pipeline definitions
 ├── firebase.json            # Firebase project configuration
 ├── firestore.rules          # Database security rules
+├── firestore.rules.dev      # Development-friendly security rules
 ├── firestore.indexes.json   # Database indexes configuration
 ├── package.json             # Frontend dependencies and scripts
 └── vite.config.ts           # Build tool configuration

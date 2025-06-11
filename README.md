@@ -76,7 +76,18 @@ LinkedGoals is a professional goal-setting and progress tracking platform design
 
 - **User Dashboard** - Goal creation, tracking, and progress management
 - **Admin Panel** - User and goal management with administrative controls
-- **Coach Integration** - Coaching feedback and guidance system preparation
+- **Coaching System** - Complete accountability coaching platform with invitation flows
+
+### 🎓 **Coaching & Accountability Features**
+
+- **Coach Invitation System** - Share goals with accountability coaches via secure links
+- **Coach Onboarding** - Streamlined onboarding process for invited coaches
+- **Coach Dashboard** - Dedicated interface for managing coached goals
+- **Dual Navigation** - Clear separation between personal goals and coaching assignments
+- **Coach Overview** - Comprehensive view of all assigned coaching goals
+- **Coaching Notes** - Communication system between coaches and goal setters
+- **Progress Monitoring** - Real-time tracking of coached goal progress
+- **Coaching Insights** - Analytics and progress summaries for coaches
 
 ### 📱 **Technical Excellence**
 
@@ -185,7 +196,16 @@ LinkedGoals is a professional goal-setting and progress tracking platform design
 2. Sign in with your LinkedIn account
 3. Create your first SMART goal
 4. Track progress and achieve objectives
-5. Celebrate your accomplishments!
+5. **Optional:** Invite accountability coaches to support your journey
+6. Celebrate your accomplishments!
+
+### **Quick Start for Coaches**
+
+1. Receive coaching invitation link from a goal setter
+2. Click the invitation link to access coach onboarding
+3. Sign in with your LinkedIn account
+4. Review the goal you've been invited to coach
+5. Access your coaching dashboard to monitor progress and provide support
 
 ### **For Developers**
 

@@ -49,6 +49,11 @@ const Navbar: React.FC = () => {
               Share Goals
             </Link>
           </li>
+          <li>
+            <Link to="/coaching" className="nav-link">
+              Coaching
+            </Link>
+          </li>
         </ul>
 
         {/* Desktop Sign Out Button */}
@@ -109,6 +114,15 @@ const Navbar: React.FC = () => {
                 onClick={toggleMobileMenu}
               >
                 Share Goals
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/coaching"
+                className="mobile-nav-link"
+                onClick={toggleMobileMenu}
+              >
+                Coaching
               </Link>
             </li>
             <li>

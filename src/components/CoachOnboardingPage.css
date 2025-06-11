@@ -187,6 +187,21 @@
   font-weight: 600;
 }
 
+/* Navigation Options */
+.navigation-options {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xl);
+}
+
+.navigation-options .btn {
+  flex: 1;
+  min-width: 150px;
+  max-width: 200px;
+}
+
 /* Utility Classes */
 .mt-4 {
   margin-top: var(--spacing-xl);

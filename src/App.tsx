@@ -15,6 +15,9 @@ import Navbar from "./components/Navbar";
 import GoalInputPage from "./components/GoalInputPage";
 import SocialSharePage from "./components/SocialSharePage";
 import CoachOnboardingPage from "./components/CoachOnboardingPage";
+import CoachOnboardingDemo from "./components/CoachOnboardingDemo";
+import CoachingDashboard from "./components/CoachingDashboard";
+import DataSeeder from "./components/DataSeeder";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
@@ -87,6 +90,11 @@ function App() {
           {/* Public routes that are always accessible */}
           <Route path="/linkedin" element={<LinkedInCallback />} />
           <Route path="/coach-onboarding" element={<CoachOnboardingPage />} />
+          <Route
+            path="/coach-onboarding-demo"
+            element={<CoachOnboardingDemo />}
+          />
+          <Route path="/seed-data" element={<DataSeeder />} />
           <Route path="/admin/login" element={<AdminLogin />} />
 
           {/* Admin Routes - This must come before the general redirects */}
@@ -150,6 +158,17 @@ function App() {
                     onDismissWelcome={() => setWelcomePlan(null)}
                   >
                     <SocialSharePage />
+                  </AuthenticatedLayout>
+                }
+              />
+              <Route
+                path="/coaching"
+                element={
+                  <AuthenticatedLayout
+                    welcomePlan={welcomePlan}
+                    onDismissWelcome={() => setWelcomePlan(null)}
+                  >
+                    <CoachingDashboard />
                   </AuthenticatedLayout>
                 }
               />

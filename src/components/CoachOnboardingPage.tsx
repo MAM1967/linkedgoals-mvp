@@ -190,9 +190,20 @@ const CoachOnboardingPage: React.FC = () => {
           error !== "Could not retrieve goal details." &&
           error !==
             "The goal you were invited to coach no longer exists or the link is invalid.")) && (
-        <button onClick={() => navigate("/")} className="btn btn-primary mt-4">
-          Go to Dashboard
-        </button>
+        <div className="navigation-options">
+          <button
+            onClick={() => navigate("/")}
+            className="btn btn-secondary mt-4"
+          >
+            Go to My Dashboard
+          </button>
+          <button
+            onClick={() => navigate(`/coaching?highlight=${goalId || ""}`)}
+            className="btn btn-primary mt-4"
+          >
+            View Coaching Goals
+          </button>
+        </div>
       )}
     </div>
   );
