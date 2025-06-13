@@ -116,6 +116,8 @@ const CoachingDashboard: React.FC = () => {
           });
         });
 
+        // Successfully loaded data - clear any previous errors
+        setError(null);
         setAssignedGoals(goals);
         setGoalProgressMap(progressMap);
         setIsCoach(goals.length > 0);
@@ -123,7 +125,24 @@ const CoachingDashboard: React.FC = () => {
       },
       (err) => {
         console.error("Error fetching coaching goals:", err);
-        setError("Failed to load coaching goals. Please try again later.");
+
+        // Check if this is a permission error or network error
+        if (err.code === "permission-denied") {
+          setError(
+            "You don't have permission to view coaching assignments. Please check your account settings."
+          );
+        } else if (err.code === "unavailable") {
+          setError(
+            "Unable to connect to the server. Please check your internet connection and try again."
+          );
+        } else {
+          // For other errors, show a generic message but don't prevent the user from seeing the empty state
+          console.warn("Coaching query failed, showing empty state:", err);
+          setAssignedGoals([]);
+          setGoalProgressMap(new Map());
+          setIsCoach(false);
+          setError(null); // Don't show error for empty results
+        }
         setLoading(false);
       }
     );
@@ -153,6 +172,7 @@ const CoachingDashboard: React.FC = () => {
       },
       (err) => {
         console.error("Error fetching coaching notes:", err);
+        // Don't show error for coaching notes - they're secondary
       }
     );
 
@@ -212,17 +232,47 @@ const CoachingDashboard: React.FC = () => {
   if (isCoach === false) {
     return (
       <div className="coaching-dashboard-empty">
-        <h2>No Coaching Assignments</h2>
+        <h2>Welcome to Coaching</h2>
         <p>
-          You haven't been assigned to coach any goals yet. When someone invites
-          you to be their accountability coach, their goals will appear here.
+          You don't have any coaching assignments yet. This is where you'll see
+          goals from people who invite you to be their accountability coach.
         </p>
-        <div className="coaching-tips">
-          <h3>How to Get Started as a Coach</h3>
+        <div className="coaching-info">
+          <h3>How Coaching Works</h3>
           <ul>
-            <li>Share your coaching expertise on LinkedIn</li>
-            <li>Connect with people who might need an accountability coach</li>
-            <li>Wait for coaching invitations from goal setters</li>
+            <li>
+              <strong>Get Invited:</strong> Someone shares a coaching invitation
+              link with you
+            </li>
+            <li>
+              <strong>Accept & Connect:</strong> Click the link to become their
+              accountability coach
+            </li>
+            <li>
+              <strong>Support & Guide:</strong> Help them stay on track with
+              their goals
+            </li>
+            <li>
+              <strong>Track Progress:</strong> Monitor their progress and
+              provide feedback
+            </li>
+          </ul>
+        </div>
+        <div className="coaching-tips">
+          <h3>Want to Start Coaching?</h3>
+          <ul>
+            <li>
+              Let friends and colleagues know you're available as an
+              accountability coach
+            </li>
+            <li>
+              Share your expertise and willingness to help others achieve their
+              goals
+            </li>
+            <li>
+              When someone creates a goal, they can invite you using your email
+              address
+            </li>
           </ul>
         </div>
       </div>

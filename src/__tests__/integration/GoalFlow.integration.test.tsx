@@ -155,7 +155,7 @@ describe("Goal Flow Integration", () => {
     await waitFor(() => {
       expect(
         screen.getByPlaceholderText(
-          /What is the overall goal you want to achieve/i
+          /e.g., I want to become a better public speaker/i
         )
       ).toBeInTheDocument();
     });

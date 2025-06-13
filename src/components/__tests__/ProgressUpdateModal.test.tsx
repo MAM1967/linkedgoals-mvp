@@ -1,9 +1,9 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ProgressUpdateModal } from "../ProgressUpdateModal";
-import { SmartGoal } from "../../types/Dashboard";
+import { SmartGoal, MeasurableData } from "../../types/Dashboard";
 
 // Mock the common Tooltip component
 jest.mock("../common/Tooltip", () => {
@@ -141,7 +141,9 @@ describe("ProgressUpdateModal", () => {
       render(<ProgressUpdateModal {...defaultProps} />);
 
       const incrementButton = screen.getByText("+");
-      await user.click(incrementButton);
+      await act(async () => {
+        await user.click(incrementButton);
+      });
 
       expect(screen.getByText("26")).toBeInTheDocument();
     });
@@ -151,7 +153,9 @@ describe("ProgressUpdateModal", () => {
       render(<ProgressUpdateModal {...defaultProps} />);
 
       const decrementButton = screen.getByText("−");
-      await user.click(decrementButton);
+      await act(async () => {
+        await user.click(decrementButton);
+      });
 
       expect(screen.getByText("24")).toBeInTheDocument();
     });
@@ -160,11 +164,19 @@ describe("ProgressUpdateModal", () => {
       const user = userEvent.setup();
       render(<ProgressUpdateModal {...defaultProps} />);
 
-      await user.click(screen.getByText("Set Value"));
+      await act(async () => {
+        await user.click(screen.getByText("Set Value"));
+      });
+
       const input = screen.getByPlaceholderText("Enter value...");
-      await user.type(input, "75");
+      await act(async () => {
+        await user.type(input, "75");
+      });
+
       const buttons = screen.getAllByText("Set Value");
-      await user.click(buttons[1]); // The button in the input form
+      await act(async () => {
+        await user.click(buttons[1]); // The button in the input form
+      });
 
       expect(screen.getByText("75%")).toBeInTheDocument();
     });
@@ -419,6 +431,39 @@ describe("ProgressUpdateModal", () => {
 
       expect(screen.getByPlaceholderText("Enter value...")).toBeInTheDocument();
     });
+
+    it("handles custom value input correctly", async () => {
+      const user = userEvent.setup();
+      render(<ProgressUpdateModal {...defaultProps} />);
+
+      // Switch to custom mode
+      await act(async () => {
+        await user.click(screen.getByText("Set Value"));
+      });
+
+      // Type custom value
+      const input = screen.getByPlaceholderText("Enter value...");
+      await act(async () => {
+        await user.clear(input);
+        await user.type(input, "75");
+      });
+
+      // Click the 'Set Value' button in the input form
+      const setValueButtons = screen.getAllByText("Set Value");
+      await act(async () => {
+        await user.click(setValueButtons[1]); // The button in the input form
+      });
+
+      // Assert the value is now displayed
+      expect(screen.getByText("75%", { exact: false })).toBeInTheDocument();
+
+      // Submit custom value
+      await act(async () => {
+        await user.click(screen.getByText("🚀 Update Progress"));
+      });
+
+      expect(defaultProps.onUpdate).toHaveBeenCalledWith("numeric-goal-id", 75);
+    });
   });
 
   describe("Accessibility", () => {
@@ -426,7 +471,6 @@ describe("ProgressUpdateModal", () => {
       render(<ProgressUpdateModal {...defaultProps} />);
 
       const incrementButton = screen.getByText("+");
-      const updateButton = screen.getByText("🚀 Update Progress");
 
       incrementButton.focus();
       expect(incrementButton).toHaveFocus();
@@ -457,7 +501,7 @@ describe("ProgressUpdateModal", () => {
     test("handles goals with missing measurable data", () => {
       const invalidGoal = {
         ...mockNumericGoal,
-        measurable: null as any,
+        measurable: null as unknown as MeasurableData,
       };
 
       render(<ProgressUpdateModal {...defaultProps} goal={invalidGoal} />);
