@@ -13,6 +13,7 @@ import {
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
+import "./CoachingDashboard.css";
 
 const CoachingDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ const CoachingDashboard: React.FC = () => {
   const [coachingNotes, setCoachingNotes] = useState<CoachingNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCoach, setIsCoach] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -116,11 +118,12 @@ const CoachingDashboard: React.FC = () => {
 
         setAssignedGoals(goals);
         setGoalProgressMap(progressMap);
+        setIsCoach(goals.length > 0);
         setLoading(false);
       },
       (err) => {
         console.error("Error fetching coaching goals:", err);
-        setError("Failed to load coaching goals");
+        setError("Failed to load coaching goals. Please try again later.");
         setLoading(false);
       }
     );
@@ -166,21 +169,12 @@ const CoachingDashboard: React.FC = () => {
     if (!user) return;
 
     try {
-      // Find the goal to get the user ID for the coaching notes collection
-      const goal = assignedGoals.find((g) => g.id === note.goalId);
-      if (!goal) throw new Error("Goal not found");
-
-      // Get the user ID from the goal's document path
-      // Since we got this from a collection group query, we need to find the user ID
-      // For now, we'll add to a top-level coaching notes collection
       const notesRef = collection(db, "coachingNotes");
-
       await addDoc(notesRef, {
         ...note,
         createdAt: serverTimestamp(),
         isRead: false,
       });
-
       console.log("Coaching note added successfully");
     } catch (error) {
       console.error("Error adding coaching note:", error);
@@ -189,13 +183,12 @@ const CoachingDashboard: React.FC = () => {
   };
 
   const handleMarkNoteAsRead = async (noteId: string) => {
-    // Implementation for marking notes as read
     console.log("Mark note as read:", noteId);
   };
 
   if (loading) {
     return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
+      <div className="coaching-dashboard-loading">
         <p>Loading your coaching assignments...</p>
       </div>
     );
@@ -203,37 +196,35 @@ const CoachingDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div style={{ padding: "20px", textAlign: "center", color: "red" }}>
+      <div className="coaching-dashboard-error">
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
+        <button
+          onClick={() => window.location.reload()}
+          className="retry-button"
+        >
+          Retry
+        </button>
       </div>
     );
   }
 
-  if (assignedGoals.length === 0) {
+  // Handle case where user is not a coach
+  if (isCoach === false) {
     return (
-      <div
-        style={{
-          padding: "40px",
-          textAlign: "center",
-          maxWidth: "600px",
-          margin: "0 auto",
-          background: "#f8f9fa",
-          borderRadius: "12px",
-          border: "2px dashed #dee2e6",
-        }}
-      >
-        <h2 style={{ color: "#6c757d", marginBottom: "16px" }}>
-          No Coaching Assignments
-        </h2>
-        <p style={{ color: "#6c757d", fontSize: "1.1rem", lineHeight: "1.6" }}>
+      <div className="coaching-dashboard-empty">
+        <h2>No Coaching Assignments</h2>
+        <p>
           You haven't been assigned to coach any goals yet. When someone invites
           you to be their accountability coach, their goals will appear here.
         </p>
-        <p style={{ color: "#6c757d", fontSize: "0.9rem", marginTop: "20px" }}>
-          💡 Tip: Share your coaching expertise on LinkedIn to connect with
-          people who might need an accountability coach!
-        </p>
+        <div className="coaching-tips">
+          <h3>How to Get Started as a Coach</h3>
+          <ul>
+            <li>Share your coaching expertise on LinkedIn</li>
+            <li>Connect with people who might need an accountability coach</li>
+            <li>Wait for coaching invitations from goal setters</li>
+          </ul>
+        </div>
       </div>
     );
   }
