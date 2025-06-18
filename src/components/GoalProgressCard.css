@@ -1,7 +1,7 @@
 /* Goal Progress Card Styles */
 .goal-progress-card {
-  background: var(--color-white);
-  border: 1px solid var(--color-border-light);
+  background: var(--color-white) !important;
+  border: 2px solid #ff0000 !important; /* Debug red border */
   border-radius: var(--radius-lg);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-sm);
