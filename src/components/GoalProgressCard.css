@@ -68,13 +68,13 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family-primary);
   margin: 0 0 var(--spacing-1) 0;
-  color: #1a1a1a !important;
+  color: var(--color-text-primary);
   line-height: var(--line-height-tight);
 }
 
 .goal-category {
   font-size: var(--font-size-sm);
-  color: #666666 !important;
+  color: var(--color-text-secondary);
   font-family: var(--font-family-primary);
   margin: 0;
   text-transform: uppercase;
@@ -178,14 +178,14 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family-primary);
-  color: #666666 !important;
+  color: var(--color-text-secondary);
 }
 
 .progress-percentage {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-primary);
-  color: #1a1a1a !important;
+  color: var(--color-text-primary);
 }
 
 .progress-bar {
@@ -239,12 +239,12 @@
 }
 
 .measurable-progress {
-  color: #666666 !important;
+  color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
 }
 
 .due-date {
-  color: #888888 !important;
+  color: var(--color-text-muted);
   font-weight: var(--font-weight-medium);
 }
 

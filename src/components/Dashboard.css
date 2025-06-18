@@ -428,6 +428,14 @@
   margin-top: var(--spacing-1);
 }
 
+/* Goals Grid */
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-6);
+  margin-top: var(--spacing-6);
+}
+
 /* Smart Goals List */
 .smart-goals-list .grid {
   display: grid;
@@ -470,7 +478,8 @@
     min-height: 280px;
   }
 
-  .smart-goals-list .grid {
+  .smart-goals-list .grid,
+  .goals-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-4);
   }
