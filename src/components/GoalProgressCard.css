@@ -1,7 +1,7 @@
 /* Goal Progress Card Styles */
 .goal-progress-card {
-  background: var(--color-white) !important;
-  border: 2px solid #ff0000 !important; /* Debug red border */
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-sm);
@@ -68,13 +68,13 @@
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family-primary);
   margin: 0 0 var(--spacing-1) 0;
-  color: var(--color-text-primary);
+  color: #1a1a1a !important;
   line-height: var(--line-height-tight);
 }
 
 .goal-category {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: #666666 !important;
   font-family: var(--font-family-primary);
   margin: 0;
   text-transform: uppercase;
@@ -178,14 +178,14 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family-primary);
-  color: var(--color-text-secondary);
+  color: #666666 !important;
 }
 
 .progress-percentage {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   font-family: var(--font-family-primary);
-  color: var(--color-text-primary);
+  color: #1a1a1a !important;
 }
 
 .progress-bar {
@@ -239,12 +239,12 @@
 }
 
 .measurable-progress {
-  color: var(--color-text-secondary);
+  color: #666666 !important;
   font-weight: var(--font-weight-medium);
 }
 
 .due-date {
-  color: var(--color-text-muted);
+  color: #888888 !important;
   font-weight: var(--font-weight-medium);
 }
 
