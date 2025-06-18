@@ -7,7 +7,6 @@
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
   margin-bottom: var(--spacing-6);
-  color: var(--color-text-primary);
 }
 
 .goal-progress-card:hover {
