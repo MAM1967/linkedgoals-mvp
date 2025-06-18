@@ -863,6 +863,10 @@ export default function Dashboard() {
                 (goal.category || "Uncategorized") === selectedCategory
             )
             .map((goal) => {
+              console.log(
+                "[Debug] Rendering Goal:",
+                JSON.stringify(goal, null, 2)
+              );
               const goalCoachingNotes = coachingNotes.filter(
                 (note) => note.goalId === goal.id
               );
@@ -878,19 +882,35 @@ export default function Dashboard() {
                 ),
                 coachingNotes: goalCoachingNotes,
               };
-
-              return (
-                <GoalProgressCard
-                  key={goal.id}
-                  goal={goal}
-                  progress={goalProgress}
-                  onUpdateProgress={() => handleShowProgressModal(goal)}
-                  onMarkComplete={() =>
-                    handleMarkAsComplete(goal.id, goal.description)
-                  }
-                  onViewDetails={() => handleViewDetails(goal)}
-                />
+              console.log(
+                "[Debug] With Progress:",
+                JSON.stringify(goalProgress, null, 2)
               );
+
+              try {
+                return (
+                  <GoalProgressCard
+                    key={goal.id}
+                    goal={goal}
+                    progress={goalProgress}
+                    onUpdateProgress={() => handleShowProgressModal(goal)}
+                    onMarkComplete={() =>
+                      handleMarkAsComplete(goal.id, goal.description)
+                    }
+                    onViewDetails={() => handleViewDetails(goal)}
+                  />
+                );
+              } catch (error) {
+                console.error(
+                  `[Debug] Error rendering GoalProgressCard for goal ${goal.id}:`,
+                  error
+                );
+                return (
+                  <div key={goal.id} className="error-card">
+                    Error rendering goal: {goal.description}
+                  </div>
+                );
+              }
             })}
         </div>
 
