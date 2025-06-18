@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { ProgressUpdateModal } from "../ProgressUpdateModal";
@@ -426,7 +426,6 @@ describe("ProgressUpdateModal", () => {
       render(<ProgressUpdateModal {...defaultProps} />);
 
       const incrementButton = screen.getByText("+");
-      const updateButton = screen.getByText("🚀 Update Progress");
 
       incrementButton.focus();
       expect(incrementButton).toHaveFocus();
@@ -457,7 +456,7 @@ describe("ProgressUpdateModal", () => {
     test("handles goals with missing measurable data", () => {
       const invalidGoal = {
         ...mockNumericGoal,
-        measurable: null as any,
+        measurable: null,
       };
 
       render(<ProgressUpdateModal {...defaultProps} goal={invalidGoal} />);
@@ -585,11 +584,21 @@ describe("ProgressUpdateModal", () => {
       const user = userEvent.setup();
       render(<ProgressUpdateModal {...defaultProps} />);
 
-      await user.click(screen.getByText("Set Value"));
+      await act(async () => {
+        await user.click(screen.getByText("Set Value"));
+      });
+
       const input = screen.getByPlaceholderText("Enter value...");
-      await user.type(input, "75");
+
+      await act(async () => {
+        await user.type(input, "75");
+      });
+
       const buttons = screen.getAllByText("Set Value");
-      await user.click(buttons[1]); // The button in the input form
+
+      await act(async () => {
+        await user.click(buttons[1]); // The button in the input form
+      });
 
       expect(screen.getByText("75%")).toBeInTheDocument();
     });

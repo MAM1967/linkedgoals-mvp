@@ -18,7 +18,7 @@ import {
   getDoc,
   setDoc,
 } from "firebase/firestore";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { User, onAuthStateChanged } from "firebase/auth";
 import "./Dashboard.css";
 
@@ -128,6 +128,8 @@ export default function Dashboard() {
   const [earnedBadges, setEarnedBadges] = useState<UserBadge[]>([]);
   const [loadingBadges, setLoadingBadges] = useState(true);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
 
   const [overallProgress, setOverallProgress] = useState<{
     completed: number;
@@ -153,6 +155,22 @@ export default function Dashboard() {
 
   // Add category filter state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Check for email verification success
+  useEffect(() => {
+    if (searchParams.get("emailVerified") === "true") {
+      setShowVerificationSuccess(true);
+      // Clear the URL parameter
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete("emailVerified");
+      setSearchParams(newSearchParams, { replace: true });
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        setShowVerificationSuccess(false);
+      }, 5000);
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -242,7 +260,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (smartGoals.length > 0) {
       let totalCompleted = 0;
-      let totalGoals = smartGoals.length;
+      const totalGoals = smartGoals.length;
 
       smartGoals.forEach((goal) => {
         // Check if goal is completed or has high progress
@@ -796,6 +814,27 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container space-y-6">
       <SafeEmailVerificationBanner />
+
+      {/* Email Verification Success Message */}
+      {showVerificationSuccess && (
+        <div className="verification-success-banner">
+          <div className="verification-success-content">
+            <span className="verification-success-icon">✅</span>
+            <span className="verification-success-text">
+              Email verified successfully! You now have full access to all
+              features.
+            </span>
+            <button
+              className="verification-success-close"
+              onClick={() => setShowVerificationSuccess(false)}
+              aria-label="Close verification success message"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Phase 3: Enhanced Dashboard Header */}
       <DashboardHeader
         overallProgress={enhancedOverallProgress}

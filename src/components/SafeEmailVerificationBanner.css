@@ -1,20 +1,20 @@
 .safe-email-verification-banner {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  background: var(--gradient-primary);
+  color: var(--text-on-dark-primary);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-5);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .banner-content {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-4);
 }
 
 .banner-icon {
-  font-size: 24px;
+  font-size: var(--font-size-2xl);
   flex-shrink: 0;
 }
 
@@ -24,29 +24,32 @@
 
 .banner-text strong {
   display: block;
-  margin-bottom: 4px;
-  font-size: 16px;
+  margin-bottom: var(--spacing-1);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
 }
 
 .banner-text p {
   margin: 0;
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: var(--font-size-sm);
+  color: var(--text-on-dark-muted);
 }
 
 .resend-button {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--text-on-dark-primary);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-normal);
 }
 
 .resend-button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .resend-button:disabled {
@@ -54,10 +57,21 @@
   cursor: not-allowed;
 }
 
+.refresh-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  margin-left: var(--spacing-2);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
 .banner-message {
-  margin-top: 12px;
-  padding: 8px 12px;
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-3);
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-on-dark-secondary);
 }

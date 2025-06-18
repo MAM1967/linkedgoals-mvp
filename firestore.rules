@@ -29,5 +29,20 @@ service cloud.firestore {
     match /{path=**}/goals/{goalId} {
       allow read: if request.auth != null && isAdmin();
     }
+
+    // Email verification rules - users can read their own verification status
+    match /emailVerifications/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Email logs and templates - only functions can access
+    match /emailLogs/{document} {
+      allow read, write: if false; // Only Cloud Functions
+    }
+    
+    match /emailTemplates/{document} {
+      allow read, write: if false; // Only Cloud Functions
+    }
   }
 } 

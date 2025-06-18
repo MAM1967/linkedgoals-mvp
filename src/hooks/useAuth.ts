@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  onAuthStateChanged,
-  User,
-  sendEmailVerification,
-  reload,
-} from "firebase/auth";
+import { onAuthStateChanged, User, reload } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
+import { httpsCallable } from "firebase/functions";
+import { auth, db, functions } from "../lib/firebase";
 
 interface AuthUser extends User {
   isAdmin?: boolean;
@@ -41,14 +37,32 @@ export function useAuth() {
 
   const sendVerificationEmail = useCallback(async () => {
     if (!auth.currentUser || !emailVerificationState.canResend) {
+      console.error("Cannot send verification email:", {
+        hasUser: !!auth.currentUser,
+        canResend: emailVerificationState.canResend,
+        userEmail: auth.currentUser?.email,
+      });
       return { success: false, error: "Cannot send verification email" };
     }
 
     try {
-      await sendEmailVerification(auth.currentUser, {
-        url: "https://app.linkedgoals.app/",
-        handleCodeInApp: false,
+      console.log(
+        "Attempting to send verification email to:",
+        auth.currentUser.email
+      );
+
+      // Use your custom Resend-based Cloud Function instead of Firebase default
+      const sendEmailFunction = httpsCallable(
+        functions,
+        "sendVerificationEmail"
+      );
+
+      await sendEmailFunction({
+        email: auth.currentUser.email,
+        userId: auth.currentUser.uid,
       });
+
+      console.log("Verification email sent successfully via Resend");
 
       setEmailVerificationState({
         canResend: false,
@@ -66,9 +80,12 @@ export function useAuth() {
 
       return { success: true };
     } catch (error) {
+      console.error("Error sending verification email:", error);
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
       };
     }
   }, [emailVerificationState.canResend]);
