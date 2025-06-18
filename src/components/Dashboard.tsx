@@ -863,31 +863,10 @@ export default function Dashboard() {
                 (goal.category || "Uncategorized") === selectedCategory
             )
             .map((goal) => {
-              const goalCoachingNotes = coachingNotes.filter(
-                (note) => note.goalId === goal.id
-              );
-              const goalProgress = goalProgressMap.get(goal.id) || {
-                goalId: goal.id,
-                percentage: calculateGoalProgress(goal.measurable),
-                status: goal.completed
-                  ? ("completed" as const)
-                  : ("in-progress" as const),
-                lastUpdated: new Date(),
-                hasUnreadCoachNotes: goalCoachingNotes.some(
-                  (note) => !note.isRead
-                ),
-                coachingNotes: goalCoachingNotes,
-              };
-
               return (
                 <GoalProgressCard
                   key={goal.id}
                   goal={goal}
-                  progress={goalProgress}
-                  onUpdateProgress={() => handleShowProgressModal(goal)}
-                  onMarkComplete={() =>
-                    handleMarkAsComplete(goal.id, goal.description)
-                  }
                   onViewDetails={() => handleViewDetails(goal)}
                 />
               );
