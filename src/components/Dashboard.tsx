@@ -44,7 +44,12 @@ import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
 import SafeEmailVerificationBanner from "./SafeEmailVerificationBanner";
 import { useGoalProgress } from "../hooks/useGoalProgress";
-import { CoachingNote } from "../types/Dashboard";
+import {
+  CoachingNote,
+  GoalProgress,
+  SmartGoal as DashboardSmartGoal,
+  MeasurableData as DashboardMeasurableData,
+} from "../types/Dashboard";
 
 interface Goal {
   name: string;
@@ -62,31 +67,9 @@ interface Checkin {
   category: string;
 }
 
-// Define the new structure for the measurable field
-interface MeasurableData {
-  type: string; // e.g., "Numeric", "Date", "DailyStreak", "Boolean"
-  targetValue: number | string | null;
-  currentValue: number | string | boolean | null;
-  unit?: string; // e.g., "pages", "days", "tasks" - for Numeric type
-}
-
-interface SmartGoal {
-  id: string;
-  description: string;
-  specific: string;
-  measurable: MeasurableData; // Updated from string to MeasurableData
-  achievable: string;
-  relevant: string;
-  dueDate: string; // This is the overall goal due date, distinct from measurable target date if any
-  createdAt: Timestamp;
-  status: string;
-  completed: boolean;
-  category?: string;
-  coachUid?: string;
-  coachName?: string;
-  coachStatus?: string;
-  lastProgressUpdateAt?: Timestamp; // New field for streak calculation
-}
+// Use types from Dashboard.ts
+type MeasurableData = DashboardMeasurableData;
+type SmartGoal = DashboardSmartGoal;
 
 // New interface for earned badges
 interface UserBadge {
@@ -814,7 +797,6 @@ export default function Dashboard() {
       {/* Phase 3: Enhanced Dashboard Header */}
       <DashboardHeader
         overallProgress={enhancedOverallProgress}
-        motivationalMessage={motivationalMessage}
         insights={insights}
       />
 
