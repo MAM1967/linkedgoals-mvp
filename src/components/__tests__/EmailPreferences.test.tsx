@@ -82,23 +82,29 @@ describe("EmailPreferences - Simplified", () => {
       render(<EmailPreferences />);
 
       await waitFor(() => {
-        expect(screen.getByDisplayValue("weekly")).toBeInTheDocument();
+        const frequencySelect = screen.getByRole("combobox");
+        expect(frequencySelect).toBeInTheDocument();
+        expect(frequencySelect).toHaveValue("weekly");
       });
 
-      expect(screen.getByLabelText(/weekly progress updates/i)).toBeChecked();
+      // Find checkboxes by their position since they're in custom switch components
+      const checkboxes = screen.getAllByRole("checkbox");
+      expect(checkboxes[0]).toBeChecked(); // Weekly Progress Updates checkbox
     });
 
     it("enables save button when preferences change", async () => {
       render(<EmailPreferences />);
 
       await waitFor(() => {
-        expect(screen.getByDisplayValue("weekly")).toBeInTheDocument();
+        const frequencySelect = screen.getByRole("combobox");
+        expect(frequencySelect).toHaveValue("weekly");
       });
 
       const saveButton = screen.getByText(/save preferences/i);
       expect(saveButton).toBeDisabled();
 
-      fireEvent.click(screen.getByLabelText(/weekly progress updates/i));
+      const checkboxes = screen.getAllByRole("checkbox");
+      fireEvent.click(checkboxes[0]); // Weekly Progress Updates checkbox
       expect(saveButton).not.toBeDisabled();
     });
 
@@ -106,13 +112,16 @@ describe("EmailPreferences - Simplified", () => {
       render(<EmailPreferences />);
 
       await waitFor(() => {
-        expect(screen.getByDisplayValue("weekly")).toBeInTheDocument();
+        const frequencySelect = screen.getByRole("combobox");
+        expect(frequencySelect).toHaveValue("weekly");
       });
 
-      const unsubscribeToggle = screen.getByLabelText(/unsubscribe from all/i);
+      const checkboxes = screen.getAllByRole("checkbox");
+      const unsubscribeToggle = checkboxes[checkboxes.length - 1]; // Last checkbox is "unsubscribe from all"
       fireEvent.click(unsubscribeToggle);
 
-      const weeklyToggle = screen.getByLabelText(/weekly progress updates/i);
+      // After unsubscribe all, weekly updates checkbox should be disabled and unchecked
+      const weeklyToggle = checkboxes[0]; // First checkbox is "Weekly Progress Updates"
       expect(weeklyToggle).toBeDisabled();
       expect(weeklyToggle).not.toBeChecked();
     });
@@ -134,10 +143,12 @@ describe("EmailPreferences - Simplified", () => {
       render(<EmailPreferences />);
 
       await waitFor(() => {
-        expect(screen.getByDisplayValue("weekly")).toBeInTheDocument();
+        const frequencySelect = screen.getByRole("combobox");
+        expect(frequencySelect).toHaveValue("weekly");
       });
 
-      fireEvent.click(screen.getByLabelText(/weekly progress updates/i));
+      const checkboxes = screen.getAllByRole("checkbox");
+      fireEvent.click(checkboxes[0]); // Weekly Progress Updates checkbox
       fireEvent.click(screen.getByText(/save preferences/i));
 
       await waitFor(() => {
@@ -153,10 +164,12 @@ describe("EmailPreferences - Simplified", () => {
       render(<EmailPreferences />);
 
       await waitFor(() => {
-        expect(screen.getByDisplayValue("weekly")).toBeInTheDocument();
+        const frequencySelect = screen.getByRole("combobox");
+        expect(frequencySelect).toHaveValue("weekly");
       });
 
-      fireEvent.click(screen.getByLabelText(/weekly progress updates/i));
+      const checkboxes = screen.getAllByRole("checkbox");
+      fireEvent.click(checkboxes[0]); // Weekly Progress Updates checkbox
       fireEvent.click(screen.getByText(/save preferences/i));
 
       await waitFor(() => {

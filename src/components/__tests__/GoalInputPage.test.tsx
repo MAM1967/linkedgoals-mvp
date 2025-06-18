@@ -2,15 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import GoalInputPage from "../GoalInputPage";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  query,
-  where,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { auth } from "../../lib/firebase"; // Import the mocked auth
 
 // Mock the firebase lib
@@ -96,7 +88,7 @@ describe("GoalInputPage", () => {
     // Check for Goal Description
     expect(screen.getByText(/Goal Description:/i)).toBeInTheDocument();
     const descriptionTextarea = screen.getByPlaceholderText(
-      /What is the overall goal you want to achieve\?/i
+      /e\.g\., I want to become a better public speaker/i
     );
     expect(descriptionTextarea).toBeInTheDocument();
 
@@ -111,7 +103,7 @@ describe("GoalInputPage", () => {
 
     // Fill in description to enable Next button if there's validation
     const descriptionTextarea = screen.getByPlaceholderText(
-      /What is the overall goal you want to achieve\?/i
+      /e\.g\., I want to become a better public speaker/i
     );
     fireEvent.change(descriptionTextarea, {
       target: { value: "Test Description" },
@@ -133,7 +125,7 @@ describe("GoalInputPage", () => {
     // Step 1: Goal Description
     fireEvent.change(
       screen.getByPlaceholderText(
-        /What is the overall goal you want to achieve\?/i
+        /e\.g\., I want to become a better public speaker/i
       ),
       { target: { value: "Comprehensive Test Goal" } }
     );
@@ -152,13 +144,13 @@ describe("GoalInputPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
 
     // Step 4: Measurable (assuming default type is Numeric)
-    // Placeholder for Target Value is "e.g., 20"
-    fireEvent.change(screen.getByPlaceholderText(/e.g., 20/i), {
+    // Placeholder for Target Value is "e.g., 10"
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\., 10/i), {
       target: { value: "100" },
     });
-    // Placeholder for Unit is "e.g., pages, tasks, hours"
+    // Placeholder for Unit is "Unit (e.g., chapters, tasks)"
     fireEvent.change(
-      screen.getByPlaceholderText(/e.g., pages, tasks, hours/i),
+      screen.getByPlaceholderText(/Unit \(e\.g\., chapters, tasks\)/i),
       { target: { value: "pages" } }
     );
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
@@ -233,7 +225,7 @@ describe("GoalInputPage", () => {
     // Step 1 -> 2
     fireEvent.change(
       screen.getByPlaceholderText(
-        /What is the overall goal you want to achieve\?/i
+        /e\.g\., I want to become a better public speaker/i
       ),
       { target: { value: "Test" } }
     );
@@ -249,13 +241,13 @@ describe("GoalInputPage", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
     // Step 4 -> 5 (Measurable)
-    // Placeholder for Target Value is "e.g., 20"
-    fireEvent.change(screen.getByPlaceholderText(/e.g., 20/i), {
+    // Placeholder for Target Value is "e.g., 10"
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\., 10/i), {
       target: { value: "10" },
     });
-    // Placeholder for Unit is "e.g., pages, tasks, hours"
+    // Placeholder for Unit is "Unit (e.g., chapters, tasks)"
     fireEvent.change(
-      screen.getByPlaceholderText(/e.g., pages, tasks, hours/i),
+      screen.getByPlaceholderText(/Unit \(e\.g\., chapters, tasks\)/i),
       { target: { value: "tasks" } }
     );
     fireEvent.click(screen.getByRole("button", { name: /Next/i }));
@@ -295,7 +287,7 @@ describe("GoalInputPage", () => {
     // Fill all fields with valid data
     fireEvent.change(
       screen.getByPlaceholderText(
-        /What is the overall goal you want to achieve\?/i
+        /e\.g\., I want to become a better public speaker/i
       ),
       { target: { value: "Test Goal for Invalid Date" } }
     );
@@ -315,11 +307,11 @@ describe("GoalInputPage", () => {
     // Assuming the select for measurableType can be found by its label or a test ID if available.
     // For now, we know Numeric is default. Let's ensure its inputs are robustly filled.
     // If there was a select element: fireEvent.change(screen.getByLabelText(/Measurable By:/i), { target: { value: "Numeric" } });
-    fireEvent.change(screen.getByPlaceholderText(/e.g., 20/i), {
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\., 10/i), {
       target: { value: "50" },
     }); // Target Value
     fireEvent.change(
-      screen.getByPlaceholderText(/e.g., pages, tasks, hours/i),
+      screen.getByPlaceholderText(/Unit \(e\.g\., chapters, tasks\)/i),
       { target: { value: "items" } }
     ); // Unit
     fireEvent.click(screen.getByRole("button", { name: /Next/i })); // To Achievable

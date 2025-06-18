@@ -4,6 +4,7 @@ import {
   getNewUsersLast24Hours,
   getTotalGoals,
 } from "../../lib/firebase";
+import EmailAnalyticsDashboard from "../../components/EmailAnalyticsDashboard";
 import "./AdminDashboard.css";
 
 const AdminDashboard: React.FC = () => {
@@ -50,6 +51,11 @@ const AdminDashboard: React.FC = () => {
           <h2>Total Goals</h2>
           <p>{totalGoals}</p>
         </div>
+      </div>
+
+      {/* Email Analytics Section */}
+      <div className="email-analytics-section">
+        <EmailAnalyticsDashboard />
       </div>
     </div>
   );

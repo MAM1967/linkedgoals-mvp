@@ -82,7 +82,7 @@ describe("MotivationalQuoteScreen", () => {
 
       const logo = screen.getByAltText("LinkedGoals");
       expect(logo).toBeInTheDocument();
-      expect(logo).toHaveAttribute("src", "/logo.png");
+      expect(logo).toHaveAttribute("src", "test-file-stub"); // Jest mocks images as "test-file-stub"
     });
 
     test("renders floating decorative elements", () => {
