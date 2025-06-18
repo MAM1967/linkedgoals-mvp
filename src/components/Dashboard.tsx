@@ -50,6 +50,7 @@ import {
   SmartGoal as DashboardSmartGoal,
   MeasurableData as DashboardMeasurableData,
 } from "../types/Dashboard";
+import EmailVerificationBanner from "./EmailVerificationBanner";
 
 interface Goal {
   name: string;
