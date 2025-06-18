@@ -42,6 +42,7 @@ import { GoalDetailsModal } from "./GoalDetailsModal";
 import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
+import EmailVerificationBanner from "./EmailVerificationBanner";
 import { useGoalProgress } from "../hooks/useGoalProgress";
 import {
   CoachingNote,
