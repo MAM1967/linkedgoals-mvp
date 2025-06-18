@@ -841,11 +841,18 @@ export default function Dashboard() {
             )
             .map((goal) => {
               return (
-                <GoalProgressCard
+                <div
                   key={goal.id}
-                  goal={goal}
-                  onViewDetails={() => handleViewDetails(goal)}
-                />
+                  style={{
+                    border: "2px solid red",
+                    background: "pink",
+                    padding: "10px",
+                    margin: "10px",
+                  }}
+                >
+                  <h3 style={{ color: "black" }}>Goal: {goal.name}</h3>
+                  <p style={{ color: "black" }}>This is a test div.</p>
+                </div>
               );
             })}
         </div>
