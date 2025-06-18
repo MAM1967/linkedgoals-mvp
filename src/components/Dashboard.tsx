@@ -95,6 +95,44 @@ const getBadgeIconBgClass = (badgeId: string): string => {
   return ""; // Default no specific background class
 };
 
+// --- HARDCODED DATA FOR TESTING ---
+const hardcodedGoals: SmartGoal[] = [
+  {
+    id: "goal-1",
+    name: "Test Goal 1: Learn Guitar",
+    description: "This is a hardcoded goal to test if the card renders at all.",
+    category: "Skills",
+    specific: 'Learn to play "Wonderwall"',
+    achievable: "Practice 30 mins a day",
+    relevant: "I want to be a rockstar",
+    timeBound: "By next month",
+    completed: false,
+    sharedWithCoach: false,
+    createdAt: Timestamp.now(),
+    measurable: { type: "boolean", currentValue: 0, targetValue: 1 },
+    status: "in-progress",
+    coachStatus: "none",
+  },
+  {
+    id: "goal-2",
+    name: "Test Goal 2: Run a 5K",
+    description:
+      "This is another hardcoded goal to ensure multiple cards can render.",
+    category: "Health",
+    specific: "Run a 5K race",
+    achievable: "Follow a training plan",
+    relevant: "Improve cardiovascular fitness",
+    timeBound: "In 3 months",
+    completed: true,
+    sharedWithCoach: false,
+    createdAt: Timestamp.now(),
+    measurable: { type: "boolean", currentValue: 1, targetValue: 1 },
+    status: "completed",
+    coachStatus: "none",
+  },
+];
+// ------------------------------------
+
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [checkins, setCheckins] = useState<Checkin[]>([]);
@@ -153,6 +191,10 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
+    // STEP 1: Using hardcoded data to test rendering.
+    setSmartGoals(hardcodedGoals);
+    setLoadingGoals(false);
+
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
@@ -164,77 +206,12 @@ export default function Dashboard() {
       }
     });
 
-    if (!currentUser) {
-      if (loadingCheckins && !currentUser) setLoadingCheckins(false);
-      return;
-    }
-
-    const user = currentUser;
-
-    const fetchCheckins = async () => {
-      console.log("Fetching checkins (if applicable)...");
-      setLoadingCheckins(true);
-      setErrorCheckins(null);
-      const ref = collection(db, "users", user.uid, "checkins");
-      const q = query(ref, orderBy("createdAt", "desc"));
-      try {
-        const snap = await getDocs(q);
-        const results: Checkin[] = [];
-        for (const docSnap of snap.docs) {
-          const base = docSnap.data();
-          const goalRef = collection(docSnap.ref, "goal");
-          const goalSnap = await getDocs(goalRef);
-          let goalData: Goal | undefined = undefined;
-          if (!goalSnap.empty) {
-            goalData = goalSnap.docs[0].data() as Goal;
-          }
-          results.push({
-            id: docSnap.id,
-            circle: base.circle,
-            message: base.message,
-            createdAt: base.createdAt,
-            goal: goalData,
-            category: base.category,
-          });
-        }
-        setCheckins(results);
-        setLoadingCheckins(false);
-      } catch (err) {
-        console.error("Error fetching checkins:", err);
-        setErrorCheckins("Failed to load check-ins.");
-        setLoadingCheckins(false);
-      }
-    };
-    fetchCheckins();
-
-    setLoadingGoals(true);
-    setErrorGoals(null);
-    const goalsCollectionRef = collection(db, `users/${user.uid}/goals`);
-    const goalsQuery = query(goalsCollectionRef, orderBy("createdAt", "desc"));
-
-    const unsubscribeGoals: Unsubscribe = onSnapshot(
-      goalsQuery,
-      (querySnapshot) => {
-        const fetchedGoals: SmartGoal[] = [];
-        querySnapshot.forEach((doc) => {
-          const goalData = doc.data() as SmartGoalData;
-          fetchedGoals.push({ ...goalData, id: doc.id });
-        });
-        setSmartGoals(fetchedGoals);
-        setLoadingGoals(false);
-        checkAndAwardBadges();
-      },
-      (error) => {
-        console.error("Error fetching SMART goals:", error);
-        setErrorGoals("Failed to load goals. Please try again later.");
-        setLoadingGoals(false);
-      }
-    );
+    // All other data fetching is disabled for this test.
 
     return () => {
-      unsubscribeGoals();
+      unsubscribeAuth();
     };
-  }, [currentUser]);
+  }, []);
 
   // Overall progress calculation
   useEffect(() => {
