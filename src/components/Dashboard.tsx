@@ -42,7 +42,7 @@ import { GoalDetailsModal } from "./GoalDetailsModal";
 import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
-import EmailVerificationBanner from "./EmailVerificationBanner";
+
 import { useGoalProgress } from "../hooks/useGoalProgress";
 import {
   CoachingNote,
@@ -799,9 +799,6 @@ export default function Dashboard() {
         overallProgress={enhancedOverallProgress}
         insights={insights}
       />
-
-      {/* Email Verification Banner */}
-      <EmailVerificationBanner />
 
       {/* Phase 3: Category Progress Overview */}
       <CategoryProgressSummary
