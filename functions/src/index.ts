@@ -2,15 +2,27 @@
 import { logger } from "firebase-functions/v2";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onRequest } from "firebase-functions/v2/https";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { defineSecret } from "firebase-functions/params";
 import axios from "axios";
 import * as admin from "firebase-admin";
+import { EmailService } from "./emailService";
+import * as crypto from "crypto";
+
+// Export scheduled weekly email function
+export { sendWeeklyEmails } from "./weeklyEmailScheduler";
 
 admin.initializeApp();
 
 const LINKEDIN_CLIENT_SECRET = defineSecret("LINKEDIN_CLIENT_SECRET");
+const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
+
+// EmailService will be initialized lazily when needed
+function ensureEmailServiceInitialized() {
+  EmailService.initialize(RESEND_API_KEY.value());
+}
 
 interface OpenIDUserInfo {
   sub: string;
@@ -367,3 +379,292 @@ export const syncUsersToFirestore = onCall(async (request) => {
     );
   }
 });
+
+// Email verification function
+export const sendVerificationEmail = onCall(
+  {
+    secrets: [RESEND_API_KEY],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated."
+      );
+    }
+
+    const { email, userId } = request.data;
+    if (!email || !userId) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Email and userId are required."
+      );
+    }
+
+    try {
+      // Initialize EmailService
+      ensureEmailServiceInitialized();
+
+      // Generate verification token
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Store verification token in Firestore
+      const firestore = getFirestore();
+      await firestore.collection("emailVerifications").doc(userId).set({
+        email,
+        token: verificationToken,
+        expiresAt,
+        verified: false,
+        createdAt: new Date(),
+      });
+
+      // Get user display name
+      const userDoc = await firestore.collection("users").doc(userId).get();
+      const userData = userDoc.data();
+      const userName =
+        userData?.displayName || userData?.fullName || email.split("@")[0];
+
+      // Send verification email
+      const result = await EmailService.sendVerificationEmail(
+        email,
+        verificationToken,
+        userName
+      );
+
+      if (result.success) {
+        logger.info(`✅ Verification email sent to ${email}`);
+        return {
+          success: true,
+          message: "Verification email sent successfully",
+        };
+      } else {
+        throw new Error(result.error || "Failed to send verification email");
+      }
+    } catch (error: any) {
+      logger.error("❌ Error sending verification email:", error);
+      throw new HttpsError(
+        "internal",
+        "Failed to send verification email",
+        error.message
+      );
+    }
+  }
+);
+
+// Email verification endpoint
+export const verifyEmail = onRequest(async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      res.status(400).send("Invalid verification token");
+      return;
+    }
+
+    const firestore = getFirestore();
+
+    // Find verification record
+    const verificationQuery = await firestore
+      .collection("emailVerifications")
+      .where("token", "==", token)
+      .limit(1)
+      .get();
+
+    if (verificationQuery.empty) {
+      res.status(400).send("Invalid or expired verification token");
+      return;
+    }
+
+    const verificationDoc = verificationQuery.docs[0];
+    const verificationData = verificationDoc.data();
+
+    // Check if token is expired
+    if (verificationData.expiresAt.toDate() < new Date()) {
+      res.status(400).send("Verification token has expired");
+      return;
+    }
+
+    // Check if already verified
+    if (verificationData.verified) {
+      res.status(200).send("Email already verified");
+      return;
+    }
+
+    // Update verification status
+    await verificationDoc.ref.update({
+      verified: true,
+      verifiedAt: new Date(),
+    });
+
+    // Update user's email verification status
+    await firestore.collection("users").doc(verificationDoc.id).update({
+      emailVerified: true,
+      emailVerificationDate: new Date(),
+    });
+
+    logger.info(`✅ Email verified for user: ${verificationDoc.id}`);
+
+    // Redirect to success page
+    res.redirect("https://app.linkedgoals.app/email-verified?success=true");
+  } catch (error: any) {
+    logger.error("❌ Error verifying email:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+// Send welcome email when user is created
+export const onUserCreate = onDocumentCreated(
+  {
+    document: "users/{userId}",
+    secrets: [RESEND_API_KEY],
+  },
+  async (event) => {
+    const userData = event.data?.data();
+    if (!userData) return;
+
+    const { email, displayName, fullName } = userData;
+    if (!email) return;
+
+    try {
+      // Initialize EmailService
+      ensureEmailServiceInitialized();
+
+      const userName = displayName || fullName || email.split("@")[0];
+
+      // Send welcome email
+      const result = await EmailService.sendWelcomeEmail(email, userName);
+
+      if (result.success) {
+        logger.info(`✅ Welcome email sent to ${email}`);
+      } else {
+        logger.error(
+          `❌ Failed to send welcome email to ${email}: ${result.error}`
+        );
+      }
+    } catch (error: any) {
+      logger.error("❌ Error in onUserCreate email trigger:", error);
+    }
+  }
+);
+
+// Admin function to get email stats
+export const getEmailStats = onCall(
+  {
+    secrets: [RESEND_API_KEY],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated."
+      );
+    }
+
+    // Check if the user is an admin
+    const adminUid = request.auth.uid;
+    const firestore = getFirestore();
+    const adminUserDoc = await firestore
+      .collection("users")
+      .doc(adminUid)
+      .get();
+
+    if (!adminUserDoc.exists || adminUserDoc.data()?.role !== "admin") {
+      throw new HttpsError(
+        "permission-denied",
+        "You must be an admin to access email stats."
+      );
+    }
+
+    try {
+      // Initialize EmailService
+      ensureEmailServiceInitialized();
+
+      const { days = 30 } = request.data || {};
+      const stats = await EmailService.getEmailStats(days);
+
+      return {
+        success: true,
+        stats,
+        period: `${days} days`,
+      };
+    } catch (error: any) {
+      logger.error("❌ Error getting email stats:", error);
+      throw new HttpsError(
+        "internal",
+        "Failed to get email stats",
+        error.message
+      );
+    }
+  }
+);
+
+// Admin function to send announcement emails
+export const sendAnnouncement = onCall(
+  {
+    secrets: [RESEND_API_KEY],
+  },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated."
+      );
+    }
+
+    // Check if the user is an admin
+    const adminUid = request.auth.uid;
+    const firestore = getFirestore();
+    const adminUserDoc = await firestore
+      .collection("users")
+      .doc(adminUid)
+      .get();
+
+    if (!adminUserDoc.exists || adminUserDoc.data()?.role !== "admin") {
+      throw new HttpsError(
+        "permission-denied",
+        "You must be an admin to send announcements."
+      );
+    }
+
+    const { subject, content, targetEmails } = request.data;
+    if (!subject || !content || !targetEmails || !Array.isArray(targetEmails)) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Subject, content, and targetEmails array are required."
+      );
+    }
+
+    try {
+      const adminData = adminUserDoc.data();
+      const adminName =
+        adminData?.displayName || adminData?.fullName || "LinkedGoals Admin";
+
+      const result = await EmailService.sendAnnouncement(
+        targetEmails,
+        subject,
+        content,
+        adminName
+      );
+
+      if (result.success) {
+        logger.info(
+          `✅ Announcement sent to ${targetEmails.length} recipients`
+        );
+        return {
+          success: true,
+          message: `Announcement sent to ${targetEmails.length} recipients`,
+        };
+      } else {
+        throw new Error(result.error || "Failed to send announcement");
+      }
+    } catch (error: any) {
+      logger.error("❌ Error sending announcement:", error);
+      throw new HttpsError(
+        "internal",
+        "Failed to send announcement",
+        error.message
+      );
+    }
+  }
+);

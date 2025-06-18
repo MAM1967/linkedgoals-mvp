@@ -54,6 +54,11 @@ const Navbar: React.FC = () => {
               Coaching
             </Link>
           </li>
+          <li>
+            <Link to="/email-preferences" className="nav-link">
+              Email Settings
+            </Link>
+          </li>
         </ul>
 
         {/* Desktop Sign Out Button */}
@@ -123,6 +128,15 @@ const Navbar: React.FC = () => {
                 onClick={toggleMobileMenu}
               >
                 Coaching
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/email-preferences"
+                className="mobile-nav-link"
+                onClick={toggleMobileMenu}
+              >
+                Email Settings
               </Link>
             </li>
             <li>

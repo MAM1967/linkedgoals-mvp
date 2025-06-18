@@ -23,6 +23,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
+import EmailVerificationSuccess from "./components/EmailVerificationSuccess";
+import EmailPreferences from "./components/EmailPreferences";
 
 import logo from "./assets/logo.svg";
 import "./app.css";
@@ -89,6 +91,10 @@ function App() {
         <Routes>
           {/* Public routes that are always accessible */}
           <Route path="/linkedin" element={<LinkedInCallback />} />
+          <Route
+            path="/email-verified"
+            element={<EmailVerificationSuccess />}
+          />
           <Route path="/coach-onboarding" element={<CoachOnboardingPage />} />
           <Route
             path="/coach-onboarding-demo"
@@ -169,6 +175,17 @@ function App() {
                     onDismissWelcome={() => setWelcomePlan(null)}
                   >
                     <CoachingDashboard />
+                  </AuthenticatedLayout>
+                }
+              />
+              <Route
+                path="/email-preferences"
+                element={
+                  <AuthenticatedLayout
+                    welcomePlan={welcomePlan}
+                    onDismissWelcome={() => setWelcomePlan(null)}
+                  >
+                    <EmailPreferences />
                   </AuthenticatedLayout>
                 }
               />
