@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { getUsers } from "../../lib/firebase";
+import { getUsersWithFallback, getAllUsers } from "../../lib/firebase";
 import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import "./UserManagement.css";
 
@@ -20,15 +20,18 @@ const UserManagement: React.FC = () => {
     useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const functions = getFunctions();
   const manageUser = httpsCallable(functions, "manageUser");
+  const syncUsers = httpsCallable(functions, "syncUsersToFirestore");
 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
-      const { users: newUsers, last } = await getUsers(lastVisible);
+      const { users: newUsers, last } = await getUsersWithFallback(lastVisible);
       setUsers((prevUsers) => [...prevUsers, ...newUsers] as User[]);
       setLastVisible(last);
     } catch (err) {
@@ -36,6 +39,52 @@ const UserManagement: React.FC = () => {
       setError("Failed to fetch users.");
     }
     setLoading(false);
+  };
+
+  const fetchAllUsers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const allUsers = await getAllUsers();
+      setUsers(allUsers as User[]);
+      setLastVisible(null);
+      setDebugMode(true);
+    } catch (err) {
+      console.error("Error fetching all users:", err);
+      setError("Failed to fetch all users.");
+    }
+    setLoading(false);
+  };
+
+  const handleSyncUsers = async () => {
+    setSyncing(true);
+    setError(null);
+    try {
+      const result = await syncUsers();
+      const resultData = result.data as {
+        message: string;
+        stats: {
+          processedCount: number;
+          createdCount: number;
+          updatedCount: number;
+        };
+      };
+      alert(
+        `✅ ${resultData.message}\n\nStats:\n- Processed: ${resultData.stats.processedCount}\n- Created: ${resultData.stats.createdCount}\n- Updated: ${resultData.stats.updatedCount}`
+      );
+
+      // Refresh the user list after sync
+      setUsers([]);
+      setLastVisible(null);
+      setDebugMode(false);
+      fetchUsers();
+    } catch (err) {
+      console.error("Error syncing users:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      alert(`❌ Failed to sync users: ${errorMessage}`);
+    }
+    setSyncing(false);
   };
 
   const handleManageUser = async (
@@ -64,9 +113,11 @@ const UserManagement: React.FC = () => {
         );
       }
       alert(`User successfully ${action}d.`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`Error performing action: ${action}`, err);
-      alert(`Failed to ${action} user: ${err.message}`);
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      alert(`Failed to ${action} user: ${errorMessage}`);
     }
   };
 
@@ -77,6 +128,14 @@ const UserManagement: React.FC = () => {
   return (
     <div className="user-management">
       <h1>User Management</h1>
+      <p style={{ fontSize: "12px", color: "#666", marginBottom: "10px" }}>
+        🔄 Version: 2024-06-17-sync-enabled
+      </p>
+      {debugMode && (
+        <p className="debug-info">
+          Debug Mode: Showing all users without pagination
+        </p>
+      )}
       {error && <p className="error-message">{error}</p>}
       <div className="user-list">
         <table>
@@ -125,8 +184,17 @@ const UserManagement: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <button onClick={fetchUsers} disabled={loading || !lastVisible}>
+      <button
+        onClick={fetchUsers}
+        disabled={loading || !lastVisible || debugMode}
+      >
         {loading ? "Loading..." : "Load More"}
+      </button>
+      <button onClick={fetchAllUsers} disabled={loading}>
+        {loading ? "Loading..." : "Load All Users"}
+      </button>
+      <button onClick={handleSyncUsers} disabled={syncing}>
+        {syncing ? "Syncing..." : "Sync Users"}
       </button>
     </div>
   );

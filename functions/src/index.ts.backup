@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger } from "firebase-functions/v2";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { onRequest } from "firebase-functions/v2/https";
@@ -225,7 +224,6 @@ export const manageUser = onCall(async (request) => {
   }
 });
 
-// Sync Firebase Auth users to Firestore
 export const syncUsersToFirestore = onCall(async (request) => {
   // Ensure the user calling the function is authenticated
   if (!request.auth) {
@@ -250,120 +248,88 @@ export const syncUsersToFirestore = onCall(async (request) => {
   try {
     const auth = getAuth();
     let nextPageToken: string | undefined;
-    let processedCount = 0;
+    let syncedCount = 0;
     let createdCount = 0;
-    let updatedCount = 0;
-
-    logger.info("Starting user sync from Firebase Auth to Firestore...");
 
     do {
-      // List users from Firebase Auth (1000 at a time)
+      // List users from Firebase Auth
       const listUsersResult = await auth.listUsers(1000, nextPageToken);
 
       for (const userRecord of listUsersResult.users) {
-        try {
-          const userDoc = await firestore
-            .collection("users")
-            .doc(userRecord.uid)
-            .get();
+        const userDoc = await firestore
+          .collection("users")
+          .doc(userRecord.uid)
+          .get();
 
-          if (!userDoc.exists) {
-            // Create new Firestore document for Auth users that don't have one
-            const userData = {
-              uid: userRecord.uid,
-              email: userRecord.email || "No email provided",
-              displayName: userRecord.displayName || "Unknown User",
-              fullName: userRecord.displayName || "Unknown User",
-              photoURL: userRecord.photoURL || null,
-              disabled: userRecord.disabled || false,
-              emailVerified: userRecord.emailVerified || false,
-              createdAt: Timestamp.fromDate(
-                new Date(userRecord.metadata.creationTime)
-              ),
-              updatedAt: Timestamp.now(),
-              role: "user", // Default role
-              // Add LinkedIn profile info if it's a LinkedIn user
-              ...(userRecord.uid.startsWith("linkedin") && {
-                linkedinProfile: {
-                  sub: userRecord.uid.replace("linkedin|", ""),
-                  email_verified: userRecord.emailVerified || false,
-                },
-              }),
-            };
+        if (!userDoc.exists) {
+          // Create Firestore document for users that don't have one
+          const userData = {
+            uid: userRecord.uid,
+            email: userRecord.email || "No email provided",
+            displayName: userRecord.displayName || "Unknown User",
+            fullName: userRecord.displayName || "Unknown User",
+            photoURL: userRecord.photoURL || null,
+            disabled: userRecord.disabled || false,
+            createdAt: Timestamp.fromDate(
+              new Date(userRecord.metadata.creationTime)
+            ),
+            updatedAt: Timestamp.now(),
+            role: "user", // Default role
+          };
 
+          await firestore.collection("users").doc(userRecord.uid).set(userData);
+          createdCount++;
+          logger.info(`Created Firestore document for user: ${userRecord.uid}`);
+        } else {
+          // Update existing document with missing fields
+          const existingData = userDoc.data();
+          const updates: any = {};
+
+          if (!existingData?.fullName && userRecord.displayName) {
+            updates.fullName = userRecord.displayName;
+          }
+          if (!existingData?.email && userRecord.email) {
+            updates.email = userRecord.email;
+          }
+          if (!existingData?.createdAt) {
+            updates.createdAt = Timestamp.fromDate(
+              new Date(userRecord.metadata.creationTime)
+            );
+          }
+
+          if (Object.keys(updates).length > 0) {
+            updates.updatedAt = Timestamp.now();
             await firestore
               .collection("users")
               .doc(userRecord.uid)
-              .set(userData);
-            createdCount++;
+              .update(updates);
             logger.info(
-              `✅ Created Firestore document for user: ${userRecord.uid} (${userRecord.email})`
+              `Updated Firestore document for user: ${userRecord.uid}`
             );
-          } else {
-            // Update existing document with any missing essential fields
-            const existingData = userDoc.data();
-            const updates: any = {};
-
-            if (!existingData?.fullName && userRecord.displayName) {
-              updates.fullName = userRecord.displayName;
-            }
-            if (!existingData?.email && userRecord.email) {
-              updates.email = userRecord.email;
-            }
-            if (!existingData?.createdAt) {
-              updates.createdAt = Timestamp.fromDate(
-                new Date(userRecord.metadata.creationTime)
-              );
-            }
-            if (existingData?.disabled !== userRecord.disabled) {
-              updates.disabled = userRecord.disabled;
-            }
-
-            if (Object.keys(updates).length > 0) {
-              updates.updatedAt = Timestamp.now();
-              await firestore
-                .collection("users")
-                .doc(userRecord.uid)
-                .update(updates);
-              updatedCount++;
-              logger.info(
-                `🔄 Updated Firestore document for user: ${userRecord.uid}`
-              );
-            }
           }
-          processedCount++;
-        } catch (error) {
-          logger.error(`❌ Error processing user ${userRecord.uid}:`, error);
         }
+        syncedCount++;
       }
 
       nextPageToken = listUsersResult.pageToken;
-
-      if (nextPageToken) {
-        logger.info(
-          `📄 Processed ${processedCount} users, continuing with next page...`
-        );
-      }
     } while (nextPageToken);
 
-    const message = `User sync completed! Processed: ${processedCount}, Created: ${createdCount}, Updated: ${updatedCount}`;
-    logger.info(`🎉 ${message}`);
+    logger.info(
+      `User sync completed. Processed: ${syncedCount}, Created: ${createdCount}`
+    );
 
     return {
       status: "success",
-      message,
-      stats: {
-        processedCount,
-        createdCount,
-        updatedCount,
-      },
+      message: `Synced ${syncedCount} users. Created ${createdCount} new Firestore documents.`,
+      syncedCount,
+      createdCount,
     };
-  } catch (error) {
-    logger.error("💥 Error syncing users:", error);
+  } catch (error: any) {
+    logger.error("Error syncing users:", error);
     throw new HttpsError(
       "internal",
       "An unexpected error occurred during user sync.",
-      error instanceof Error ? error.message : "Unknown error"
+      error.message
     );
   }
 });

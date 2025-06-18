@@ -83,23 +83,88 @@ export const getTotalGoals = async () => {
   return goalSnapshot.size;
 };
 
-export const getUsers = async (
+export const syncAuthUsersToFirestore = async () => {
+  try {
+    // This would need to be called from a Cloud Function with admin privileges
+    // For now, this is a placeholder function structure
+    console.log("User sync would happen in Cloud Function with admin SDK");
+  } catch (error) {
+    console.error("Error syncing users:", error);
+  }
+};
+
+// Enhanced getUsers function that handles missing data gracefully
+export const getUsersWithFallback = async (
   lastVisible: QueryDocumentSnapshot<DocumentData> | null
 ) => {
   const usersCollection = collection(db, "users");
-  const q = query(
-    usersCollection,
-    orderBy("createdAt", "desc"),
-    ...(lastVisible ? [startAfter(lastVisible)] : []),
-    limit(10)
-  );
-  const userSnapshot = await getDocs(q);
-  const last = userSnapshot.docs[userSnapshot.docs.length - 1];
-  const users = userSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return { users, last };
+
+  // Try the ordered query first
+  try {
+    const q = query(
+      usersCollection,
+      orderBy("createdAt", "desc"),
+      ...(lastVisible ? [startAfter(lastVisible)] : []),
+      limit(10)
+    );
+    const userSnapshot = await getDocs(q);
+    const last = userSnapshot.docs[userSnapshot.docs.length - 1];
+    const users = userSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        fullName: data.fullName || data.displayName || "Unknown User",
+        email: data.email || "No email provided",
+        disabled: data.disabled || false,
+        createdAt: data.createdAt || { toDate: () => new Date() },
+        ...data,
+      };
+    });
+    return { users, last };
+  } catch (error) {
+    // If ordered query fails, try without ordering
+    console.warn(
+      "Ordered query failed, falling back to unordered query:",
+      error
+    );
+
+    const q = query(
+      usersCollection,
+      limit(10),
+      ...(lastVisible ? [startAfter(lastVisible)] : [])
+    );
+    const userSnapshot = await getDocs(q);
+    const last = userSnapshot.docs[userSnapshot.docs.length - 1];
+    const users = userSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        fullName: data.fullName || data.displayName || "Unknown User",
+        email: data.email || "No email provided",
+        disabled: data.disabled || false,
+        createdAt: data.createdAt || { toDate: () => new Date() },
+        ...data,
+      };
+    });
+    return { users, last };
+  }
+};
+
+// Function to get all users without pagination for debugging
+export const getAllUsers = async () => {
+  const usersCollection = collection(db, "users");
+  const userSnapshot = await getDocs(usersCollection);
+  return userSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      fullName: data.fullName || data.displayName || "Unknown User",
+      email: data.email || "No email provided",
+      disabled: data.disabled || false,
+      createdAt: data.createdAt || { toDate: () => new Date() },
+      ...data,
+    };
+  });
 };
 
 export default app;
