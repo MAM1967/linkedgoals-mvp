@@ -63,7 +63,7 @@
   --color-primary: var(--brand-primary);
   --color-primary-dark: var(--brand-primary-dark);
   --color-primary-light: var(--brand-primary-light);
-  --color-secondary: var(--brand-secondary);
+  --color-secondary: var(--color-white);
   --color-background: var(--color-white);
   --color-background-light: var(--color-gray-50);
   --color-text-primary: var(--color-gray-700);
