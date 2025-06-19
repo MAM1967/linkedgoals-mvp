@@ -1,26 +1,23 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { db, auth } from "../lib/firebase";
 import {
   collection,
-  getDocs,
   query,
   orderBy,
   Timestamp,
   onSnapshot,
-  Unsubscribe,
   doc,
   updateDoc,
   serverTimestamp,
-  where,
   writeBatch,
   getDoc,
   setDoc,
 } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import { User, onAuthStateChanged } from "firebase/auth";
-import "./Dashboard.css";
+import "./Dashboard.basic.css";
 
 // Import Chart.js components
 
@@ -38,7 +35,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
 // Enhanced Dashboard Components
 import { DashboardHeader } from "./DashboardHeader";
 import { GoalProgressCard } from "./GoalProgressCard";
-import { GoalDetailsModal } from "./GoalDetailsModal";
+import { NewGoalModal } from "./NewGoalModal";
 import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
@@ -82,9 +79,6 @@ interface UserBadge {
   goalId?: string; // If badge is related to a specific goal
 }
 
-// Type for the data part of the goal, excluding the ID
-type SmartGoalData = Omit<SmartGoal, "id">;
-
 // Helper function to get badge-specific CSS class for the icon background
 const getBadgeIconBgClass = (badgeId: string): string => {
   if (badgeId.startsWith("consistencyChampion"))
@@ -94,44 +88,6 @@ const getBadgeIconBgClass = (badgeId: string): string => {
     return "sharingEnthusiast-icon-bg";
   return ""; // Default no specific background class
 };
-
-// --- HARDCODED DATA FOR TESTING ---
-const hardcodedGoals: SmartGoal[] = [
-  {
-    id: "goal-1",
-    name: "Test Goal 1: Learn Guitar",
-    description: "This is a hardcoded goal to test if the card renders at all.",
-    category: "Skills",
-    specific: 'Learn to play "Wonderwall"',
-    achievable: "Practice 30 mins a day",
-    relevant: "I want to be a rockstar",
-    timeBound: "By next month",
-    completed: false,
-    sharedWithCoach: false,
-    createdAt: Timestamp.now(),
-    measurable: { type: "boolean", currentValue: 0, targetValue: 1 },
-    status: "in-progress",
-    coachStatus: "none",
-  },
-  {
-    id: "goal-2",
-    name: "Test Goal 2: Run a 5K",
-    description:
-      "This is another hardcoded goal to ensure multiple cards can render.",
-    category: "Health",
-    specific: "Run a 5K race",
-    achievable: "Follow a training plan",
-    relevant: "Improve cardiovascular fitness",
-    timeBound: "In 3 months",
-    completed: true,
-    sharedWithCoach: false,
-    createdAt: Timestamp.now(),
-    measurable: { type: "boolean", currentValue: 1, targetValue: 1 },
-    status: "completed",
-    coachStatus: "none",
-  },
-];
-// ------------------------------------
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -191,22 +147,74 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    // STEP 1: Using hardcoded data to test rendering.
-    setSmartGoals(hardcodedGoals);
-    setLoadingGoals(false);
-
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
+
+        // Fetch SMART goals
+        const goalsRef = collection(db, `users/${user.uid}/goals`);
+        const goalsQuery = query(goalsRef, orderBy("createdAt", "desc"));
+
+        const unsubscribeGoals = onSnapshot(
+          goalsQuery,
+          (snapshot) => {
+            const goals: SmartGoal[] = snapshot.docs.map(
+              (doc) =>
+                ({
+                  id: doc.id,
+                  ...doc.data(),
+                } as SmartGoal)
+            );
+            setSmartGoals(goals);
+            setLoadingGoals(false);
+            setErrorGoals(null);
+          },
+          (error) => {
+            console.error("Error fetching goals:", error);
+            setErrorGoals(error.message);
+            setLoadingGoals(false);
+          }
+        );
+
+        // Fetch checkins
+        const checkinsRef = collection(db, `users/${user.uid}/checkins`);
+        const checkinsQuery = query(checkinsRef, orderBy("createdAt", "desc"));
+
+        const unsubscribeCheckins = onSnapshot(
+          checkinsQuery,
+          (snapshot) => {
+            const checkins: Checkin[] = snapshot.docs.map(
+              (doc) =>
+                ({
+                  id: doc.id,
+                  ...doc.data(),
+                } as Checkin)
+            );
+            setCheckins(checkins);
+            setLoadingCheckins(false);
+            setErrorCheckins(null);
+          },
+          (error) => {
+            console.error("Error fetching checkins:", error);
+            setErrorCheckins(error.message);
+            setLoadingCheckins(false);
+          }
+        );
+
+        return () => {
+          unsubscribeGoals();
+          unsubscribeCheckins();
+        };
       } else {
         setCurrentUser(null);
+        setSmartGoals([]);
+        setCheckins([]);
+        setLoadingGoals(false);
         setLoadingCheckins(false);
         setErrorCheckins("Please log in to view your dashboard.");
         setStreakCount(0);
       }
     });
-
-    // All other data fetching is disabled for this test.
 
     return () => {
       unsubscribeAuth();
@@ -343,6 +351,8 @@ export default function Dashboard() {
       hasUnreadCoachNotes: false,
       coachingNotes: coachingNotes.filter((note) => note.goalId === goal.id),
     };
+
+    console.log("📈 Final progress object:", progress);
 
     setSelectedGoal(goal);
     setGoalProgress(progress);
@@ -832,6 +842,7 @@ export default function Dashboard() {
         {!loadingGoals && smartGoals.length === 0 && (
           <p>No SMART goals found. Why not add one?</p>
         )}
+
         <div className="goals-grid">
           {smartGoals
             .filter(
@@ -840,19 +851,13 @@ export default function Dashboard() {
                 (goal.category || "Uncategorized") === selectedCategory
             )
             .map((goal) => {
+              const progress = goalProgressMap.get(goal.id);
               return (
-                <div
+                <GoalProgressCard
                   key={goal.id}
-                  style={{
-                    border: "2px solid red",
-                    background: "pink",
-                    padding: "10px",
-                    margin: "10px",
-                  }}
-                >
-                  <h3 style={{ color: "black" }}>Goal: {goal.name}</h3>
-                  <p style={{ color: "black" }}>This is a test div.</p>
-                </div>
+                  goal={goal}
+                  onViewDetails={handleViewDetails}
+                />
               );
             })}
         </div>
@@ -877,38 +882,67 @@ export default function Dashboard() {
         )}
         {!loadingBadges && earnedBadges.length > 0 && (
           <div className="badges-grid">
-            {earnedBadges.map((badge) => (
-              <div key={badge.id} className="badge-card">
+            {earnedBadges.map((badge) => {
+              const isMilestoneMaster =
+                badge.badgeId.startsWith("milestoneMaster");
+              return (
                 <div
-                  className={`badge-icon ${getBadgeIconBgClass(badge.badgeId)}`}
+                  key={badge.id}
+                  className={`badge-card ${
+                    isMilestoneMaster ? "milestone-master" : ""
+                  }`}
                 >
-                  {badge.iconClass && <i className={badge.iconClass}></i>}
-                  {!badge.iconClass && <i className="fas fa-medal"></i>}
+                  <div
+                    className={`badge-icon ${getBadgeIconBgClass(
+                      badge.badgeId
+                    )}`}
+                  >
+                    {badge.iconClass && <i className={badge.iconClass}></i>}
+                    {!badge.iconClass && <i className="fas fa-medal"></i>}
+                    {isMilestoneMaster && (
+                      <i
+                        className="fas fa-trophy"
+                        style={{
+                          position: "absolute",
+                          fontSize: "24px",
+                          color: "white",
+                          textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                        }}
+                      ></i>
+                    )}
+                  </div>
+                  <div className="badge-info">
+                    <h4 className="badge-name">
+                      {isMilestoneMaster && "🏆 "}
+                      {badge.displayName}
+                      {isMilestoneMaster && " 🏆"}
+                    </h4>
+                    <p className="badge-description">{badge.description}</p>
+                    {badge.count && (
+                      <p className="badge-count">
+                        {isMilestoneMaster
+                          ? `Progress: ${badge.count}%`
+                          : `Level: ${badge.count}`}
+                      </p>
+                    )}
+                    <p className="badge-earned-date">
+                      Earned: {badge.earnedAt?.toDate().toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
-                <div className="badge-info">
-                  <h4 className="badge-name">{badge.displayName}</h4>
-                  <p className="badge-description">{badge.description}</p>
-                  {badge.count && (
-                    <p className="badge-count">Level: {badge.count}</p>
-                  )}
-                  <p className="badge-earned-date">
-                    Earned: {badge.earnedAt?.toDate().toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
 
       {/* Enhanced Modals */}
       {selectedGoal && goalProgress && (
-        <GoalDetailsModal
+        <NewGoalModal
           goal={selectedGoal}
           progress={goalProgress}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
-          onGoalUpdate={handleGoalUpdate}
         />
       )}
 
