@@ -301,3 +301,253 @@ For questions, feedback, or support regarding LinkedGoals MVP:
 **LinkedGoals MVP - Empowering Professional Success Through Structured Goal Achievement** 🎯
 
 _Built with React, TypeScript, Firebase, and professional design principles. Deployed and ready for users._
+
+## 🌟 Features
+
+- **LinkedIn OAuth Integration**: Seamless login with LinkedIn profiles
+- **Goal Management**: Create, track, and manage SMART goals
+- **Progress Tracking**: Visual progress indicators and milestone tracking
+- **Social Sharing**: Share achievements and goals on LinkedIn
+- **Email Notifications**: Weekly progress emails and reminders
+- **Admin Dashboard**: Administrative interface for user and goal management
+- **Multi-Environment Setup**: Development, staging, and production environments
+
+## 🚀 Multi-Environment Architecture
+
+This project supports three environments:
+
+- **Development** (`linkedgoals-dev`): Local development and testing
+- **Staging** (`linkedgoals-staging`): Pre-production testing and QA
+- **Production** (`linkedgoals-d7053`): Live production environment
+
+### Environment URLs
+
+- **Development**: https://linkedgoals-dev.web.app
+- **Staging**: https://linkedgoals-staging.web.app  
+- **Production**: https://linkedgoals-d7053.web.app
+
+## 🛠️ Setup Instructions
+
+### Prerequisites
+
+- Node.js 18+
+- Firebase CLI (`npm install -g firebase-tools`)
+- Git
+
+### Initial Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd linkedgoals-mvp
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Firebase environments** (see [Firebase Environment Setup Guide](docs/FIREBASE_ENVIRONMENT_SETUP.md))
+   ```bash
+   # Create Firebase projects
+   ./scripts/create-firebase-projects.sh
+   
+   # Configure project aliases
+   firebase use --add linkedgoals-dev --alias dev
+   firebase use --add linkedgoals-staging --alias staging
+   firebase use --add linkedgoals-d7053 --alias prod
+   ```
+
+4. **Configure environment variables**
+   - Update `.env.development`, `.env.staging`, and `.env.production`
+   - Add Firebase configuration for each environment
+   - Set up LinkedIn OAuth client IDs for each environment
+
+## 🚀 Development
+
+### Local Development
+
+```bash
+# Start development server with emulators
+npm run dev
+
+# Start Firebase emulators
+npm run firebase:emulators
+```
+
+### Building
+
+```bash
+# Build for development
+npm run build:dev
+
+# Build for staging
+npm run build:staging
+
+# Build for production
+npm run build:prod
+```
+
+### Testing
+
+```bash
+# Run unit tests
+npm run test
+
+# Run all tests
+npm run test:all
+
+# Run tests for specific environment
+npm run test:dev
+npm run test:staging
+npm run test:prod
+```
+
+## 🚢 Deployment
+
+### Automated Deployment (Recommended)
+
+Deployments happen automatically via GitHub Actions:
+
+- **Development**: Push to `develop` branch
+- **Staging**: Push to `staging` branch  
+- **Production**: Push to `main` branch
+
+### Manual Deployment
+
+```bash
+# Deploy to development
+./scripts/deploy-environment.sh dev
+
+# Deploy to staging
+./scripts/deploy-environment.sh staging
+
+# Deploy to production
+./scripts/deploy-environment.sh prod
+```
+
+### Direct Firebase Deployment
+
+```bash
+# Deploy to specific environment
+npm run deploy:dev
+npm run deploy:staging
+npm run deploy:prod
+```
+
+## 🔧 Environment Configuration
+
+### Firebase Project Setup
+
+Each environment has its own Firebase project:
+
+```bash
+# Switch between environments
+firebase use dev      # Development
+firebase use staging  # Staging  
+firebase use prod     # Production
+```
+
+### Environment Variables
+
+Environment-specific variables are configured in:
+
+- `.env.development` - Development environment
+- `.env.staging` - Staging environment
+- `.env.production` - Production environment
+
+### Security Rules
+
+Environment-specific Firestore rules:
+
+- `firestore.rules.dev` - Development (permissive)
+- `firestore.rules.staging` - Staging (production-like)
+- `firestore.rules` - Production (strict)
+
+## 📋 Available Scripts
+
+### Build Scripts
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development
+- `npm run build:staging` - Build for staging
+- `npm run build:prod` - Build for production
+
+### Test Scripts
+- `npm run test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Generate coverage report
+- `npm run test:all` - Run all test suites
+- `npm run test:e2e` - Run end-to-end tests
+
+### Deployment Scripts
+- `npm run deploy:dev` - Deploy to development
+- `npm run deploy:staging` - Deploy to staging
+- `npm run deploy:prod` - Deploy to production
+
+### Firebase Scripts
+- `npm run firebase:emulators` - Start Firebase emulators
+- `npm run emulators:dev` - Start emulators for dev project
+- `npm run emulators:staging` - Start emulators for staging project
+
+## 🔒 Security & Compliance
+
+- **GDPR/CCPA Compliant**: User data management and deletion capabilities
+- **Role-based Access Control**: Admin and user roles with appropriate permissions
+- **Secure Authentication**: Firebase Auth with LinkedIn OAuth
+- **Data Encryption**: All data encrypted in transit and at rest
+- **Security Rules**: Environment-specific Firestore security rules
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the `/docs` folder:
+
+- [Architecture Overview](docs/01-architecture.md)
+- [Firebase Environment Setup](docs/FIREBASE_ENVIRONMENT_SETUP.md)
+- [Deployment Guide](docs/07-deployment.md)
+- [Testing Strategy](docs/TESTING_STRATEGY.md)
+- [Development Setup](docs/03-development-setup.md)
+
+## 🤝 Contributing
+
+1. Create a feature branch from `develop`
+2. Make your changes
+3. Run tests: `npm run test:all`
+4. Push to your branch
+5. Create a Pull Request to `develop`
+
+### Branch Strategy
+
+- `main` - Production releases
+- `staging` - Pre-production testing
+- `develop` - Development integration
+- `feature/*` - Feature development
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+1. **Environment not loading**: Check `VITE_ENVIRONMENT` variable
+2. **Firebase connection errors**: Verify project aliases and configurations
+3. **Build failures**: Ensure all environment files are properly configured
+4. **Deployment issues**: Check GitHub secrets and service account permissions
+
+### Getting Help
+
+- Check the [troubleshooting guide](docs/FIREBASE_ENVIRONMENT_SETUP.md#troubleshooting)
+- Review GitHub Actions logs for deployment issues
+- Verify Firebase project permissions in Google Cloud Console
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 🔗 Links
+
+- [Firebase Console](https://console.firebase.google.com/)
+- [LinkedIn Developer Portal](https://developer.linkedin.com/)
+- [GitHub Repository](https://github.com/your-org/linkedgoals-mvp)
+
+---
+
+For detailed setup instructions, see the [Firebase Environment Setup Guide](docs/FIREBASE_ENVIRONMENT_SETUP.md).

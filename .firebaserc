@@ -1,10 +1,19 @@
 {
   "projects": {
-    "default": "linkedgoals-d7053"
+    "default": "linkedgoals-d7053",
+    "prod": "linkedgoals-d7053",
+    "staging": "linkedgoals-staging",
+    "dev": "linkedgoals-dev"
   },
   "targets": {},
   "etags": {
     "linkedgoals-d7053": {
+      "extensionInstances": {}
+    },
+    "linkedgoals-staging": {
+      "extensionInstances": {}
+    },
+    "linkedgoals-dev": {
       "extensionInstances": {}
     }
   }

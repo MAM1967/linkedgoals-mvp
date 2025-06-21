@@ -1,13 +1,13 @@
-name: Deploy to Production
+name: Deploy to Staging
 on:
   push:
-    branches: [main]
+    branches: [staging]
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    environment: staging
     
     steps:
       - name: Checkout code
@@ -28,18 +28,20 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level high
         
-      - name: Build for production
+      - name: Build for staging
         run: npm run build
         env:
-          VITE_ENVIRONMENT: production
+          VITE_ENVIRONMENT: staging
           
-      - name: Deploy to Firebase Production
+      - name: Deploy to Firebase Staging
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LINKEDGOALS_D7053 }}
-          projectId: linkedgoals-d7053
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STAGING }}
+          projectId: linkedgoals-staging
           channelId: live
           
-      - name: Notify deployment
-        run: echo "✅ Production deployment successful"
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          BASE_URL: https://linkedgoals-staging.web.app
