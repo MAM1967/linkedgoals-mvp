@@ -14,5 +14,6 @@ export const environment = {
   development: false,
   enableEmulators: false,
   apiUrl: "https://us-central1-linkedgoals-d7053.cloudfunctions.net",
-  linkedinClientId: "YOUR_PROD_LINKEDIN_CLIENT_ID",
+  linkedinClientId: "7880c93kzzfsgj",
+  linkedinRedirectUri: "https://app.linkedgoals.app/linkedin",
 };
