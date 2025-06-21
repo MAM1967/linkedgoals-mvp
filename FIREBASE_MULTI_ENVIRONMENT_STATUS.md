@@ -11,7 +11,7 @@ The Firebase multi-environment setup has been successfully implemented and teste
 | Environment | Firebase Project ID | Status | URL |
 |------------|-------------------|---------|-----|
 | **Production** | `linkedgoals-d7053` | ✅ Active | https://app.linkedgoals.app |
-| **Staging** | `linkedgoalsweb` | ✅ Active | https://linkedgoalsweb.web.app |
+| **Staging** | `linkedgoals-staging` | ✅ Active | https://linkedgoals-staging.web.app |
 | **Development** | `linkedgoals-development` | ✅ Active | https://linkedgoals-development.web.app |
 
 ### ✅ Configuration Files Updated
@@ -38,12 +38,12 @@ The Firebase multi-environment setup has been successfully implemented and teste
 **Staging Environment:**
 ```javascript
 {
-  projectId: "linkedgoalsweb",
-  appId: "1:208764454771:web:905ca6f7c3f3de55046706",
-  apiKey: "AIzaSyBiMHeLX6pIH8yJLxRKtdWvR3ttqgfx1ag",
-  authDomain: "linkedgoalsweb.firebaseapp.com",
-  storageBucket: "linkedgoalsweb.firebasestorage.app",
-  messagingSenderId: "208764454771"
+  projectId: "linkedgoals-staging",
+  appId: "1:82785247102:web:a6a6b0e8550e5b125d5d2f",
+  apiKey: "AIzaSyA9DBA7m42wOVMX2W6VlY8-ptQ8I3XK-tQ",
+  authDomain: "linkedgoals-staging.firebaseapp.com",
+  storageBucket: "linkedgoals-staging.firebasestorage.app",
+  messagingSenderId: "82785247102"
 }
 ```
 
@@ -51,7 +51,7 @@ The Firebase multi-environment setup has been successfully implemented and teste
 
 ```
 feature/xyz → develop → linkedgoals-development (dev)
-staging branch → linkedgoalsweb (staging)  
+staging branch → linkedgoals-staging (staging)  
 main → linkedgoals-d7053 (production)
 ```
 
@@ -68,7 +68,7 @@ $ firebase use dev
 Now using alias dev (linkedgoals-development)
 
 $ firebase use staging  
-Now using alias staging (linkedgoalsweb)
+Now using alias staging (linkedgoals-staging)
 ```
 
 **Deployment Testing:**
@@ -78,7 +78,7 @@ $ firebase deploy --only firestore:rules --project linkedgoals-development
 ✔ Deploy complete!
 
 # Staging Environment  
-$ firebase deploy --only firestore:rules --project linkedgoalsweb
+$ firebase deploy --only firestore:rules --project linkedgoals-staging
 ✔ Deploy complete!
 ```
 

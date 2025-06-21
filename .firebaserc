@@ -2,7 +2,7 @@
   "projects": {
     "default": "linkedgoals-d7053",
     "prod": "linkedgoals-d7053", 
-    "staging": "linkedgoalsweb",
+    "staging": "linkedgoals-staging",
     "dev": "linkedgoals-development"
   },
   "targets": {},
@@ -10,7 +10,7 @@
     "linkedgoals-d7053": {
       "extensionInstances": {}
     },
-    "linkedgoalsweb": {
+    "linkedgoals-staging": {
       "extensionInstances": {}
     },
     "linkedgoals-development": {
