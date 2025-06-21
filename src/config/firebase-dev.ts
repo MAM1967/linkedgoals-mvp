@@ -1,11 +1,11 @@
 export const firebaseConfig = {
-  apiKey: "YOUR_DEV_API_KEY", // Get from Firebase Console after project creation
-  authDomain: "linkedgoals-dev.firebaseapp.com",
-  databaseURL: "https://linkedgoals-dev-default-rtdb.firebaseio.com",
-  projectId: "linkedgoals-dev",
-  storageBucket: "linkedgoals-dev.firebasestorage.app",
-  messagingSenderId: "YOUR_DEV_SENDER_ID", // Get from Firebase Console
-  appId: "YOUR_DEV_APP_ID", // Get from Firebase Console
+  apiKey: "AIzaSyDlMrKCMZlxf_3WlV7TX7O7bymeLzU3Qtw",
+  authDomain: "linkedgoals-development.firebaseapp.com",
+  databaseURL: "https://linkedgoals-development-default-rtdb.firebaseio.com",
+  projectId: "linkedgoals-development",
+  storageBucket: "linkedgoals-development.firebasestorage.app",
+  messagingSenderId: "820615632128",
+  appId: "1:820615632128:web:4ef6e8a10bed5ee6accfe5",
 };
 
 export const environment = {
@@ -13,8 +13,8 @@ export const environment = {
   staging: false,
   development: true,
   enableEmulators: true,
-  apiUrl: "https://us-central1-linkedgoals-dev.cloudfunctions.net",
+  apiUrl: "https://us-central1-linkedgoals-development.cloudfunctions.net",
   linkedinClientId: "7880c93kzzfsgj", // Use production for now, create separate dev app later
-  linkedinRedirectUri: "https://linkedgoals-dev.web.app/linkedin",
+  linkedinRedirectUri: "https://linkedgoals-development.web.app/linkedin",
   localRedirectUri: "http://localhost:5173/linkedin",
 };
