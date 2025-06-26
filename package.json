@@ -6,6 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:dev": "NODE_ENV=development tsc -b && vite build --mode development",
+    "build:staging": "NODE_ENV=staging tsc -b && vite build --mode staging",
+    "build:prod": "NODE_ENV=production tsc -b && vite build --mode production",
+    "deploy:dev": "firebase use dev && npm run build:dev && firebase deploy",
+    "deploy:staging": "firebase use staging && npm run build:staging && firebase deploy",
+    "deploy:prod": "firebase use prod && npm run build:prod && firebase deploy",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",
@@ -17,6 +23,8 @@
     "test:performance": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html",
     "test:all": "npm run test && npm run test:integration && npm run test:e2e",
     "firebase:emulators": "firebase emulators:start --only firestore,auth",
+    "emulators:dev": "firebase use dev && firebase emulators:start",
+    "emulators:staging": "firebase use staging && firebase emulators:start",
     "audit:security": "npm audit && snyk test",
     "analyze:bundle": "webpack-bundle-analyzer build/static/js/*.js"
   },
