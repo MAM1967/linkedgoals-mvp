@@ -6,11 +6,35 @@ const LINKEDIN_CLIENT_ID =
   (typeof process !== "undefined" && process.env?.VITE_LINKEDIN_CLIENT_ID) ||
   (typeof window !== "undefined" && (window as any)?.VITE_LINKEDIN_CLIENT_ID) ||
   "7880c93kzzfsgj";
+
+// Dynamic redirect URI based on current hostname
+const getRedirectUri = () => {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // Environment-specific redirect URIs
+    if (hostname.includes('linkedgoals-development') || hostname.includes('development')) {
+      return `${protocol}//${hostname}/linkedin`;
+    }
+    if (hostname.includes('linkedgoals-staging') || hostname.includes('staging')) {
+      return `${protocol}//${hostname}/linkedin`;
+    }
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:${window.location.port}/linkedin`;
+    }
+    // Production fallback
+    return "https://app.linkedgoals.app/linkedin";
+  }
+  
+  // Server-side fallback to production
+  return "https://app.linkedgoals.app/linkedin";
+};
+
 const REDIRECT_URI =
   (typeof process !== "undefined" && process.env?.VITE_LINKEDIN_REDIRECT_URI) ||
-  (typeof window !== "undefined" &&
-    (window as any)?.VITE_LINKEDIN_REDIRECT_URI) ||
-  "https://app.linkedgoals.app/linkedin";
+  (typeof window !== "undefined" && (window as any)?.VITE_LINKEDIN_REDIRECT_URI) ||
+  getRedirectUri();
 // Use correct LinkedIn v2 scopes (not OpenID Connect scopes)
 const LINKEDIN_SCOPES = "openid profile email";
 
