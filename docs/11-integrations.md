@@ -18,11 +18,11 @@ This document describes all external services and integrations used by the Linke
 
 ### Overview
 
-The application integrates with LinkedIn using **OpenID Connect** to provide user authentication and profile access through LinkedIn's **API v2**.
+The application integrates with LinkedIn using **OAuth 2.0 with OpenID Connect** to provide user authentication and profile access through LinkedIn's **OpenID Connect userinfo endpoint**.
 
-⚠️ **Important**: LinkedIn PKCE requires explicit permission and is not recommended for this integration. We use OpenID Connect flow.
+✅ **Current Working Implementation**: Uses OpenID Connect with `openid profile email` scopes and `/v2/userinfo` endpoint.
 
-### LinkedIn API V2 Configuration
+### LinkedIn OpenID Connect Configuration
 
 #### Required LinkedIn Developer App Settings
 
@@ -32,7 +32,7 @@ The application integrates with LinkedIn using **OpenID Connect** to provide use
 
 2. **OAuth 2.0 Scopes (OpenID Connect)**:
 
-   - ✅ `openid` - Required for OpenID Connect flow
+   - ✅ `openid` - Required for OpenID Connect
    - ✅ `profile` - Access to basic profile information
    - ✅ `email` - Access to email address
 
@@ -40,7 +40,7 @@ The application integrates with LinkedIn using **OpenID Connect** to provide use
    - **Production**: `https://app.linkedgoals.app/linkedin`
    - **Staging**: `https://linkedgoals-staging.web.app/linkedin`
    - **Development**: `https://linkedgoals-development.web.app/linkedin`
-   - **Local**: `http://localhost:5173/linkedin`
+   - **Local Development**: `http://localhost:5173/linkedin`
 
 #### API Endpoints Used
 
@@ -50,7 +50,7 @@ const LINKEDIN_ENDPOINTS = {
   // OAuth token exchange
   TOKEN_URL: "https://www.linkedin.com/oauth/v2/accessToken",
 
-  // User profile information (OpenID Connect)
+  // OpenID Connect userinfo endpoint
   USERINFO_URL: "https://api.linkedin.com/v2/userinfo",
 
   // Authorization URL
@@ -67,7 +67,7 @@ const LINKEDIN_ENDPOINTS = {
 const initiateLinkedInAuth = () => {
   // Generate state for security
   const state = Math.random().toString(36).substring(7);
-  localStorage.setItem("linkedin_state", state);
+  sessionStorage.setItem("linkedin_oauth_state", state);
 
   // Build OAuth URL with OpenID Connect scopes
   const params = new URLSearchParams({
@@ -111,18 +111,15 @@ export const linkedinlogin = onRequest(async (req, res) => {
 
     const { access_token } = tokenResponse.data;
 
-    // Fetch user profile using OpenID Connect userinfo endpoint
-    const userInfoResponse = await axios.get("https://api.linkedin.com/v2/userinfo", {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
+    // Fetch user info using OpenID Connect userinfo endpoint
+    const userInfoResponse = await axios.get(
+      "https://api.linkedin.com/v2/userinfo",
+      {
+        headers: { Authorization: `Bearer ${access_token}` },
+      }
+    );
 
-    // Process user data and create Firebase user
-    const userInfo = {
-      sub: userInfoResponse.data.sub,
-      email: userInfoResponse.data.email,
-      name: userInfoResponse.data.name,
-      picture: userInfoResponse.data.picture,
-    };
+    const userInfo = userInfoResponse.data;
 
     // Create/update Firebase user and return custom token
     const customToken = await createFirebaseUser(userInfo);
@@ -137,6 +134,53 @@ export const linkedinlogin = onRequest(async (req, res) => {
     res.status(500).json({ error: "Authentication failed" });
   }
 });
+```
+
+### Multi-Environment Setup
+
+#### Environment Detection
+
+The application automatically detects the environment and configures LinkedIn OAuth accordingly:
+
+```typescript
+// Dynamic redirect URI based on current hostname
+const getRedirectUri = () => {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // Environment-specific redirect URIs
+    if (hostname.includes('linkedgoals-development') || hostname.includes('development')) {
+      return `${protocol}//${hostname}/linkedin`;
+    }
+    if (hostname.includes('linkedgoals-staging') || hostname.includes('staging')) {
+      return `${protocol}//${hostname}/linkedin`;
+    }
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:${window.location.port}/linkedin`;
+    }
+    // Production fallback
+    return "https://app.linkedgoals.app/linkedin";
+  }
+  
+  return "https://app.linkedgoals.app/linkedin";
+};
+```
+
+#### Backend Environment Handling
+
+```typescript
+// Environment-specific redirect URI detection in Cloud Functions
+const origin = req.get('origin') || req.get('referer') || '';
+let redirectUri = "https://app.linkedgoals.app/linkedin"; // Default to production
+
+if (origin.includes('linkedgoals-staging.web.app')) {
+  redirectUri = "https://linkedgoals-staging.web.app/linkedin";
+} else if (origin.includes('linkedgoals-development.web.app')) {
+  redirectUri = "https://linkedgoals-development.web.app/linkedin";
+} else if (origin.includes('localhost')) {
+  redirectUri = "http://localhost:5173/linkedin";
+}
 ```
 
 ### Environment Configuration
@@ -170,36 +214,33 @@ firebase deploy --only functions
 
 #### Common Issues & Solutions
 
-1. **"OpenID permission is not supported for PKCE flows"**
+1. **Staging redirects to production after login**
 
-   - ✅ **Fixed**: Use `profile email` scopes instead of `openid`
-   - ✅ **Fixed**: Remove all PKCE implementation
+   - ✅ **Fixed**: Updated LinkedInCallback.tsx to use environment-aware function URLs
+   - ✅ **Fixed**: Backend detects origin and uses correct redirect URI
 
-2. **"invalid_client" errors**
+2. **"OpenID permission is not supported for PKCE flows"**
 
-   - ✅ **Fixed**: Use standard OAuth flow without PKCE parameters
+   - ✅ **Working**: Use `openid profile email` scopes with standard OAuth (not PKCE)
+   - ✅ **Working**: Use OpenID Connect userinfo endpoint
+
+3. **"invalid_client" errors**
+
    - Check client ID/secret configuration
+   - Ensure redirect URI matches exactly in LinkedIn app settings
 
-3. **"Redirect URI mismatch"**
-
-   - Ensure exact match in LinkedIn app settings: `https://app.linkedgoals.app/linkedin`
-   - Include protocol (`https://`) and path (`/linkedin`)
-
-4. **403 "ACCESS_DENIED" errors**
-   - ✅ **Fixed**: Correct API v2 endpoints
-   - ✅ **Fixed**: Proper scope configuration
+4. **CORS errors**
+   - ✅ **Fixed**: Production function configured with staging CORS origins
 
 #### Debug Information
 
 ```typescript
 // Successful authentication logs
 console.log("✅ LinkedIn config loaded successfully");
-console.log("🔄 Exchanging code for access token (standard OAuth)...");
+console.log("🔄 Exchanging code for access token...");
 console.log("✅ Token exchange successful");
-console.log("👤 Fetching LinkedIn profile...");
-console.log("✅ Profile fetched successfully");
-console.log("📧 Fetching LinkedIn email...");
-console.log("✅ Email fetched successfully");
+console.log("👤 Fetching LinkedIn userinfo via OpenID Connect...");
+console.log("✅ OpenID Connect userinfo fetched successfully");
 console.log("🔥 Creating/updating Firebase user...");
 console.log("✅ Custom token created successfully");
 ```
