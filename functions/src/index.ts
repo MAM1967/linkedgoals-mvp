@@ -10,15 +10,7 @@ admin.initializeApp();
 
 const LINKEDIN_CLIENT_SECRET = defineSecret("LINKEDIN_CLIENT_SECRET");
 
-interface OpenIDUserInfo {
-  sub: string;
-  name: string;
-  given_name: string;
-  family_name: string;
-  email: string;
-  email_verified: boolean;
-  picture: string;
-}
+
 
 export const linkedinlogin = onRequest(
   {
@@ -27,7 +19,7 @@ export const linkedinlogin = onRequest(
       "https://app.linkedgoals.app",
       "https://linkedgoals-staging.web.app", 
       "https://linkedgoals-development.web.app",
-      "http://localhost:3000"
+      "http://localhost:5173"
     ],
   },
   async (req, res) => {
@@ -60,7 +52,7 @@ export const linkedinlogin = onRequest(
       } else if (origin.includes('linkedgoals-development.web.app')) {
         redirectUri = "https://linkedgoals-development.web.app/linkedin";
       } else if (origin.includes('localhost')) {
-        redirectUri = "http://localhost:3000/linkedin";
+        redirectUri = "http://localhost:5173/linkedin";
       }
       
       logger.info("🔑 Received authorization code.");
@@ -89,9 +81,9 @@ export const linkedinlogin = onRequest(
         tokenResponse.data.scope
       );
 
-      logger.info("👤 Fetching user info via OpenID Connect...");
-      const userInfoResponse = await axios.get<OpenIDUserInfo>(
-        "https://api.linkedin.com/v2/userinfo",
+      logger.info("👤 Fetching LinkedIn profile using API v2...");
+      const profileResponse = await axios.get(
+        "https://api.linkedin.com/v2/me",
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -99,8 +91,25 @@ export const linkedinlogin = onRequest(
         }
       );
 
-      const userInfo = userInfoResponse.data;
-      logger.info("✅ OpenID Connect userinfo fetched:", {
+      logger.info("📧 Fetching LinkedIn email using API v2...");
+      const emailResponse = await axios.get(
+        "https://api.linkedin.com/v2/emailAddresses?q=members&projection=(elements*(handle~))",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      const userInfo = {
+        sub: profileResponse.data.id,
+        email: emailResponse.data.elements[0]["handle~"].emailAddress,
+        name: `${profileResponse.data.localizedFirstName} ${profileResponse.data.localizedLastName}`,
+        email_verified: true,
+        picture: profileResponse.data.profilePicture?.displayImage || null,
+      };
+
+      logger.info("✅ LinkedIn API v2 data fetched:", {
         sub: userInfo.sub,
         name: userInfo.name,
         email: userInfo.email,
