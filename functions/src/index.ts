@@ -23,7 +23,12 @@ interface OpenIDUserInfo {
 export const linkedinlogin = onRequest(
   {
     secrets: [LINKEDIN_CLIENT_SECRET],
-    cors: "https://app.linkedgoals.app",
+    cors: [
+      "https://app.linkedgoals.app",
+      "https://linkedgoals-staging.web.app", 
+      "https://linkedgoals-development.web.app",
+      "http://localhost:3000"
+    ],
   },
   async (req, res) => {
     if (req.method === "OPTIONS") {
@@ -46,14 +51,28 @@ export const linkedinlogin = onRequest(
         return;
       }
 
+      // Determine redirect URI based on origin header
+      const origin = req.get('origin') || req.get('referer') || '';
+      let redirectUri = "https://app.linkedgoals.app/linkedin"; // Default to production
+      
+      if (origin.includes('linkedgoals-staging.web.app')) {
+        redirectUri = "https://linkedgoals-staging.web.app/linkedin";
+      } else if (origin.includes('linkedgoals-development.web.app')) {
+        redirectUri = "https://linkedgoals-development.web.app/linkedin";
+      } else if (origin.includes('localhost')) {
+        redirectUri = "http://localhost:3000/linkedin";
+      }
+      
       logger.info("🔑 Received authorization code.");
+      logger.info("🌍 Origin:", origin);
+      logger.info("🔗 Using redirect URI:", redirectUri);
 
       const tokenResponse = await axios.post(
         "https://www.linkedin.com/oauth/v2/accessToken",
         new URLSearchParams({
           grant_type: "authorization_code",
           code,
-          redirect_uri: "https://app.linkedgoals.app/linkedin",
+          redirect_uri: redirectUri,
           client_id: "7880c93kzzfsgj",
           client_secret: LINKEDIN_CLIENT_SECRET.value(),
         }).toString(),

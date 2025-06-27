@@ -39,16 +39,19 @@ const LinkedInCallback = () => {
         console.log("Calling LinkedIn OAuth Firebase Function...");
 
         // Call Firebase Function for LinkedIn OAuth
-        const response = await fetch(
-          "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ code, state }),
-          }
-        );
+        // NOTE: Using production function for now since staging needs Blaze plan for functions
+        // The production function should handle staging redirects correctly
+        const functionUrl = "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin";
+        console.log("Calling LinkedIn OAuth function:", functionUrl);
+        console.log("Current hostname:", window.location.hostname);
+        
+        const response = await fetch(functionUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code, state }),
+        });
 
         console.log("Function response status:", response.status);
 
