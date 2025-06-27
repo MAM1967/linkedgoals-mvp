@@ -39,9 +39,33 @@ const LinkedInCallback = () => {
         console.log("Calling LinkedIn OAuth Firebase Function...");
 
         // Call Firebase Function for LinkedIn OAuth
-        // NOTE: Using production function for now since staging needs Blaze plan for functions
-        // The production function should handle staging redirects correctly
-        const functionUrl = "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin";
+        // Use environment-specific function URLs
+        const getCurrentEnvironment = () => {
+          const hostname = window.location.hostname;
+          if (hostname.includes('linkedgoals-development') || hostname.includes('development') || hostname === 'localhost') {
+            return 'development';
+          }
+          if (hostname.includes('linkedgoals-staging') || hostname.includes('staging')) {
+            return 'staging';
+          }
+          return 'production';
+        };
+
+        const environment = getCurrentEnvironment();
+        let functionUrl;
+        
+        // Since staging doesn't have Blaze plan yet, use production function for staging
+        // but the production function will handle staging redirects correctly
+        if (environment === 'development') {
+          functionUrl = "https://us-central1-linkedgoals-development.cloudfunctions.net/linkedinlogin";
+        } else if (environment === 'staging') {
+          // Use production function for staging until staging gets Blaze plan
+          functionUrl = "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin";
+        } else {
+          functionUrl = "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin";
+        }
+        
+        console.log("Environment:", environment);
         console.log("Calling LinkedIn OAuth function:", functionUrl);
         console.log("Current hostname:", window.location.hostname);
         

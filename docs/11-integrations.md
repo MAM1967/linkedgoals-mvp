@@ -18,9 +18,9 @@ This document describes all external services and integrations used by the Linke
 
 ### Overview
 
-The application integrates with LinkedIn using **OAuth 2.0 standard flow** (not PKCE) to provide user authentication and profile access through LinkedIn's **API v2**.
+The application integrates with LinkedIn using **OpenID Connect** to provide user authentication and profile access through LinkedIn's **API v2**.
 
-⚠️ **Important**: LinkedIn PKCE requires explicit permission and is not recommended for this integration. We use standard OAuth 2.0 flow.
+⚠️ **Important**: LinkedIn PKCE requires explicit permission and is not recommended for this integration. We use OpenID Connect flow.
 
 ### LinkedIn API V2 Configuration
 
@@ -30,30 +30,28 @@ The application integrates with LinkedIn using **OAuth 2.0 standard flow** (not 
 
    - ✅ "Sign In with LinkedIn using OpenID Connect"
 
-2. **OAuth 2.0 Scopes (API V2)**:
+2. **OAuth 2.0 Scopes (OpenID Connect)**:
 
+   - ✅ `openid` - Required for OpenID Connect flow
    - ✅ `profile` - Access to basic profile information
    - ✅ `email` - Access to email address
-   - ❌ **Do NOT use**: `openid` (causes OpenID Connect complications)
 
 3. **Authorized Redirect URLs**:
    - **Production**: `https://app.linkedgoals.app/linkedin`
-   - **Development**: `http://localhost:5173/linkedin`
+   - **Staging**: `https://linkedgoals-staging.web.app/linkedin`
+   - **Development**: `https://linkedgoals-development.web.app/linkedin`
+   - **Local**: `http://localhost:5173/linkedin`
 
 #### API Endpoints Used
 
 ```typescript
-// LinkedIn API V2 Endpoints (Standard OAuth)
+// LinkedIn OpenID Connect Endpoints (Working Implementation)
 const LINKEDIN_ENDPOINTS = {
   // OAuth token exchange
   TOKEN_URL: "https://www.linkedin.com/oauth/v2/accessToken",
 
-  // User profile information (API v2)
-  PROFILE_URL: "https://api.linkedin.com/v2/me",
-
-  // Email address (API v2)
-  EMAIL_URL:
-    "https://api.linkedin.com/v2/emailAddresses?q=members&projection=(elements*(handle~))",
+  // User profile information (OpenID Connect)
+  USERINFO_URL: "https://api.linkedin.com/v2/userinfo",
 
   // Authorization URL
   AUTH_URL: "https://www.linkedin.com/oauth/v2/authorization",
@@ -62,21 +60,21 @@ const LINKEDIN_ENDPOINTS = {
 
 ### Implementation Details
 
-#### Frontend OAuth Flow (No PKCE)
+#### Frontend OAuth Flow (OpenID Connect)
 
 ```typescript
 // src/components/LinkedInLogin.tsx
 const initiateLinkedInAuth = () => {
-  // Generate state for security (NOT PKCE)
+  // Generate state for security
   const state = Math.random().toString(36).substring(7);
   localStorage.setItem("linkedin_state", state);
 
-  // Build OAuth URL with v2 scopes
+  // Build OAuth URL with OpenID Connect scopes
   const params = new URLSearchParams({
     response_type: "code",
     client_id: import.meta.env.VITE_LINKEDIN_CLIENT_ID,
     redirect_uri: import.meta.env.VITE_LINKEDIN_REDIRECT_URI,
-    scope: "profile email", // LinkedIn v2 scopes (NOT openid)
+    scope: "openid profile email", // OpenID Connect scopes
     state: state,
   });
 
@@ -85,21 +83,20 @@ const initiateLinkedInAuth = () => {
 };
 ```
 
-#### Backend Token Exchange (Standard OAuth)
+#### Backend Token Exchange (OpenID Connect)
 
 ```typescript
 // functions/src/index.ts - linkedinlogin function
 export const linkedinlogin = onRequest(async (req, res) => {
   const { code, state } = req.body;
 
-  // Standard OAuth token exchange (NO PKCE parameters)
+  // Standard OAuth token exchange
   const tokenRequestParams = {
     grant_type: "authorization_code",
     code: code,
     redirect_uri: process.env.LINKEDIN_REDIRECT_URI,
     client_id: process.env.LINKEDIN_CLIENT_ID,
     client_secret: process.env.LINKEDIN_CLIENT_SECRET,
-    // NO code_verifier or code_challenge
   };
 
   try {
@@ -114,25 +111,17 @@ export const linkedinlogin = onRequest(async (req, res) => {
 
     const { access_token } = tokenResponse.data;
 
-    // Fetch user profile using LinkedIn API v2
-    const profileResponse = await axios.get("https://api.linkedin.com/v2/me", {
+    // Fetch user profile using OpenID Connect userinfo endpoint
+    const userInfoResponse = await axios.get("https://api.linkedin.com/v2/userinfo", {
       headers: { Authorization: `Bearer ${access_token}` },
     });
 
-    // Fetch email using LinkedIn API v2
-    const emailResponse = await axios.get(
-      "https://api.linkedin.com/v2/emailAddresses?q=members&projection=(elements*(handle~))",
-      {
-        headers: { Authorization: `Bearer ${access_token}` },
-      }
-    );
-
     // Process user data and create Firebase user
     const userInfo = {
-      sub: profileResponse.data.id,
-      email: emailResponse.data.elements[0]["handle~"].emailAddress,
-      name: `${profileResponse.data.localizedFirstName} ${profileResponse.data.localizedLastName}`,
-      picture: profileResponse.data.profilePicture?.displayImage,
+      sub: userInfoResponse.data.sub,
+      email: userInfoResponse.data.email,
+      name: userInfoResponse.data.name,
+      picture: userInfoResponse.data.picture,
     };
 
     // Create/update Firebase user and return custom token
@@ -183,7 +172,7 @@ firebase deploy --only functions
 
 1. **"OpenID permission is not supported for PKCE flows"**
 
-   - ✅ **Fixed**: Use `profile email` scopes instead of `openid profile email`
+   - ✅ **Fixed**: Use `profile email` scopes instead of `openid`
    - ✅ **Fixed**: Remove all PKCE implementation
 
 2. **"invalid_client" errors**
