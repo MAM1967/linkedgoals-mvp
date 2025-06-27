@@ -36,7 +36,7 @@ const REDIRECT_URI =
   (typeof window !== "undefined" && (window as any)?.VITE_LINKEDIN_REDIRECT_URI) ||
   getRedirectUri();
 // Use correct LinkedIn v2 scopes (not OpenID Connect scopes)
-const LINKEDIN_SCOPES = "profile email";
+const LINKEDIN_SCOPES = "openid profile email";
 
 const LinkedInLogin = () => {
   const [planFromUrl, setPlanFromUrl] = useState<string | null>(null);

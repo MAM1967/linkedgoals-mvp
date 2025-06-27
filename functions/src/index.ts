@@ -10,6 +10,16 @@ admin.initializeApp();
 
 const LINKEDIN_CLIENT_SECRET = defineSecret("LINKEDIN_CLIENT_SECRET");
 
+interface OpenIDUserInfo {
+  sub: string;
+  name: string;
+  given_name: string;
+  family_name: string;
+  email: string;
+  email_verified: boolean;
+  picture: string;
+}
+
 
 
 export const linkedinlogin = onRequest(
@@ -81,9 +91,9 @@ export const linkedinlogin = onRequest(
         tokenResponse.data.scope
       );
 
-      logger.info("👤 Fetching LinkedIn profile using API v2...");
-      const profileResponse = await axios.get(
-        "https://api.linkedin.com/v2/me",
+      logger.info("👤 Fetching user info via OpenID Connect...");
+      const userInfoResponse = await axios.get<OpenIDUserInfo>(
+        "https://api.linkedin.com/v2/userinfo",
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -91,25 +101,8 @@ export const linkedinlogin = onRequest(
         }
       );
 
-      logger.info("📧 Fetching LinkedIn email using API v2...");
-      const emailResponse = await axios.get(
-        "https://api.linkedin.com/v2/emailAddresses?q=members&projection=(elements*(handle~))",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      const userInfo = {
-        sub: profileResponse.data.id,
-        email: emailResponse.data.elements[0]["handle~"].emailAddress,
-        name: `${profileResponse.data.localizedFirstName} ${profileResponse.data.localizedLastName}`,
-        email_verified: true,
-        picture: profileResponse.data.profilePicture?.displayImage || null,
-      };
-
-      logger.info("✅ LinkedIn API v2 data fetched:", {
+      const userInfo = userInfoResponse.data;
+      logger.info("✅ OpenID Connect userinfo fetched:", {
         sub: userInfo.sub,
         name: userInfo.name,
         email: userInfo.email,
