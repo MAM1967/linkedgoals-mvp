@@ -106,6 +106,63 @@
   background: #2563eb;
 }
 
+/* Enhanced No Data State */
+.no-data-state {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  margin: 2rem 0;
+}
+
+.no-data-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-data-state h3 {
+  color: #1e293b;
+  margin-bottom: 12px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.no-data-state p {
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.no-data-info {
+  background: #e8f4f8;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  text-align: left;
+  display: inline-block;
+  border: 1px solid #0077b5;
+}
+
+.no-data-info h4 {
+  color: #0077b5;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.no-data-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.no-data-info li {
+  padding: 4px 0;
+  color: #333;
+  font-size: 14px;
+}
+
 /* Overview Cards */
 .analytics-overview {
   display: grid;
