@@ -2,10 +2,10 @@
 {
   "localId": "0RqbwLpqnjglr2D4Q3mJiL5Gs0w1",
   "email": "michael.mcdermott@crestcom.com",
-  "emailVerified": false,
+  "emailVerified": true,
   "displayName": "Michael",
   "photoUrl": "https://media.licdn.com/dms/image/v2/D4E03AQHJ4VKo8BJmEA/profile-displayphoto-shrink_400_400/B4EZaM6tkxHMAg-/0/1746120924352?e=1754524800&v=beta&t=YlhvwC9dwgM7WGz592j8QvHeyuytoecoTdQulggRnOY",
-  "lastSignedInAt": "1749851198098",
+  "lastSignedInAt": "1752101900419",
   "createdAt": "1744328299325",
   "disabled": false
 },
@@ -25,7 +25,7 @@
   "emailVerified": false,
   "passwordHash": "xjg7YGE87kwHC4wdTv6pHGUpIzVPve/BGY4EQvy44sjDWh9c7azpPDsP0+t1DqkTc+vNZz0BaDOVmutDleGSGw==",
   "salt": "KipTGqBTtYZWFQ==",
-  "lastSignedInAt": "1749832363970",
+  "lastSignedInAt": "1750204377226",
   "createdAt": "1749345669600",
   "disabled": false,
   "providerUserInfo": []
@@ -98,5 +98,15 @@
   "photoUrl": "https://media.licdn.com/dms/image/v2/C4D03AQH7DIfI8_MIiA/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1620948382474?e=1755129600&v=beta&t=SHHHR5aNU47LLrf0bIf4E5b6LOZ5ZT6LleO4oPxz5nA",
   "lastSignedInAt": "1749718835446",
   "createdAt": "1749718834275",
+  "disabled": false
+},
+{
+  "localId": "linkedin|v8nwYi7mfR",
+  "email": "rosie@digitalcluesgroup.com",
+  "emailVerified": true,
+  "displayName": "Rosie Hausler",
+  "photoUrl": "https://media.licdn.com/dms/image/v2/C4E03AQG8_XqDM56hIA/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1516174000908?e=1755734400&v=beta&t=dXuQgkF5U6R6mz80RicC2BAHI7KsU_gkMIrlHH4z6rI",
+  "lastSignedInAt": "1750189166934",
+  "createdAt": "1750189165939",
   "disabled": false
 }]}
