@@ -1,99 +1,253 @@
-import React from "react";
-import { Timestamp } from "firebase/firestore";
-
-// Replicating the SmartGoal type from Dashboard.tsx to ensure correctness
-// In a larger refactor, this would be in a shared types file.
-interface MeasurableData {
-  type: "boolean" | "number" | "steps";
-  targetValue: number;
-  currentValue: number;
-  unit?: string;
-  steps?: { name: string; completed: boolean }[];
-}
-
-interface SmartGoal {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  specific: string;
-  measurable: MeasurableData;
-  achievable: string;
-  relevant: string;
-  timeBound: string;
-  createdAt: Timestamp;
-  completed: boolean;
-  sharedWithCoach: boolean;
-  coachNotes?: string[];
-  dueDate?: Timestamp;
-}
-
-// Define styles directly in the component file
-const styles: { [key: string]: React.CSSProperties } = {
-  card: {
-    background: "#ffffff",
-    border: "1px solid #e4e9f0",
-    borderRadius: "12px",
-    padding: "24px",
-    marginBottom: "24px",
-    boxShadow:
-      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-    color: "#2d3748", // --color-text-primary
-    fontFamily: '"Inter", sans-serif',
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: "20px",
-  },
-  title: {
-    fontSize: "20px",
-    fontWeight: 600,
-    margin: "0 0 4px 0",
-  },
-  category: {
-    fontSize: "14px",
-    color: "#6c7b8a", // --color-text-secondary
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    fontWeight: 500,
-  },
-  description: {
-    fontSize: "16px",
-    lineHeight: 1.5,
-  },
-};
+import React, { useState } from "react";
+import { SmartGoal, GoalProgress } from "../types/Dashboard";
+import { CoachingNotesPanel } from "./CoachingNotesPanel";
+import Tooltip from "./common/Tooltip";
+import "./GoalProgressCard.css";
 
 interface GoalProgressCardProps {
   goal: SmartGoal;
-  // For now, only include the props we are actively using.
-  onViewDetails: (goal: SmartGoal) => void;
+  progress: GoalProgress;
+  onUpdateProgress?: (goalId: string) => void;
+  onMarkComplete?: (goalId: string) => void;
+  onViewDetails?: (goalId: string) => void;
 }
 
 export const GoalProgressCard: React.FC<GoalProgressCardProps> = ({
   goal,
+  progress,
+  onUpdateProgress,
+  onMarkComplete,
   onViewDetails,
 }) => {
-  const statusStyle = {
-    borderLeft: goal.completed ? "4px solid #22c55e" : "4px solid #0077b5", // Green for completed, blue for in-progress
+  const [showCoachingNotes, setShowCoachingNotes] = useState(false);
+
+  const { percentage, status, hasUnreadCoachNotes, coachingNotes } = progress;
+  const isCompleted = status === "completed";
+  const isOverdue = status === "overdue";
+  const isStalled =
+    progress.daysWithoutProgress && progress.daysWithoutProgress > 7;
+
+  // Format due date
+  const dueDate = new Date(goal.dueDate);
+  const isUpcoming = dueDate.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // 7 days
+  const dueDateFormatted = dueDate.toLocaleDateString();
+
+  // Progress bar color based on status
+  const getProgressColor = () => {
+    if (isCompleted) return "#28a745";
+    if (isOverdue) return "#dc3545";
+    if (percentage >= 75) return "#17a2b8";
+    if (percentage >= 50) return "#ffc107";
+    return "#6c757d";
+  };
+
+  // Status badge
+  const getStatusBadge = () => {
+    if (isCompleted) return { text: "Completed", class: "completed" };
+    if (isOverdue) return { text: "Overdue", class: "overdue" };
+    if (isStalled) return { text: "Stalled", class: "stalled" };
+    if (isUpcoming) return { text: "Due Soon", class: "upcoming" };
+    return { text: "In Progress", class: "in-progress" };
+  };
+
+  const statusBadge = getStatusBadge();
+
+  // Format measurable data for display
+  const formatMeasurableProgress = () => {
+    if (!goal.measurable) {
+      return "Progress tracking";
+    }
+
+    const { type, currentValue, targetValue, unit } = goal.measurable;
+
+    switch (type) {
+      case "Numeric":
+      case "DailyStreak":
+        return `${currentValue || 0} / ${targetValue || 0} ${
+          unit || (type === "DailyStreak" ? "days" : "")
+        }`;
+      case "Boolean":
+        return currentValue ? "Completed" : "Not completed";
+      case "Date":
+        return `Target: ${new Date(
+          targetValue as string
+        ).toLocaleDateString()}`;
+      default:
+        return "Progress tracking";
+    }
   };
 
   return (
     <div
-      style={{ ...styles.card, ...statusStyle }}
-      onClick={() => onViewDetails(goal)}
+      className={`goal-progress-card ${status}`}
+      data-testid="goal-progress-card"
+      role="article"
+      aria-label={`Goal: ${goal.specific}, ${percentage}% complete`}
     >
-      <div style={styles.header}>
-        <div>
-          <h3 style={styles.title}>{goal.name}</h3>
-          <p style={styles.category}>{goal.category}</p>
+      {/* Header */}
+      <div className="goal-progress-card__header">
+        <div className="goal-info">
+          <h3 className="goal-title">{goal.specific}</h3>
+          <p className="goal-category">{goal.category || "Uncategorized"}</p>
+        </div>
+
+        <div className="goal-badges">
+          <Tooltip text={`Current status: ${statusBadge.text}`} position="top">
+            <span className={`status-badge ${statusBadge.class}`}>
+              {statusBadge.text}
+            </span>
+          </Tooltip>
+          {hasUnreadCoachNotes && (
+            <Tooltip
+              text="You have unread feedback from your coach"
+              position="top"
+            >
+              <span className="coaching-badge unread">💬 New</span>
+            </Tooltip>
+          )}
         </div>
       </div>
-      <div style={styles.description}>
-        <p>{goal.description}</p>
+
+      {/* Progress Section */}
+      <Tooltip
+        text="Current completion percentage based on measurable criteria"
+        position="top"
+      >
+        <div className="goal-progress-card__progress">
+          <div className="progress-header">
+            <span className="progress-label">Progress</span>
+            <span className="progress-percentage">{percentage}%</span>
+          </div>
+
+          <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuenow={percentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Progress: ${percentage}%`}
+          >
+            <div
+              className="progress-bar-fill"
+              style={{
+                width: `${percentage}%`,
+                backgroundColor: getProgressColor(),
+              }}
+            />
+          </div>
+
+          <div className="progress-details">
+            <Tooltip
+              text="Your current progress vs target value"
+              position="bottom"
+            >
+              <span className="measurable-progress">
+                {formatMeasurableProgress()}
+              </span>
+            </Tooltip>
+            <span className="due-date">Due: {dueDateFormatted}</span>
+          </div>
+        </div>
+      </Tooltip>
+
+      {/* Goal Description */}
+      {goal.description && (
+        <div className="goal-description">
+          <p>{goal.description}</p>
+        </div>
+      )}
+
+      {/* Coaching Notes Preview */}
+      {coachingNotes && coachingNotes.length > 0 && (
+        <div className="coaching-preview">
+          <Tooltip text="View feedback from your coach" position="left">
+            <button
+              className="coaching-toggle"
+              onClick={() => setShowCoachingNotes(!showCoachingNotes)}
+            >
+              <span>💬</span>
+              <span>
+                {coachingNotes.length} coaching note
+                {coachingNotes.length !== 1 ? "s" : ""}
+                {hasUnreadCoachNotes && " (new)"}
+              </span>
+              <span className={`chevron ${showCoachingNotes ? "open" : ""}`}>
+                ▼
+              </span>
+            </button>
+          </Tooltip>
+
+          {showCoachingNotes && <CoachingNotesPanel notes={coachingNotes} />}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="goal-progress-card__actions">
+        {!isCompleted && onUpdateProgress && (
+          <Tooltip
+            text="Update your current progress for this goal"
+            position="bottom"
+          >
+            <button
+              className="action-btn primary"
+              onClick={() => onUpdateProgress(goal.id)}
+            >
+              Update Progress
+            </button>
+          </Tooltip>
+        )}
+
+        {!isCompleted && onMarkComplete && percentage >= 90 && (
+          <Tooltip text="Mark this goal as 100% complete" position="bottom">
+            <button
+              className="action-btn success"
+              onClick={() => onMarkComplete(goal.id)}
+            >
+              Mark Complete
+            </button>
+          </Tooltip>
+        )}
+
+        {onViewDetails && (
+          <Tooltip text="See the detailed view of this goal" position="bottom">
+            <button
+              className="action-btn secondary"
+              onClick={() => onViewDetails(goal.id)}
+            >
+              View Details
+            </button>
+          </Tooltip>
+        )}
       </div>
-      {/* Buttons can be added back here later if needed */}
+
+      {/* Smart Criteria Breakdown (Collapsible) */}
+      <Tooltip text="Click to expand detailed goal criteria" position="bottom">
+        <details className="smart-breakdown">
+          <summary>SMART Breakdown</summary>
+          <div className="smart-details">
+            <div className="smart-item">
+              <strong>S - Specific:</strong>
+              <span>{goal.specific}</span>
+            </div>
+            <div className="smart-item">
+              <strong>M - Measurable:</strong>
+              <span>{formatMeasurableProgress()}</span>
+            </div>
+            <div className="smart-item">
+              <strong>A - Achievable:</strong>
+              <span>{goal.achievable}</span>
+            </div>
+            <div className="smart-item">
+              <strong>R - Relevant:</strong>
+              <span>{goal.relevant}</span>
+            </div>
+            <div className="smart-item">
+              <strong>T - Time-bound:</strong>
+              <span>Due {dueDateFormatted}</span>
+            </div>
+          </div>
+        </details>
+      </Tooltip>
     </div>
   );
 };

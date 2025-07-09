@@ -73,46 +73,47 @@
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-4);
-  text-align: center;
+  /* Simple, direct approach like the working black/white version */
+  background: #005582 !important; /* LinkedIn dark blue - force override */
+  border: 2px solid white !important; /* White border for separation */
+  border-radius: 8px !important;
+  padding: 15px !important;
+  text-align: center !important;
   min-width: 120px;
   transition: all 0.3s ease;
   cursor: pointer;
+  /* Remove problematic properties */
 }
 
 .stat-card:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: #0077b5 !important; /* LinkedIn main blue - force override */
+  border-color: white !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .stat-value {
-  font-size: var(--font-size-3xl) !important;
-  font-weight: var(--font-weight-bold) !important;
-  color: #ffffff !important;
-  margin-bottom: var(--spacing-1);
+  font-size: 24px !important; /* Simple px values like the working version */
+  font-weight: bold !important;
+  color: white !important; /* Force white text */
+  margin-bottom: 5px !important;
 }
 
 .stat-label {
-  font-size: var(--font-size-sm) !important;
-  color: #ffffff !important;
-  opacity: 0.9;
-  text-transform: uppercase;
+  font-size: 14px !important; /* Simple px values like the working version */
+  color: white !important; /* Force white text */
+  text-transform: uppercase !important;
   letter-spacing: 0.5px;
 }
 
 .stat-card.attention {
-  background: rgba(255, 193, 7, 0.2);
-  border-color: rgba(255, 193, 7, 0.4);
+  background: #f59e0b !important; /* Warning amber - force override */
+  border-color: white !important;
 }
 
 .stat-card.attention:hover {
-  background: rgba(255, 193, 7, 0.3);
+  background: #d97706 !important; /* Darker warning amber - force override */
+  border-color: white !important;
 }
 
 /* Notifications */

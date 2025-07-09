@@ -1,23 +1,26 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { db, auth } from "../lib/firebase";
 import {
   collection,
+  getDocs,
   query,
   orderBy,
   Timestamp,
   onSnapshot,
+  Unsubscribe,
   doc,
   updateDoc,
   serverTimestamp,
+  where,
   writeBatch,
   getDoc,
   setDoc,
 } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import { User, onAuthStateChanged } from "firebase/auth";
-import "./Dashboard.basic.css";
+import "./Dashboard.css";
 
 // Import Chart.js components
 
@@ -35,7 +38,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
 // Enhanced Dashboard Components
 import { DashboardHeader } from "./DashboardHeader";
 import { GoalProgressCard } from "./GoalProgressCard";
-import { NewGoalModal } from "./NewGoalModal";
+// import { GoalDetailsModal } from "./GoalDetailsModal";
 import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
@@ -78,6 +81,9 @@ interface UserBadge {
   count?: number; // For streak length or engagement counts associated with the badge
   goalId?: string; // If badge is related to a specific goal
 }
+
+// Type for the data part of the goal, excluding the ID
+type SmartGoalData = Omit<SmartGoal, "id">;
 
 // Helper function to get badge-specific CSS class for the icon background
 const getBadgeIconBgClass = (badgeId: string): string => {
@@ -150,76 +156,85 @@ export default function Dashboard() {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
-
-        // Fetch SMART goals
-        const goalsRef = collection(db, `users/${user.uid}/goals`);
-        const goalsQuery = query(goalsRef, orderBy("createdAt", "desc"));
-
-        const unsubscribeGoals = onSnapshot(
-          goalsQuery,
-          (snapshot) => {
-            const goals: SmartGoal[] = snapshot.docs.map(
-              (doc) =>
-                ({
-                  id: doc.id,
-                  ...doc.data(),
-                } as SmartGoal)
-            );
-            setSmartGoals(goals);
-            setLoadingGoals(false);
-            setErrorGoals(null);
-          },
-          (error) => {
-            console.error("Error fetching goals:", error);
-            setErrorGoals(error.message);
-            setLoadingGoals(false);
-          }
-        );
-
-        // Fetch checkins
-        const checkinsRef = collection(db, `users/${user.uid}/checkins`);
-        const checkinsQuery = query(checkinsRef, orderBy("createdAt", "desc"));
-
-        const unsubscribeCheckins = onSnapshot(
-          checkinsQuery,
-          (snapshot) => {
-            const checkins: Checkin[] = snapshot.docs.map(
-              (doc) =>
-                ({
-                  id: doc.id,
-                  ...doc.data(),
-                } as Checkin)
-            );
-            setCheckins(checkins);
-            setLoadingCheckins(false);
-            setErrorCheckins(null);
-          },
-          (error) => {
-            console.error("Error fetching checkins:", error);
-            setErrorCheckins(error.message);
-            setLoadingCheckins(false);
-          }
-        );
-
-        return () => {
-          unsubscribeGoals();
-          unsubscribeCheckins();
-        };
       } else {
         setCurrentUser(null);
-        setSmartGoals([]);
-        setCheckins([]);
-        setLoadingGoals(false);
         setLoadingCheckins(false);
         setErrorCheckins("Please log in to view your dashboard.");
         setStreakCount(0);
       }
     });
 
-    return () => {
-      unsubscribeAuth();
+    if (!currentUser) {
+      if (loadingCheckins && !currentUser) setLoadingCheckins(false);
+      return;
+    }
+
+    const user = currentUser;
+
+    const fetchCheckins = async () => {
+      console.log("Fetching checkins (if applicable)...");
+      setLoadingCheckins(true);
+      setErrorCheckins(null);
+      const ref = collection(db, "users", user.uid, "checkins");
+      const q = query(ref, orderBy("createdAt", "desc"));
+      try {
+        const snap = await getDocs(q);
+        const results: Checkin[] = [];
+        for (const docSnap of snap.docs) {
+          const base = docSnap.data();
+          const goalRef = collection(docSnap.ref, "goal");
+          const goalSnap = await getDocs(goalRef);
+          let goalData: Goal | undefined = undefined;
+          if (!goalSnap.empty) {
+            goalData = goalSnap.docs[0].data() as Goal;
+          }
+          results.push({
+            id: docSnap.id,
+            circle: base.circle,
+            message: base.message,
+            createdAt: base.createdAt,
+            goal: goalData,
+            category: base.category,
+          });
+        }
+        setCheckins(results);
+        setLoadingCheckins(false);
+      } catch (err) {
+        console.error("Error fetching checkins:", err);
+        setErrorCheckins("Failed to load check-ins.");
+        setLoadingCheckins(false);
+      }
     };
-  }, []);
+    fetchCheckins();
+
+    setLoadingGoals(true);
+    setErrorGoals(null);
+    const goalsCollectionRef = collection(db, `users/${user.uid}/goals`);
+    const goalsQuery = query(goalsCollectionRef, orderBy("createdAt", "desc"));
+
+    const unsubscribeGoals: Unsubscribe = onSnapshot(
+      goalsQuery,
+      (querySnapshot) => {
+        const fetchedGoals: SmartGoal[] = [];
+        querySnapshot.forEach((doc) => {
+          const goalData = doc.data() as SmartGoalData;
+          fetchedGoals.push({ ...goalData, id: doc.id });
+        });
+        setSmartGoals(fetchedGoals);
+        setLoadingGoals(false);
+        checkAndAwardBadges();
+      },
+      (error) => {
+        console.error("Error fetching SMART goals:", error);
+        setErrorGoals("Failed to load goals. Please try again later.");
+        setLoadingGoals(false);
+      }
+    );
+
+    return () => {
+      unsubscribeGoals();
+    };
+  }, [currentUser]);
 
   // Overall progress calculation
   useEffect(() => {
@@ -351,8 +366,6 @@ export default function Dashboard() {
       hasUnreadCoachNotes: false,
       coachingNotes: coachingNotes.filter((note) => note.goalId === goal.id),
     };
-
-    console.log("📈 Final progress object:", progress);
 
     setSelectedGoal(goal);
     setGoalProgress(progress);
@@ -851,12 +864,38 @@ export default function Dashboard() {
                 (goal.category || "Uncategorized") === selectedCategory
             )
             .map((goal) => {
-              const progress = goalProgressMap.get(goal.id);
+              const goalCoachingNotes = coachingNotes.filter(
+                (note) => note.goalId === goal.id
+              );
+              const goalProgress = goalProgressMap.get(goal.id) || {
+                goalId: goal.id,
+                percentage: calculateGoalProgress(goal.measurable),
+                status: goal.completed
+                  ? ("completed" as const)
+                  : ("in-progress" as const),
+                lastUpdated: new Date(),
+                hasUnreadCoachNotes: goalCoachingNotes.some(
+                  (note) => !note.isRead
+                ),
+                coachingNotes: goalCoachingNotes,
+              };
+
               return (
                 <GoalProgressCard
                   key={goal.id}
                   goal={goal}
-                  onViewDetails={handleViewDetails}
+                  progress={goalProgress}
+                  onUpdateProgress={(goalId) => {
+                    const targetGoal = smartGoals.find((g) => g.id === goalId);
+                    if (targetGoal) handleShowProgressModal(targetGoal);
+                  }}
+                  onMarkComplete={(goalId) =>
+                    handleMarkAsComplete(goalId, goal.description)
+                  }
+                  onViewDetails={(goalId) => {
+                    const targetGoal = smartGoals.find((g) => g.id === goalId);
+                    if (targetGoal) handleViewDetails(targetGoal);
+                  }}
                 />
               );
             })}
@@ -882,75 +921,39 @@ export default function Dashboard() {
         )}
         {!loadingBadges && earnedBadges.length > 0 && (
           <div className="badges-grid">
-            {earnedBadges.map((badge) => {
-              const isMilestoneMaster =
-                badge.badgeId.startsWith("milestoneMaster");
-              return (
+            {earnedBadges.map((badge) => (
+              <div key={badge.id} className="badge-card">
                 <div
-                  key={badge.id}
-                  className={`badge-card ${
-                    isMilestoneMaster ? "milestone-master" : ""
-                  }`}
+                  className={`badge-icon ${getBadgeIconBgClass(badge.badgeId)}`}
                 >
-                  <div
-                    className={`badge-icon ${getBadgeIconBgClass(
-                      badge.badgeId
-                    )}`}
-                  >
-                    {badge.iconClass && <i className={badge.iconClass}></i>}
-                    {!badge.iconClass && <i className="fas fa-medal"></i>}
-                    {isMilestoneMaster && (
-                      <i
-                        className="fas fa-trophy"
-                        style={{
-                          position: "absolute",
-                          fontSize: "24px",
-                          color: "white",
-                          textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                        }}
-                      ></i>
-                    )}
-                  </div>
-                  <div className="badge-info">
-                    <h4 className="badge-name">
-                      {isMilestoneMaster && "🏆 "}
-                      {badge.displayName}
-                      {isMilestoneMaster && " 🏆"}
-                    </h4>
-                    <p className="badge-description">{badge.description}</p>
-                    {badge.count && (
-                      <p className="badge-count">
-                        {isMilestoneMaster
-                          ? `Progress: ${badge.count}%`
-                          : `Level: ${badge.count}`}
-                      </p>
-                    )}
-                    <p className="badge-earned-date">
-                      Earned: {badge.earnedAt?.toDate().toLocaleDateString()}
-                    </p>
-                  </div>
+                  {badge.iconClass && <i className={badge.iconClass}></i>}
+                  {!badge.iconClass && <i className="fas fa-medal"></i>}
                 </div>
-              );
-            })}
+                <div className="badge-info">
+                  <h4 className="badge-name">{badge.displayName}</h4>
+                  <p className="badge-description">{badge.description}</p>
+                  {badge.count && (
+                    <p className="badge-count">Level: {badge.count}</p>
+                  )}
+                  <p className="badge-earned-date">
+                    Earned: {badge.earnedAt?.toDate().toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>
 
-      {/* Enhanced Modals */}
-      {selectedGoal && goalProgress && (
-        <NewGoalModal
-          goal={selectedGoal}
-          progress={goalProgress}
-          isOpen={showDetailsModal}
-          onClose={() => setShowDetailsModal(false)}
-        />
-      )}
-
+      {/* Progress Update Modal */}
       {selectedGoal && (
         <ProgressUpdateModal
           goal={selectedGoal}
-          isOpen={showProgressModal}
-          onClose={() => setShowProgressModal(false)}
+          isOpen={showDetailsModal || showProgressModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setShowProgressModal(false);
+          }}
           onUpdate={handleEnhancedProgressUpdate}
         />
       )}
