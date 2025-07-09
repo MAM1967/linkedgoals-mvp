@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import "./EmailAnalyticsDashboard.css";
 
 interface EmailStats {
@@ -47,27 +48,25 @@ const EmailAnalyticsDashboard: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(
-        "https://us-central1-linkedgoals-d7053.cloudfunctions.net/getEmailStats",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${await user?.getIdToken()}`,
-          },
-          body: JSON.stringify({ data: { days: selectedTimeRange } }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch email statistics");
+      if (!user) {
+        throw new Error("User not authenticated");
       }
 
-      const result = await response.json();
-      if (result.success) {
-        setStats(result.stats);
+      // Use Firebase Functions callable
+      const functions = getFunctions();
+      const getEmailStatsFunction = httpsCallable(functions, "getEmailStats");
+
+      const result = await getEmailStatsFunction({ days: selectedTimeRange });
+      const data = result.data as {
+        success: boolean;
+        stats?: EmailStats;
+        error?: string;
+      };
+
+      if (data.success) {
+        setStats(data.stats || null);
       } else {
-        throw new Error(result.error || "Failed to fetch email statistics");
+        throw new Error(data.error || "Failed to fetch email statistics");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
