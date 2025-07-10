@@ -92,8 +92,10 @@ describe("EmailAnalyticsDashboard", () => {
       render(<EmailAnalyticsDashboard />);
 
       await waitFor(() => {
+        // Note: In tests, we expect the production URL since VITE_FUNCTIONS_BASE_URL won't be set
+        const expectedUrl = "https://us-central1-linkedgoals-d7053.cloudfunctions.net/getEmailStats";
         expect(global.fetch).toHaveBeenCalledWith(
-          "https://us-central1-linkedgoals-d7053.cloudfunctions.net/getEmailStats",
+          expectedUrl,
           {
             method: "POST",
             headers: {

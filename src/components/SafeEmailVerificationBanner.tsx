@@ -63,8 +63,9 @@ export const SafeEmailVerificationBanner: React.FC<
     setResendMessage("");
 
     try {
+      const functionsBaseUrl = import.meta.env.VITE_FUNCTIONS_BASE_URL || "https://us-central1-linkedgoals-d7053.cloudfunctions.net";
       const response = await fetch(
-        "https://us-central1-linkedgoals-d7053.cloudfunctions.net/sendVerificationEmail",
+        `${functionsBaseUrl}/sendVerificationEmail`,
         {
           method: "POST",
           headers: {

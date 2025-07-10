@@ -110,8 +110,9 @@ goalForm.addEventListener('submit', (event) => {
             lastUpdatedDate: new Date().toISOString(),
         };
 
-        // Send data to the Cloud Function
-        const cloudFunctionUrl = 'https://us-central1-linkedgoals-d7053.cloudfunctions.net/saveSmartGoal';
+        // Send data to the Cloud Function  
+        const functionsBaseUrl = (window as any).VITE_FUNCTIONS_BASE_URL || 'https://us-central1-linkedgoals-d7053.cloudfunctions.net';
+        const cloudFunctionUrl = `${functionsBaseUrl}/saveSmartGoal`;
 
         fetch(cloudFunctionUrl, {
             method: 'POST',

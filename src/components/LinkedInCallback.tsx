@@ -39,8 +39,9 @@ const LinkedInCallback = () => {
         console.log("Calling LinkedIn OAuth Firebase Function...");
 
         // Call Firebase Function for LinkedIn OAuth
+        const functionsBaseUrl = import.meta.env.VITE_FUNCTIONS_BASE_URL || "https://us-central1-linkedgoals-d7053.cloudfunctions.net";
         const response = await fetch(
-          "https://us-central1-linkedgoals-d7053.cloudfunctions.net/linkedinlogin",
+          `${functionsBaseUrl}/linkedinlogin`,
           {
             method: "POST",
             headers: {

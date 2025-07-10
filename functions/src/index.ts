@@ -37,7 +37,7 @@ interface OpenIDUserInfo {
 export const linkedinlogin = onRequest(
   {
     secrets: [LINKEDIN_CLIENT_SECRET],
-    cors: "https://app.linkedgoals.app",
+    cors: ["https://app.linkedgoals.app", "https://linkedgoals-staging.web.app"],
   },
   async (req, res) => {
     if (req.method === "OPTIONS") {
@@ -67,7 +67,9 @@ export const linkedinlogin = onRequest(
         new URLSearchParams({
           grant_type: "authorization_code",
           code,
-          redirect_uri: "https://app.linkedgoals.app/linkedin",
+          redirect_uri: req.headers.origin?.includes("staging") 
+            ? "https://linkedgoals-staging.web.app/linkedin"
+            : "https://app.linkedgoals.app/linkedin",
           client_id: "7880c93kzzfsgj",
           client_secret: LINKEDIN_CLIENT_SECRET.value(),
         }).toString(),
