@@ -25,13 +25,13 @@ import {
 import { connectAuthEmulator } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD2q7PxQoZykMIih6-8fCeNhxBjPxVpBpc",
-  authDomain: "linkedgoals-d7053.firebaseapp.com",
-  databaseURL: "https://linkedgoals-d7053-default-rtdb.firebaseio.com",
-  projectId: "linkedgoals-d7053",
-  storageBucket: "linkedgoals-d7053.firebasestorage.app",
-  messagingSenderId: "753801883214",
-  appId: "1:753801883214:web:cf46567024a37452a65d1f",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyD2q7PxQoZykMIih6-8fCeNhxBjPxVpBpc",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "linkedgoals-d7053.firebaseapp.com",
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || "https://linkedgoals-d7053-default-rtdb.firebaseio.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "linkedgoals-d7053",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "linkedgoals-d7053.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "753801883214",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:753801883214:web:cf46567024a37452a65d1f",
 };
 
 // Initialize Firebase
@@ -40,6 +40,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
+
+// Log environment info for debugging
+const environment = import.meta.env.VITE_ENVIRONMENT || 'production';
+console.log(`🌐 Environment: ${environment}`);
+console.log(`🔥 Firebase Project: ${firebaseConfig.projectId}`);
 
 // Connect to emulators if running locally
 if (
