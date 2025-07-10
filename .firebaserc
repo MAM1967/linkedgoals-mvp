@@ -1,9 +1,7 @@
 {
   "projects": {
     "default": "linkedgoals-d7053",
-    "firebase use linkedgoals-staging": "crestcomnyc-6c86d",
-    "staging": "linkedgoals-staging",
-    "prod": "linkedgoals-d7053"
+    "firebase use linkedgoals-staging": "crestcomnyc-6c86d"
   },
   "targets": {},
   "etags": {

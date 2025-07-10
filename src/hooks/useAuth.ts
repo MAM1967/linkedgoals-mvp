@@ -5,6 +5,8 @@ import { auth, db } from "../lib/firebase";
 
 interface AuthUser extends User {
   isAdmin?: boolean;
+  customEmailVerified?: boolean;
+  emailVerificationDate?: Date;
 }
 
 export function useAuth() {
@@ -17,11 +19,24 @@ export function useAuth() {
         if (currentUser) {
           const userDocRef = doc(db, "users", currentUser.uid);
           const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists() && userDoc.data().role === "admin") {
-            setUser({ ...currentUser, isAdmin: true });
-          } else {
-            setUser(currentUser);
+
+          let isAdmin = false;
+          let customEmailVerified = false;
+          let emailVerificationDate = undefined;
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            isAdmin = userData.role === "admin";
+            customEmailVerified = userData.emailVerified || false;
+            emailVerificationDate = userData.emailVerificationDate?.toDate();
           }
+
+          setUser({
+            ...currentUser,
+            isAdmin,
+            customEmailVerified,
+            emailVerificationDate,
+          });
         } else {
           setUser(null);
         }

@@ -6,22 +6,14 @@ import {
   orderBy,
   onSnapshot,
   Timestamp,
-  Unsubscribe,
   doc,
   getDoc,
   setDoc,
   increment,
   serverTimestamp,
 } from "firebase/firestore";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import "./SocialSharePage.css"; // We'll create this CSS file later
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTwitter,
-  faFacebook,
-  faLinkedin,
-} from "@fortawesome/free-brands-svg-icons";
-import { faCopy } from "@fortawesome/free-solid-svg-icons";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import "./SocialSharePage.css";
 
 // Interface for SMART Goals (same as in Dashboard and GoalInputPage)
 interface SmartGoal {
@@ -54,8 +46,6 @@ const SocialSharePage: React.FC = () => {
 
   // State to hold the full URL for sharing if needed, e.g. for a direct link to the app/goal
   // For now, we primarily share text, but this could be useful for 'Copy Link' functionality
-  const [shareUrl, setShareUrl] = useState<string>(window.location.origin);
-  const [goalDescription, setGoalDescription] = useState<string | null>(null);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -69,12 +59,8 @@ const SocialSharePage: React.FC = () => {
       | "coachInvitation"
       | null;
 
-    let constructedShareUrl = window.location.origin;
-
     // Logic to set initial share text and title based on URL parameters
     if (goalId) {
-      constructedShareUrl = `${window.location.origin}/shared-goal/${goalId}`; // Example link
-      setShareUrl(constructedShareUrl);
       setIsMilestoneShare(!!milestone); // If milestone param exists, it's a milestone share
 
       if (auth.currentUser) {
@@ -257,30 +243,17 @@ const SocialSharePage: React.FC = () => {
     }
   };
 
-  const handleShare = (
-    platform: "linkedin" | "twitter" | "facebook" | "copy"
-  ) => {
+  const handleShare = (platform: "linkedin" | "copy") => {
     if (!shareText.trim()) return;
 
     let url = "";
     const encodedMessage = encodeURIComponent(shareText.trim());
-    const encodedPageUrl = encodeURIComponent(shareUrl);
 
     let sharedSuccessfully = false;
 
     switch (platform) {
       case "linkedin":
         url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodedMessage}`;
-        window.open(url, "_blank", "noopener,noreferrer");
-        sharedSuccessfully = true;
-        break;
-      case "twitter":
-        url = `https://twitter.com/intent/tweet?text=${encodedMessage}`;
-        window.open(url, "_blank", "noopener,noreferrer");
-        sharedSuccessfully = true;
-        break;
-      case "facebook":
-        url = `https://www.facebook.com/sharer/sharer.php?u=${encodedPageUrl}&quote=${encodedMessage}`;
         window.open(url, "_blank", "noopener,noreferrer");
         sharedSuccessfully = true;
         break;
@@ -309,7 +282,6 @@ const SocialSharePage: React.FC = () => {
       navigate("/"); // Navigate to dashboard after sharing a milestone
     } else {
       // Reset selection for non-milestone shares to allow sharing another goal
-      // This block is reached if platform was LinkedIn, Twitter, or Facebook.
       setSelectedGoal(null);
       setShareText("");
       setShareType("progress");
@@ -386,18 +358,6 @@ const SocialSharePage: React.FC = () => {
               className="btn-linkedin"
             >
               <i className="fab fa-linkedin"></i> Share on LinkedIn
-            </button>
-            <button
-              onClick={() => handleShare("twitter")}
-              className="btn-twitter"
-            >
-              <i className="fab fa-twitter"></i> Share on X (Twitter)
-            </button>
-            <button
-              onClick={() => handleShare("facebook")}
-              className="btn-facebook"
-            >
-              <i className="fab fa-facebook"></i> Share on Facebook
             </button>
             <button onClick={() => handleShare("copy")} className="btn-copy">
               <i className="fas fa-copy"></i> Copy Message

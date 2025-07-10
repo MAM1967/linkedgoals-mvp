@@ -1,42 +1,42 @@
-/* GoalInputPage.css - Updated to match marketing site design */
+/* GoalInputPage.css - LinkedIn Brand Colors */
 .goal-input-page {
   max-width: 700px;
   margin: 0 auto;
-  padding: var(--spacing-2xl);
-  background-color: var(--color-secondary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  padding: 48px; /* --spacing-2xl */
+  background-color: #ffffff; /* White background */
+  border-radius: 12px; /* --radius-lg */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* --shadow-md */
+  border: 1px solid #e4e9f0; /* Light gray border */
 }
 
 .goal-input-page h2 {
   text-align: center;
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xl);
-  font-size: var(--font-size-2xl);
+  color: #2d3748; /* Dark gray text */
+  margin-bottom: 32px; /* --spacing-xl */
+  font-size: 24px; /* --font-size-2xl */
   font-weight: 600;
 }
 
 .goal-input-form .form-step {
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-background-light);
+  margin-bottom: 32px; /* --spacing-xl */
+  padding: 20px; /* --spacing-lg */
+  border: 1px solid #c1c9d2; /* Gray border */
+  border-radius: 8px; /* --radius-md */
+  background-color: #f8fafc; /* Very light gray background */
   transition: all 0.2s ease;
 }
 
 .goal-input-form .form-step:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
+  border-color: #0077b5; /* LinkedIn blue */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 .goal-input-form label {
   display: block;
   font-weight: 600;
-  margin-bottom: var(--spacing-sm);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
+  margin-bottom: 8px; /* --spacing-sm */
+  color: #2d3748; /* Dark gray text */
+  font-size: 14px; /* --font-size-sm */
 }
 
 .goal-input-form input[type="text"],
@@ -44,12 +44,12 @@
 .goal-input-form textarea,
 .goal-input-form select {
   width: 100%;
-  padding: var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  background-color: var(--color-secondary);
+  padding: 12px; /* --spacing-md */
+  border: 1px solid #c1c9d2; /* Gray border */
+  border-radius: 4px; /* --radius-sm */
+  font-size: 16px; /* --font-size-base */
+  color: #2d3748; /* Dark gray text */
+  background-color: #ffffff; /* White background */
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -59,7 +59,7 @@
 .goal-input-form textarea:focus,
 .goal-input-form select:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: #0077b5; /* LinkedIn blue */
   box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
 }
 
@@ -73,21 +73,21 @@
 .navigation-buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: var(--spacing-2xl);
-  gap: var(--spacing-md);
+  margin-top: 48px; /* --spacing-2xl */
+  gap: 16px; /* --spacing-md */
 }
 
 .btn {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 12px 32px; /* --spacing-md --spacing-xl */
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
+  border-radius: 4px; /* --radius-sm */
+  font-size: 16px; /* --font-size-base */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px; /* --spacing-sm */
   min-width: 120px;
   justify-content: center;
 }
@@ -103,98 +103,98 @@
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
-  color: white;
+  background-color: #0077b5 !important; /* LinkedIn blue */
+  color: white !important;
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-dark);
-  box-shadow: var(--shadow-sm);
+  background-color: #005582 !important; /* Darker LinkedIn blue */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 .btn-secondary {
-  background-color: var(--color-text-secondary);
-  color: white;
+  background-color: #6c7b8a !important; /* Gray */
+  color: white !important;
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268;
-  box-shadow: var(--shadow-sm);
+  background-color: #5a6268 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 .btn-success {
-  background-color: var(--color-success);
-  color: white;
+  background-color: #22c55e !important; /* Success green */
+  color: white !important;
 }
 
 .btn-success:hover {
-  background-color: #218838;
-  box-shadow: var(--shadow-sm);
+  background-color: #218838 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 .btn-outline {
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
+  background-color: transparent !important;
+  color: #0077b5 !important; /* LinkedIn blue */
+  border: 2px solid #0077b5 !important; /* LinkedIn blue */
 }
 
 .btn-outline:hover {
-  background-color: var(--color-primary);
-  color: white;
+  background-color: #0077b5 !important; /* LinkedIn blue */
+  color: white !important;
 }
 
 /* Message Styling */
 .error-message {
   background-color: rgba(220, 53, 69, 0.1);
-  color: var(--color-error);
-  padding: var(--spacing-md) var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+  color: #dc3545; /* Red */
+  padding: 12px 20px; /* --spacing-md --spacing-lg */
+  margin-bottom: 12px; /* --spacing-md */
   border: 1px solid rgba(220, 53, 69, 0.2);
-  border-left: 4px solid var(--color-error);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
+  border-left: 4px solid #dc3545; /* Red */
+  border-radius: 4px; /* --radius-sm */
+  font-size: 14px; /* --font-size-sm */
 }
 
 .success-message {
   background-color: rgba(40, 167, 69, 0.1);
-  color: var(--color-success);
-  padding: var(--spacing-md) var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
+  color: #22c55e; /* Green */
+  padding: 12px 20px; /* --spacing-md --spacing-lg */
+  margin-bottom: 12px; /* --spacing-md */
   border: 1px solid rgba(40, 167, 69, 0.2);
-  border-left: 4px solid var(--color-success);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
+  border-left: 4px solid #22c55e; /* Green */
+  border-radius: 4px; /* --radius-sm */
+  font-size: 14px; /* --font-size-sm */
 }
 
 /* Form Progress Indicator */
 .form-progress {
   display: flex;
   justify-content: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 32px; /* --spacing-xl */
 }
 
 .progress-step {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: var(--color-border);
-  color: var(--color-text-muted);
+  background-color: #c1c9d2; /* Gray border */
+  color: #6c7b8a; /* Muted text */
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: var(--font-size-sm);
-  margin: 0 var(--spacing-sm);
+  font-size: 14px; /* --font-size-sm */
+  margin: 0 8px; /* --spacing-sm */
   position: relative;
 }
 
 .progress-step.active {
-  background-color: var(--color-primary);
+  background-color: #0077b5; /* LinkedIn blue */
   color: white;
 }
 
 .progress-step.completed {
-  background-color: var(--color-success);
+  background-color: #22c55e; /* Success green */
   color: white;
 }
 
@@ -204,41 +204,41 @@
   left: 100%;
   top: 50%;
   transform: translateY(-50%);
-  width: var(--spacing-lg);
+  width: 20px; /* --spacing-lg */
   height: 2px;
-  background-color: var(--color-border);
+  background-color: #c1c9d2; /* Gray border */
 }
 
 .progress-step.completed:not(:last-child)::after {
-  background-color: var(--color-success);
+  background-color: #22c55e; /* Success green */
 }
 
 /* Character Counter */
 .character-counter {
   text-align: right;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: var(--spacing-xs);
+  font-size: 12px; /* --font-size-xs */
+  color: #6c7b8a; /* Muted text */
+  margin-top: 4px; /* --spacing-xs */
 }
 
 .character-counter.warning {
-  color: var(--color-warning);
+  color: #f59e0b; /* Warning amber */
 }
 
 .character-counter.error {
-  color: var(--color-error);
+  color: #dc3545; /* Error red */
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .goal-input-page {
-    padding: var(--spacing-xl);
-    margin: var(--spacing-md);
+    padding: 32px; /* --spacing-xl */
+    margin: 16px; /* --spacing-md */
   }
 
   .navigation-buttons {
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 8px; /* --spacing-sm */
   }
 
   .btn {
@@ -252,15 +252,15 @@
 
 @media (max-width: 480px) {
   .goal-input-page {
-    padding: var(--spacing-lg);
-    margin: var(--spacing-sm);
+    padding: 20px; /* --spacing-lg */
+    margin: 8px; /* --spacing-sm */
   }
 
   .goal-input-page h2 {
-    font-size: var(--font-size-xl);
+    font-size: 20px; /* --font-size-xl */
   }
 
   .goal-input-form .form-step {
-    padding: var(--spacing-md);
+    padding: 12px; /* --spacing-md */
   }
 }

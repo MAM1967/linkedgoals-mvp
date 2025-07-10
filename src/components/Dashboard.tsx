@@ -38,7 +38,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
 // Enhanced Dashboard Components
 import { DashboardHeader } from "./DashboardHeader";
 import { GoalProgressCard } from "./GoalProgressCard";
-import { GoalDetailsModal } from "./GoalDetailsModal";
+// import { GoalDetailsModal } from "./GoalDetailsModal";
 import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
@@ -855,6 +855,7 @@ export default function Dashboard() {
         {!loadingGoals && smartGoals.length === 0 && (
           <p>No SMART goals found. Why not add one?</p>
         )}
+
         <div className="goals-grid">
           {smartGoals
             .filter(
@@ -884,11 +885,17 @@ export default function Dashboard() {
                   key={goal.id}
                   goal={goal}
                   progress={goalProgress}
-                  onUpdateProgress={() => handleShowProgressModal(goal)}
-                  onMarkComplete={() =>
-                    handleMarkAsComplete(goal.id, goal.description)
+                  onUpdateProgress={(goalId) => {
+                    const targetGoal = smartGoals.find((g) => g.id === goalId);
+                    if (targetGoal) handleShowProgressModal(targetGoal);
+                  }}
+                  onMarkComplete={(goalId) =>
+                    handleMarkAsComplete(goalId, goal.description)
                   }
-                  onViewDetails={() => handleViewDetails(goal)}
+                  onViewDetails={(goalId) => {
+                    const targetGoal = smartGoals.find((g) => g.id === goalId);
+                    if (targetGoal) handleViewDetails(targetGoal);
+                  }}
                 />
               );
             })}
@@ -938,22 +945,15 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* Enhanced Modals */}
-      {selectedGoal && goalProgress && (
-        <GoalDetailsModal
-          goal={selectedGoal}
-          progress={goalProgress}
-          isOpen={showDetailsModal}
-          onClose={() => setShowDetailsModal(false)}
-          onGoalUpdate={handleGoalUpdate}
-        />
-      )}
-
+      {/* Progress Update Modal */}
       {selectedGoal && (
         <ProgressUpdateModal
           goal={selectedGoal}
-          isOpen={showProgressModal}
-          onClose={() => setShowProgressModal(false)}
+          isOpen={showDetailsModal || showProgressModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setShowProgressModal(false);
+          }}
           onUpdate={handleEnhancedProgressUpdate}
         />
       )}

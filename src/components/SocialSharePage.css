@@ -1,27 +1,27 @@
-/* SocialSharePage.css - Updated to match marketing site design */
+/* SocialSharePage.css - LinkedIn Brand Colors */
 .social-share-page {
   max-width: 700px;
   margin: 0 auto;
-  padding: var(--spacing-2xl);
-  background-color: var(--color-secondary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  padding: 48px; /* --spacing-2xl */
+  background-color: #ffffff; /* White background */
+  border-radius: 12px; /* --radius-lg */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* --shadow-md */
+  border: 1px solid #e4e9f0; /* Light gray border */
   text-align: center;
 }
 
 .social-share-page h2 {
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xl);
-  font-size: var(--font-size-2xl);
+  color: #2d3748 !important; /* Dark gray text - force override */
+  margin-bottom: 32px; /* --spacing-xl */
+  font-size: 24px; /* --font-size-2xl */
   font-weight: 600;
 }
 
 .social-share-page h3 {
-  color: var(--color-text-primary);
-  margin-top: var(--spacing-xl);
-  margin-bottom: var(--spacing-lg);
-  font-size: var(--font-size-xl);
+  color: #2d3748 !important; /* Dark gray text - force override */
+  margin-top: 32px; /* --spacing-xl */
+  margin-bottom: 20px; /* --spacing-lg */
+  font-size: 20px; /* --font-size-xl */
   font-weight: 600;
 }
 
@@ -36,96 +36,96 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-sm);
-  background-color: var(--color-background-light);
+  padding: 20px; /* --spacing-lg */
+  border: 1px solid #c1c9d2; /* Gray border */
+  border-radius: 8px; /* --radius-md */
+  margin-bottom: 8px; /* --spacing-sm */
+  background-color: #f8fafc; /* Very light gray background */
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .goal-selection-list li:hover {
-  border-color: var(--color-primary);
-  background-color: var(--color-secondary);
-  box-shadow: var(--shadow-sm);
+  border-color: #0077b5 !important; /* LinkedIn blue - force override */
+  background-color: #ffffff !important; /* White background - force override */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 .goal-selection-list li.selected {
-  border-color: var(--color-primary);
-  background-color: rgba(0, 119, 181, 0.05);
+  border-color: #0077b5 !important; /* LinkedIn blue - force override */
+  background-color: rgba(0, 119, 181, 0.05) !important;
 }
 
 .goal-selection-list li span {
   flex-grow: 1;
   text-align: left;
-  color: var(--color-text-primary);
+  color: #2d3748 !important; /* Dark gray text - force override */
   font-weight: 500;
 }
 
 /* Share Type Selector */
 .share-type-selector {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 32px; /* --spacing-xl */
   display: flex;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: 8px; /* --spacing-sm */
   flex-wrap: wrap;
 }
 
 .share-type-selector button {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border: 2px solid var(--color-primary);
-  background-color: var(--color-secondary);
-  color: var(--color-primary);
-  border-radius: var(--radius-sm);
+  padding: 8px 20px; /* --spacing-sm --spacing-lg */
+  border: 2px solid #0077b5 !important; /* LinkedIn blue - force override */
+  background-color: #ffffff !important; /* White background - force override */
+  color: #0077b5 !important; /* LinkedIn blue text - force override */
+  border-radius: 4px; /* --radius-sm */
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
-  font-size: var(--font-size-sm);
+  font-size: 14px; /* --font-size-sm */
 }
 
 .share-type-selector button:hover {
-  background-color: var(--color-primary);
-  color: white;
+  background-color: #0077b5 !important; /* LinkedIn blue - force override */
+  color: white !important;
   transform: translateY(-1px);
 }
 
 .share-type-selector button.active {
-  background-color: var(--color-primary);
-  color: white;
-  box-shadow: var(--shadow-sm);
+  background-color: #0077b5 !important; /* LinkedIn blue - force override */
+  color: white !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 /* Share Preview Area */
 .share-preview-area {
-  margin-top: var(--spacing-xl);
-  padding: var(--spacing-xl);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-background-light);
+  margin-top: 32px; /* --spacing-xl */
+  padding: 32px; /* --spacing-xl */
+  border: 1px solid #c1c9d2; /* Gray border */
+  border-radius: 8px; /* --radius-md */
+  background-color: #f8fafc; /* Very light gray background */
   text-align: left;
 }
 
 .share-preview-area h4 {
-  margin-bottom: var(--spacing-lg);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-lg);
+  margin-bottom: 20px; /* --spacing-lg */
+  color: #2d3748 !important; /* Dark gray text - force override */
+  font-size: 18px; /* --font-size-lg */
   font-weight: 600;
   text-align: center;
 }
 
 .share-preview-area textarea {
   width: 100%;
-  padding: var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-lg);
+  padding: 12px; /* --spacing-md */
+  border: 1px solid #c1c9d2; /* Gray border */
+  border-radius: 4px; /* --radius-sm */
+  margin-bottom: 20px; /* --spacing-lg */
   min-height: 120px;
   box-sizing: border-box;
   font-family: inherit;
-  font-size: var(--font-size-base);
-  background-color: var(--color-secondary);
-  color: var(--color-text-primary);
+  font-size: 16px; /* --font-size-base */
+  background-color: #ffffff; /* White background */
+  color: #2d3748; /* Dark gray text */
   line-height: 1.5;
   transition: all 0.2s ease;
   resize: vertical;
@@ -133,7 +133,7 @@
 
 .share-preview-area textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: #0077b5; /* LinkedIn blue */
   box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
 }
 
@@ -141,29 +141,29 @@
 .share-buttons {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+  gap: 16px; /* --spacing-md */
+  margin-top: 20px; /* --spacing-lg */
 }
 
 .share-buttons button {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 12px 20px; /* --spacing-md --spacing-lg */
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 4px; /* --radius-sm */
   color: white;
-  font-size: var(--font-size-base);
+  font-size: 16px; /* --font-size-base */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: 8px; /* --spacing-sm */
   min-height: 48px;
 }
 
 .share-buttons button:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* --shadow-sm */
 }
 
 .share-buttons button:disabled {
@@ -173,45 +173,29 @@
 }
 
 .share-buttons button i {
-  font-size: var(--font-size-lg);
+  font-size: 18px; /* --font-size-lg */
 }
 
 /* Platform-specific button colors */
 .btn-linkedin {
-  background-color: #0077b5;
+  background-color: #0077b5 !important; /* LinkedIn blue */
 }
 
 .btn-linkedin:hover {
-  background-color: #006097;
-}
-
-.btn-twitter {
-  background-color: #1da1f2;
-}
-
-.btn-twitter:hover {
-  background-color: #1991da;
-}
-
-.btn-facebook {
-  background-color: #1877f2;
-}
-
-.btn-facebook:hover {
-  background-color: #166fe5;
+  background-color: #005582 !important; /* Darker LinkedIn blue */
 }
 
 .btn-copy {
-  background-color: var(--color-text-secondary);
+  background-color: #6c7b8a !important; /* Gray */
 }
 
 .btn-copy:hover {
-  background-color: #5a6268;
+  background-color: #5a6268 !important;
 }
 
 /* Success/Error States */
 .copy-success {
-  background-color: var(--color-success) !important;
+  background-color: #22c55e !important; /* Success green */
 }
 
 .copy-success:hover {
@@ -220,16 +204,16 @@
 
 /* General Button Styles */
 .btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 8px 20px; /* --spacing-sm --spacing-lg */
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
+  border-radius: 4px; /* --radius-sm */
+  font-size: 16px; /* --font-size-base */
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px; /* --spacing-sm */
   justify-content: center;
 }
 
@@ -238,55 +222,55 @@
 }
 
 .btn-secondary {
-  background-color: var(--color-text-secondary);
-  color: white;
+  background-color: #6c7b8a !important; /* Gray */
+  color: white !important;
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268;
+  background-color: #5a6268 !important;
 }
 
 .btn-small {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-sm);
+  padding: 4px 8px; /* --spacing-xs --spacing-sm */
+  font-size: 14px; /* --font-size-sm */
 }
 
 /* Error Message */
 .error-message {
-  color: var(--color-error);
+  color: #dc3545 !important; /* Error red - force override */
   background-color: rgba(220, 53, 69, 0.1);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-sm);
-  border-left: 4px solid var(--color-error);
-  margin: var(--spacing-md) 0;
-  font-size: var(--font-size-sm);
+  padding: 12px; /* --spacing-md */
+  border-radius: 4px; /* --radius-sm */
+  border-left: 4px solid #dc3545; /* Error red */
+  margin: 12px 0; /* --spacing-md */
+  font-size: 14px; /* --font-size-sm */
 }
 
 /* Success Message */
 .success-message {
-  color: var(--color-success);
+  color: #22c55e !important; /* Success green - force override */
   background-color: rgba(40, 167, 69, 0.1);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-sm);
-  border-left: 4px solid var(--color-success);
-  margin: var(--spacing-md) 0;
-  font-size: var(--font-size-sm);
+  padding: 12px; /* --spacing-md */
+  border-radius: 4px; /* --radius-sm */
+  border-left: 4px solid #22c55e; /* Success green */
+  margin: 12px 0; /* --spacing-md */
+  font-size: 14px; /* --font-size-sm */
 }
 
 /* Character Counter */
 .character-counter {
   text-align: right;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: var(--spacing-xs);
+  font-size: 12px; /* --font-size-xs */
+  color: #6c7b8a; /* Muted text */
+  margin-top: 4px; /* --spacing-xs */
 }
 
 .character-counter.warning {
-  color: var(--color-warning);
+  color: #f59e0b; /* Warning amber */
 }
 
 .character-counter.error {
-  color: var(--color-error);
+  color: #dc3545; /* Error red */
 }
 
 /* Loading State */
@@ -311,8 +295,8 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .social-share-page {
-    padding: var(--spacing-xl);
-    margin: var(--spacing-md);
+    padding: 32px; /* --spacing-xl */
+    margin: 16px; /* --spacing-md */
   }
 
   .share-buttons {
@@ -331,21 +315,21 @@
 
 @media (max-width: 480px) {
   .social-share-page {
-    padding: var(--spacing-lg);
-    margin: var(--spacing-sm);
+    padding: 20px; /* --spacing-lg */
+    margin: 8px; /* --spacing-sm */
   }
 
   .social-share-page h2 {
-    font-size: var(--font-size-xl);
+    font-size: 20px; /* --font-size-xl */
   }
 
   .social-share-page h3 {
-    font-size: var(--font-size-lg);
+    font-size: 18px; /* --font-size-lg */
   }
 
   .goal-selection-list li {
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 8px; /* --spacing-sm */
     text-align: center;
   }
 }

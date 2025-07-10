@@ -1,0 +1,351 @@
+import { EmailService } from "./emailService";
+
+const emailTemplates = {
+  email_verification: {
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - LinkedGoals</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #0A66C2; margin-bottom: 10px; }
+        .button { display: inline-block; background-color: #0A66C2; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .footer { margin-top: 30px; text-align: center; font-size: 14px; color: #666; }
+        .divider { border-top: 1px solid #eee; margin: 30px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎯 LinkedGoals</div>
+            <h1>Verify Your Email Address</h1>
+        </div>
+        
+        <p>Hi {{userName}},</p>
+        
+        <p>Welcome to LinkedGoals! We're excited to help you achieve your professional goals.</p>
+        
+        <p>To get started, please verify your email address by clicking the button below:</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{verificationUrl}}" class="button">Verify Email Address</a>
+        </div>
+        
+        <p>Or copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; background-color: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace;">{{verificationUrl}}</p>
+        
+        <div class="divider"></div>
+        
+        <p>Once verified, you'll be able to:</p>
+        <ul>
+            <li>✅ Create and track your professional goals</li>
+            <li>📊 Monitor your progress with detailed analytics</li>
+            <li>🎯 Get personalized insights and recommendations</li>
+            <li>📧 Receive weekly progress updates</li>
+        </ul>
+        
+        <div class="footer">
+            <p>If you didn't create an account with LinkedGoals, you can safely ignore this email.</p>
+            <p>Questions? Contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+            <p>&copy; 2024 LinkedGoals. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`,
+    text: `
+Hi {{userName}},
+
+Welcome to LinkedGoals! We're excited to help you achieve your professional goals.
+
+To get started, please verify your email address by clicking this link:
+{{verificationUrl}}
+
+Once verified, you'll be able to:
+✅ Create and track your professional goals
+📊 Monitor your progress with detailed analytics
+🎯 Get personalized insights and recommendations
+📧 Receive weekly progress updates
+
+If you didn't create an account with LinkedGoals, you can safely ignore this email.
+
+Questions? Contact us at {{supportEmail}}
+
+© 2024 LinkedGoals. All rights reserved.
+    `,
+  },
+
+  welcome: {
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to LinkedGoals!</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #0A66C2; margin-bottom: 10px; }
+        .button { display: inline-block; background-color: #0A66C2; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .feature-box { background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .footer { margin-top: 30px; text-align: center; font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎯 LinkedGoals</div>
+            <h1>Welcome to LinkedGoals!</h1>
+        </div>
+        
+        <p>Hi {{userName}},</p>
+        
+        <p>Welcome to LinkedGoals! We're thrilled to have you join our community of goal-driven professionals.</p>
+        
+        <div class="feature-box">
+            <h3>🚀 Ready to get started?</h3>
+            <p>Your journey to achieving your professional goals begins now. Here's what you can do:</p>
+            <ul>
+                <li><strong>Create Your First Goal:</strong> Set up a SMART goal that aligns with your career objectives</li>
+                <li><strong>Track Progress:</strong> Log regular check-ins to stay accountable</li>
+                <li><strong>Get Insights:</strong> Review your progress analytics and improvement areas</li>
+                <li><strong>Invite Coaches:</strong> Get support from mentors and accountability partners</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{dashboardUrl}}" class="button">Go to Dashboard</a>
+        </div>
+        
+        <div class="feature-box">
+            <h3>💡 Pro Tips for Success:</h3>
+            <ul>
+                <li>Start with 1-3 focused goals rather than overwhelming yourself</li>
+                <li>Set specific, measurable milestones with deadlines</li>
+                <li>Check in weekly to maintain momentum</li>
+                <li>Celebrate small wins along the way</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>Questions? We're here to help! Check out our <a href="{{helpUrl}}">Help Center</a> or contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+            <p>&copy; 2024 LinkedGoals. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`,
+    text: `
+Hi {{userName}},
+
+Welcome to LinkedGoals! We're thrilled to have you join our community of goal-driven professionals.
+
+🚀 READY TO GET STARTED?
+
+Your journey to achieving your professional goals begins now. Here's what you can do:
+
+• Create Your First Goal: Set up a SMART goal that aligns with your career objectives
+• Track Progress: Log regular check-ins to stay accountable  
+• Get Insights: Review your progress analytics and improvement areas
+• Invite Coaches: Get support from mentors and accountability partners
+
+Go to Dashboard: {{dashboardUrl}}
+
+💡 PRO TIPS FOR SUCCESS:
+
+• Start with 1-3 focused goals rather than overwhelming yourself
+• Set specific, measurable milestones with deadlines
+• Check in weekly to maintain momentum
+• Celebrate small wins along the way
+
+Questions? We're here to help! Check out our Help Center: {{helpUrl}}
+Or contact us at {{supportEmail}}
+
+© 2024 LinkedGoals. All rights reserved.
+    `,
+  },
+
+  weekly_update: {
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Weekly Goal Progress</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #0A66C2; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
+        .stat-box { background-color: #f8f9fa; padding: 20px; border-radius: 6px; text-align: center; }
+        .stat-number { font-size: 36px; font-weight: bold; color: #0A66C2; }
+        .stat-label { font-size: 14px; color: #666; }
+        .button { display: inline-block; background-color: #0A66C2; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .quote-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .footer { margin-top: 30px; text-align: center; font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎯 LinkedGoals</div>
+            <h1>Your Weekly Progress Report</h1>
+        </div>
+        
+        <p>Hi {{firstName}},</p>
+        
+        <p>Here's your weekly goal progress summary. Keep up the great work!</p>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">{{goalsCompleted}}</div>
+                <div class="stat-label">Goals Completed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{goalsInProgress}}</div>
+                <div class="stat-label">Goals In Progress</div>
+            </div>
+        </div>
+        
+        {{#if upcomingDeadlines}}
+        <div class="feature-box">
+            <h3>📅 Upcoming Deadlines</h3>
+            <ul>
+                {{#each upcomingDeadlines}}
+                <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+        {{/if}}
+        
+        <div class="quote-box">
+            <h3>💪 Weekly Motivation</h3>
+            <p>"{{motivationalQuote}}"</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{dashboardUrl}}" class="button">View Dashboard</a>
+        </div>
+        
+        <div class="footer">
+            <p>Don't want these updates? <a href="{{unsubscribeUrl}}">Unsubscribe here</a></p>
+            <p>&copy; 2024 LinkedGoals. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`,
+    text: `
+Hi {{firstName}},
+
+Here's your weekly goal progress summary. Keep up the great work!
+
+📊 YOUR PROGRESS:
+• Goals Completed: {{goalsCompleted}}
+• Goals In Progress: {{goalsInProgress}}
+
+📅 UPCOMING DEADLINES:
+{{#each upcomingDeadlines}}
+• {{this}}
+{{/each}}
+
+💪 WEEKLY MOTIVATION:
+"{{motivationalQuote}}"
+
+View Dashboard: {{dashboardUrl}}
+
+Don't want these updates? Unsubscribe: {{unsubscribeUrl}}
+
+© 2024 LinkedGoals. All rights reserved.
+    `,
+  },
+
+  announcement: {
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedGoals Update</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #0A66C2; margin-bottom: 10px; }
+        .announcement-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .content { background-color: #f8f9fa; padding: 30px; border-radius: 6px; margin: 30px 0; }
+        .footer { margin-top: 30px; text-align: center; font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎯 LinkedGoals</div>
+        </div>
+        
+        <div class="announcement-banner">
+            <h1>📢 {{subject}}</h1>
+        </div>
+        
+        <div class="content">
+            {{content}}
+        </div>
+        
+        <p>Best regards,<br>
+        {{adminName}}<br>
+        LinkedGoals Team</p>
+        
+        <div class="footer">
+            <p>Don't want announcements? <a href="{{unsubscribeUrl}}">Unsubscribe here</a></p>
+            <p>&copy; 2024 LinkedGoals. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`,
+    text: `
+📢 {{subject}}
+
+{{content}}
+
+Best regards,
+{{adminName}}
+LinkedGoals Team
+
+Don't want announcements? Unsubscribe: {{unsubscribeUrl}}
+
+© 2024 LinkedGoals. All rights reserved.
+    `,
+  },
+};
+
+export async function setupEmailTemplates() {
+  console.log("Setting up email templates...");
+
+  try {
+    for (const [templateName, template] of Object.entries(emailTemplates)) {
+      await EmailService.createEmailTemplate(
+        templateName,
+        template.html,
+        template.text
+      );
+      console.log(`✅ Created template: ${templateName}`);
+    }
+
+    console.log("🎉 All email templates created successfully!");
+  } catch (error) {
+    console.error("❌ Error setting up email templates:", error);
+    throw error;
+  }
+}
+
+// Run this function if the script is executed directly
+if (require.main === module) {
+  setupEmailTemplates().catch(console.error);
+}
