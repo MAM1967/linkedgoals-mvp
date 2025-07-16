@@ -109,6 +109,9 @@ export const linkedinlogin = onRequest(
       const displayName = userInfo.name || userInfo.email.split("@")[0];
 
       let userRecord;
+      const firestore = getFirestore();
+      let isNewUser = false;
+
       try {
         userRecord = await auth.getUserByEmail(userInfo.email);
         logger.info(
@@ -136,9 +139,68 @@ export const linkedinlogin = onRequest(
             emailVerified: userInfo.email_verified,
           });
           logger.info("✅ New Firebase user created:", userRecord.uid);
+          isNewUser = true;
         } else {
           throw error;
         }
+      }
+
+      // Create or update Firestore user document
+      const userDocRef = firestore.collection("users").doc(userRecord.uid);
+      const userDoc = await userDocRef.get();
+
+      if (!userDoc.exists || isNewUser) {
+        const userData = {
+          uid: userRecord.uid,
+          email: userRecord.email || userInfo.email,
+          displayName: userRecord.displayName || displayName,
+          fullName: userRecord.displayName || displayName,
+          photoURL: userRecord.photoURL || userInfo.picture || null,
+          disabled: userRecord.disabled || false,
+          emailVerified:
+            userRecord.emailVerified || userInfo.email_verified || false,
+          createdAt: isNewUser
+            ? Timestamp.now()
+            : Timestamp.fromDate(new Date(userRecord.metadata.creationTime)),
+          updatedAt: Timestamp.now(),
+          role: "user", // Default role
+          linkedinProfile: {
+            sub: userInfo.sub,
+            given_name: userInfo.given_name,
+            family_name: userInfo.family_name,
+            email_verified: userInfo.email_verified || false,
+          },
+        };
+
+        await userDocRef.set(userData);
+        logger.info(
+          `✅ Created Firestore document for user: ${userRecord.uid}`
+        );
+      } else {
+        // Update existing document with LinkedIn profile info
+        const updates: any = {
+          updatedAt: Timestamp.now(),
+          linkedinProfile: {
+            sub: userInfo.sub,
+            given_name: userInfo.given_name,
+            family_name: userInfo.family_name,
+            email_verified: userInfo.email_verified || false,
+          },
+        };
+
+        // Update fields if they're missing
+        const existingData = userDoc.data();
+        if (!existingData?.fullName && displayName) {
+          updates.fullName = displayName;
+        }
+        if (!existingData?.photoURL && userInfo.picture) {
+          updates.photoURL = userInfo.picture;
+        }
+
+        await userDocRef.update(updates);
+        logger.info(
+          `✅ Updated Firestore document for user: ${userRecord.uid}`
+        );
       }
 
       const customToken = await auth.createCustomToken(userRecord.uid);

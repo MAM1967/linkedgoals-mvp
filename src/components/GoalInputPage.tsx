@@ -7,6 +7,8 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../lib/firebase"; // Corrected path
 import Tooltip from "./common/Tooltip"; // Import Tooltip
+import TemplateSelector from "./TemplateSelector"; // Import Template Selector
+import { GoalTemplate } from "../types/GoalTemplates"; // Import Template type
 import "./GoalInputPage.css"; // We will create this CSS file
 
 // Define the allowed categories for the MVP
@@ -28,7 +30,10 @@ const MEASURABLE_TYPES = [
 ];
 
 const GoalInputPage: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // Start with template selection
+  const [selectedTemplate, setSelectedTemplate] = useState<GoalTemplate | null>(
+    null
+  );
   const [goalDescription, setGoalDescription] = useState("");
   const [category, setCategory] = useState<string>(MVP_CATEGORIES[0]); // New state for category, default to first
   const [specific, setSpecific] = useState("");
@@ -56,9 +61,40 @@ const GoalInputPage: React.FC = () => {
   };
 
   const prevStep = () => {
-    if (currentStep > 1) {
+    if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  // Template selection handlers
+  const handleTemplateSelection = (template: GoalTemplate) => {
+    setSelectedTemplate(template);
+
+    // Pre-fill form with template data
+    setGoalDescription(template.description);
+    setCategory(template.category);
+    setSpecific(template.smartFramework.specific);
+    setMeasurableType(template.smartFramework.measurable.type);
+    setMeasurableTarget(
+      template.smartFramework.measurable.suggestedTarget?.toString() || ""
+    );
+    setMeasurableUnit(template.smartFramework.measurable.unit || "");
+    setAchievable(template.smartFramework.achievable);
+    setRelevant(template.smartFramework.relevant);
+
+    // Set suggested due date
+    const suggestedDueDate = new Date();
+    suggestedDueDate.setDate(
+      suggestedDueDate.getDate() + template.smartFramework.suggestedDuration
+    );
+    setDueDate(suggestedDueDate.toISOString().split("T")[0]);
+
+    setCurrentStep(1); // Move to first SMART step
+  };
+
+  const handleCreateFromScratch = () => {
+    setSelectedTemplate(null);
+    setCurrentStep(1); // Move to first SMART step
   };
 
   const isValidDateString = (dateString: string): string | false => {
@@ -247,6 +283,14 @@ const GoalInputPage: React.FC = () => {
 
   const renderStep = () => {
     switch (currentStep) {
+      case 0: {
+        return (
+          <TemplateSelector
+            onSelectTemplate={handleTemplateSelection}
+            onCreateFromScratch={handleCreateFromScratch}
+          />
+        );
+      }
       case 1: {
         return (
           <div className="form-step">
@@ -428,9 +472,22 @@ const GoalInputPage: React.FC = () => {
 
   return (
     <div className="goal-input-page">
-      <h2>
-        Create New SMART Goal ({currentStep}/{totalSteps})
-      </h2>
+      {currentStep > 0 && (
+        <>
+          <h2>
+            {selectedTemplate
+              ? `Create Goal: ${selectedTemplate.name}`
+              : "Create New SMART Goal"}{" "}
+            ({currentStep}/{totalSteps})
+          </h2>
+          {selectedTemplate && (
+            <p className="template-indicator">
+              📋 Using {selectedTemplate.category} template •{" "}
+              {selectedTemplate.difficulty} level
+            </p>
+          )}
+        </>
+      )}
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
 
