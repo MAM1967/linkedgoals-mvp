@@ -515,13 +515,12 @@ export const sendVerificationEmail = onCall(
 );
 
 // Email verification endpoint
-export const verifyEmail = onRequest(async (req, res) => {
+export const verifyEmail = onCall(async (request) => {
   try {
-    const { token } = req.query;
+    const { token } = request.data;
 
     if (!token || typeof token !== "string") {
-      res.status(400).send("Invalid verification token");
-      return;
+      throw new HttpsError("invalid-argument", "Invalid verification token");
     }
 
     const firestore = getFirestore();
@@ -534,23 +533,38 @@ export const verifyEmail = onRequest(async (req, res) => {
       .get();
 
     if (verificationQuery.empty) {
-      res.status(400).send("Invalid or expired verification token");
-      return;
+      logger.error("❌ No verification record found for token:", token);
+      throw new HttpsError(
+        "not-found",
+        "Invalid or expired verification token"
+      );
     }
 
     const verificationDoc = verificationQuery.docs[0];
     const verificationData = verificationDoc.data();
+    logger.info("🔍 Found verification record:", {
+      id: verificationDoc.id,
+      verified: verificationData.verified,
+      expiresAt: verificationData.expiresAt,
+      verifiedAt: verificationData.verifiedAt,
+    });
 
     // Check if token is expired
     if (verificationData.expiresAt.toDate() < new Date()) {
-      res.status(400).send("Verification token has expired");
-      return;
+      logger.error("❌ Token expired:", verificationData.expiresAt.toDate());
+      throw new HttpsError(
+        "deadline-exceeded",
+        "Verification token has expired"
+      );
     }
 
     // Check if already verified
     if (verificationData.verified) {
-      res.status(200).send("Email already verified");
-      return;
+      logger.info("✅ Email already verified for user:", verificationDoc.id);
+      return {
+        success: true,
+        message: "Email already verified",
+      };
     }
 
     // Update verification status
@@ -560,18 +574,29 @@ export const verifyEmail = onRequest(async (req, res) => {
     });
 
     // Update user's email verification status
-    await firestore.collection("users").doc(verificationDoc.id).update({
-      emailVerified: true,
-      emailVerificationDate: new Date(),
-    });
+    await firestore.collection("users").doc(verificationDoc.id).set(
+      {
+        emailVerified: true,
+        emailVerificationDate: new Date(),
+      },
+      { merge: true }
+    );
 
     logger.info(`✅ Email verified for user: ${verificationDoc.id}`);
 
-    // Redirect to success page
-    res.redirect("https://app.linkedgoals.app/email-verified?success=true");
+    // Return success response
+    return {
+      success: true,
+      message: "Email verified successfully",
+    };
   } catch (error: any) {
     logger.error("❌ Error verifying email:", error);
-    res.status(500).send("Internal server error");
+    logger.error("❌ Error details:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+    });
+    throw new HttpsError("internal", `Internal server error: ${error.message}`);
   }
 });
 

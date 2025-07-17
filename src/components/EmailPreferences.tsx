@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import SafeEmailVerificationBanner from "./SafeEmailVerificationBanner";
 import "./EmailPreferences.css";
 
 interface EmailPreferencesData {
@@ -134,6 +135,9 @@ const EmailPreferences: React.FC = () => {
 
   return (
     <div className="email-preferences-container">
+      {/* Email Verification Banner */}
+      <SafeEmailVerificationBanner />
+
       <div className="email-preferences-card">
         <div className="preferences-header">
           <h2>Email Preferences</h2>
