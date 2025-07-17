@@ -9,6 +9,17 @@ jest.mock("firebase/firestore", () => ({
   doc: jest.fn(),
   getDoc: jest.fn(),
   updateDoc: jest.fn(),
+  onSnapshot: jest.fn((docRef, callback) => {
+    // Simulate document snapshot
+    const mockSnapshot = {
+      exists: () => true,
+      data: () => ({}),
+      id: "mock-doc-id",
+    };
+    callback(mockSnapshot);
+    // Return unsubscribe function
+    return jest.fn();
+  }),
 }));
 
 jest.mock("../../lib/firebase", () => ({

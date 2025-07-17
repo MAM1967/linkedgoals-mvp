@@ -2,11 +2,22 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import EmailAnalyticsDashboard from "../EmailAnalyticsDashboard";
-import { useAuth } from "../../hooks/useAuth";
+
+// Mock variables must be declared before jest.mock calls
+const mockHttpsCallable = jest.fn();
+
+// Mock Firebase functions
+jest.mock("firebase/functions", () => ({
+  getFunctions: jest.fn(),
+  httpsCallable: mockHttpsCallable,
+}));
 
 // Mock the useAuth hook
 jest.mock("../../hooks/useAuth");
+
+import EmailAnalyticsDashboard from "../EmailAnalyticsDashboard";
+import { useAuth } from "../../hooks/useAuth";
+
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 // Mock fetch globally
@@ -39,6 +50,12 @@ describe("EmailAnalyticsDashboard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockClear();
+    
+    // Setup default Firebase function mock
+    const mockFunction = jest.fn().mockResolvedValue({
+      data: { success: true, stats: createMockEmailStats() }
+    });
+    mockHttpsCallable.mockReturnValue(mockFunction);
   });
 
   describe("Authentication States", () => {
