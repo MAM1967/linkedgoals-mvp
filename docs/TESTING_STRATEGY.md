@@ -1,4 +1,82 @@
-# LinkedGoals MVP Testing Strategy
+# Testing Strategy
+
+## 🚨 **STANDARD OPERATING PROCEDURE: Staging-First Testing**
+
+### 🎯 **Core Principle**
+
+**NEVER TEST DIRECTLY IN PRODUCTION.** All testing must be done on staging environment that replicates production.
+
+### 📋 **Mandatory Testing Workflow**
+
+#### 1. **Pre-Testing Setup**
+
+- ✅ Replicate production Firestore data to staging
+- ✅ Mirror production configuration and secrets
+- ✅ Ensure staging environment matches production infrastructure
+- ✅ Verify staging URLs and OAuth configurations work
+
+#### 2. **Code Deployment Sequence**
+
+```bash
+# REQUIRED ORDER - NO EXCEPTIONS
+1. Deploy to staging FIRST
+   firebase use linkedgoals-staging
+   npm run build && firebase deploy
+
+2. Test on staging COMPLETELY
+   - Manual testing of changed features
+   - Automated test suite execution
+   - User acceptance testing
+   - Performance validation
+
+3. Production deployment ONLY after staging passes
+   firebase use linkedgoals-d7053
+   npm run build && firebase deploy
+```
+
+#### 3. **Testing Requirements**
+
+- ✅ **All user flows** must work on staging
+- ✅ **Email functionality** tested with staging email addresses
+- ✅ **LinkedIn OAuth** tested with staging redirect URLs
+- ✅ **Database operations** verified with staging data
+- ✅ **Performance** validated under staging load
+
+#### 4. **Data Replication Protocol**
+
+```bash
+# Export production data
+firebase use linkedgoals-d7053
+firebase firestore:export gs://linkedgoals-d7053-backup/$(date +%Y-%m-%d)
+
+# Import to staging
+firebase use linkedgoals-staging
+firebase firestore:import gs://linkedgoals-d7053-backup/YYYY-MM-DD
+```
+
+### 🚫 **PROHIBITED PRACTICES**
+
+- ❌ Testing email verification on production emails
+- ❌ Creating test data in production Firestore
+- ❌ Testing OAuth flows with production LinkedIn app
+- ❌ Performance testing against production infrastructure
+- ❌ Any testing that could affect production users
+
+### ✅ **APPROVED TESTING PRACTICES**
+
+- ✅ All testing on staging environment
+- ✅ Production data replicated to staging for realistic testing
+- ✅ Staging-specific test accounts and data
+- ✅ Automated tests run against staging before production
+
+## 🏗️ **Environment Configuration**
+
+### Staging Environment Setup Required:
+
+1. **Firebase Project**: Create `linkedgoals-staging` project
+2. **OAuth Configuration**: Add staging URLs to LinkedIn app
+3. **Data Replication**: Setup automated prod→staging data sync
+4. **Configuration Sync**: Replicate secrets and settings
 
 ## 🎯 **Testing Priorities for MVP Launch**
 
