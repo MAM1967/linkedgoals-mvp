@@ -213,6 +213,20 @@
   background-color: #22c55e; /* Success green */
 }
 
+/* Template indicator styling */
+.template-indicator {
+  color: #0077b5;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: #e8f4fd;
+  border-radius: 6px;
+  border-left: 3px solid #0077b5;
+  text-align: center;
+}
+
 /* Character Counter */
 .character-counter {
   text-align: right;

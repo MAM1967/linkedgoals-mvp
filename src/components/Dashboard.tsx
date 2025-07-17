@@ -42,6 +42,7 @@ import { GoalProgressCard } from "./GoalProgressCard";
 import { ProgressUpdateModal } from "./ProgressUpdateModal";
 import { CategoryProgressSummary } from "./CategoryProgressSummary";
 import { InsightsPanel } from "./InsightsPanel";
+import SafeEmailVerificationBanner from "./SafeEmailVerificationBanner";
 import { useGoalProgress } from "../hooks/useGoalProgress";
 import {
   CoachingNote,
@@ -793,6 +794,9 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container space-y-6">
+      {/* Email Verification Banner */}
+      <SafeEmailVerificationBanner />
+
       {/* Phase 3: Enhanced Dashboard Header */}
       <DashboardHeader
         overallProgress={enhancedOverallProgress}

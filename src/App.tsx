@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
+import EmailVerificationHandler from "./components/EmailVerificationHandler";
 import EmailVerificationSuccess from "./components/EmailVerificationSuccess";
 import EmailPreferences from "./components/EmailPreferences";
 
@@ -91,6 +92,7 @@ function App() {
         <Routes>
           {/* Public routes that are always accessible */}
           <Route path="/linkedin" element={<LinkedInCallback />} />
+          <Route path="/verify-email" element={<EmailVerificationHandler />} />
           <Route
             path="/email-verified"
             element={<EmailVerificationSuccess />}

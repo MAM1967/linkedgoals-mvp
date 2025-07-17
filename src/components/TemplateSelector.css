@@ -1,0 +1,247 @@
+/* Template Selector - LinkedIn-inspired styling */
+.template-selector {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.template-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.template-header h2 {
+  color: #1f2937;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.template-header p {
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.template-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.template-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.template-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.template-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.template-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.template-info h3 {
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.template-category {
+  color: #0077b5;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #e8f4fd;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.template-description {
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.template-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.difficulty-badge {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.time-estimate {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.template-preview {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #0077b5;
+}
+
+.template-preview strong {
+  color: #374151;
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.template-preview p {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.template-btn {
+  background: #0077b5;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: auto;
+}
+
+.template-btn:hover {
+  background: #005885;
+}
+
+/* Create from Scratch Card */
+.create-from-scratch {
+  border: 2px dashed #d1d5db;
+  background: #fefefe;
+}
+
+.create-from-scratch:hover {
+  border-color: #0077b5;
+  background: #f8fafc;
+}
+
+.template-btn-custom {
+  background: #6b7280;
+}
+
+.template-btn-custom:hover {
+  background: #4b5563;
+}
+
+/* Premium Upgrade Card */
+.premium-upgrade {
+  border: 2px solid #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+  position: relative;
+}
+
+.premium-badge {
+  position: absolute;
+  top: -8px;
+  right: 1rem;
+  background: #f59e0b;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.premium-features {
+  margin: 1rem 0;
+}
+
+.premium-feature {
+  color: #374151;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.template-btn-premium {
+  background: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.template-btn-premium:hover {
+  background: #d97706;
+}
+
+.premium-note {
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Template Footer */
+.template-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.free-tier-note {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .template-selector {
+    padding: 1rem;
+  }
+
+  .template-options {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .template-card {
+    padding: 1rem;
+  }
+
+  .template-header h2 {
+    font-size: 1.5rem;
+  }
+}

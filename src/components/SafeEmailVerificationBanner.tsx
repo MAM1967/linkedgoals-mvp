@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import "./SafeEmailVerificationBanner.css";
 
 interface SafeEmailVerificationBannerProps {
@@ -63,25 +64,24 @@ export const SafeEmailVerificationBanner: React.FC<
     setResendMessage("");
 
     try {
-      const functionsBaseUrl = import.meta.env.VITE_FUNCTIONS_BASE_URL || "https://us-central1-linkedgoals-d7053.cloudfunctions.net";
-      const response = await fetch(
-        `${functionsBaseUrl}/sendVerificationEmail`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${await user.getIdToken()}`,
-          },
-          body: JSON.stringify({
-            email: user.email,
-            userId: user.uid,
-          }),
-        }
+      if (!auth.currentUser) {
+        throw new Error("User not authenticated");
+      }
+
+      // Use Firebase callable function instead of HTTP fetch
+      const functions = getFunctions();
+      const sendVerificationEmail = httpsCallable(
+        functions,
+        "sendVerificationEmail"
       );
 
-      const result = await response.json();
+      const result = await sendVerificationEmail({
+        email: user.email,
+        userId: user.uid,
+      });
 
-      if (result.success) {
+      const data = result.data as { success: boolean };
+      if (data.success) {
         setResendMessage("✅ Verification email sent! Check your inbox.");
         onResendSuccess?.();
       } else {

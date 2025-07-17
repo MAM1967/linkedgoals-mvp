@@ -11,19 +11,20 @@ import "@testing-library/jest-dom";
 import { GoalDetailsModal } from "../GoalDetailsModal";
 import { SmartGoal, GoalProgress } from "../../types/Dashboard";
 
+// Mock Firebase functions
+const mockUpdateDoc = jest.fn();
+
+jest.mock("firebase/firestore", () => ({
+  doc: jest.fn(),
+  updateDoc: mockUpdateDoc,
+}));
+
 // Mock Firebase
 jest.mock("../../lib/firebase", () => ({
   db: {},
   auth: {
     currentUser: { uid: "test-user-id" },
   },
-}));
-
-const mockUpdateDoc = jest.fn();
-
-jest.mock("firebase/firestore", () => ({
-  doc: jest.fn(),
-  updateDoc: mockUpdateDoc,
 }));
 
 // Mock the common Tooltip component
