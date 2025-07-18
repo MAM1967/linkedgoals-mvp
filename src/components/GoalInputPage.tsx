@@ -9,6 +9,8 @@ import { auth, db } from "../lib/firebase"; // Corrected path
 import Tooltip from "./common/Tooltip"; // Import Tooltip
 import TemplateSelector from "./TemplateSelector"; // Import Template Selector
 import { GoalTemplate } from "../types/GoalTemplates"; // Import Template type
+import { usePlanLimits } from "../hooks/usePlanLimits";
+import { GoalLimitReached } from "./freemium/GoalLimitReached";
 import "./GoalInputPage.css"; // We will create this CSS file
 
 // Define the allowed categories for the MVP
@@ -30,6 +32,7 @@ const MEASURABLE_TYPES = [
 ];
 
 const GoalInputPage: React.FC = () => {
+  const { goalCount, canCreateGoal } = usePlanLimits();
   const [currentStep, setCurrentStep] = useState(0); // Start with template selection
   const [selectedTemplate, setSelectedTemplate] = useState<GoalTemplate | null>(
     null
@@ -143,6 +146,13 @@ const GoalInputPage: React.FC = () => {
     setSuccess(null);
     if (!auth.currentUser) {
       setError("You must be logged in to save a goal.");
+      return;
+    }
+
+    // Check freemium limits before saving
+    const limitValidation = canCreateGoal();
+    if (!limitValidation.allowed) {
+      setError(limitValidation.reason || "You've reached your goal limit.");
       return;
     }
 
@@ -470,6 +480,10 @@ const GoalInputPage: React.FC = () => {
     }
   };
 
+  // Check if user has reached goal limit
+  const limitValidation = canCreateGoal();
+  const hasReachedLimit = !limitValidation.allowed;
+
   return (
     <div className="goal-input-page">
       {currentStep > 0 && (
@@ -491,38 +505,53 @@ const GoalInputPage: React.FC = () => {
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
 
-      <form onSubmit={(e) => e.preventDefault()} className="goal-input-form">
-        {renderStep()}
-        <div className="navigation-buttons">
-          {currentStep > 1 && (
-            <button
-              type="button"
-              onClick={prevStep}
-              className="btn btn-secondary"
-            >
-              Previous
-            </button>
-          )}
-          {currentStep < totalSteps && (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="btn btn-primary"
-            >
-              Next
-            </button>
-          )}
-          {currentStep === totalSteps && (
-            <button
-              type="button"
-              onClick={handleSaveGoal}
-              className="btn btn-success"
-            >
-              Save Goal
-            </button>
-          )}
-        </div>
-      </form>
+      {/* Show goal limit reached component if user can't create more goals */}
+      {hasReachedLimit ? (
+        <GoalLimitReached
+          currentCount={goalCount}
+          onUpgradeClick={() => {
+            // TODO: Navigate to premium signup
+            alert("Premium upgrade coming soon!");
+          }}
+          onWaitlistClick={() => {
+            // TODO: Add to waitlist
+            alert("Waitlist signup coming soon!");
+          }}
+        />
+      ) : (
+        <form onSubmit={(e) => e.preventDefault()} className="goal-input-form">
+          {renderStep()}
+          <div className="navigation-buttons">
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="btn btn-secondary"
+              >
+                Previous
+              </button>
+            )}
+            {currentStep < totalSteps && (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="btn btn-primary"
+              >
+                Next
+              </button>
+            )}
+            {currentStep === totalSteps && (
+              <button
+                type="button"
+                onClick={handleSaveGoal}
+                className="btn btn-success"
+              >
+                Save Goal
+              </button>
+            )}
+          </div>
+        </form>
+      )}
     </div>
   );
 };

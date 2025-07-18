@@ -1,6 +1,8 @@
 import React from "react";
 import { DashboardInsights } from "../types/Dashboard";
 import Tooltip from "./common/Tooltip";
+import { usePlanLimits } from "../hooks/usePlanLimits";
+import { PlanStatusBadge } from "./freemium/PlanStatusBadge";
 import "./DashboardHeader.css";
 
 interface DashboardHeaderProps {
@@ -19,6 +21,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 }) => {
   const { completed, total, averageProgress } = overallProgress;
   const { stalledGoals, upcomingDeadlines, recentCoachingFeedback } = insights;
+  const { goalCount, planType } = usePlanLimits();
 
   // Calculate quick stats
   const activeGoals = total - completed;
@@ -40,7 +43,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <div className="dashboard-header">
       {/* Simple Header with Linear Progress */}
       <div className="header-content">
-        <h1 className="dashboard-title">Your Goal Progress</h1>
+        <div className="header-top">
+          <h1 className="dashboard-title">Your Goal Progress</h1>
+          <PlanStatusBadge
+            planType={planType}
+            goalCount={goalCount}
+            maxGoals={planType === "free" ? 3 : -1}
+          />
+        </div>
 
         <div className="linear-progress-section">
           <div className="progress-info">
