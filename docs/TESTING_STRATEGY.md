@@ -71,12 +71,37 @@ firebase firestore:import gs://linkedgoals-d7053-backup/YYYY-MM-DD
 
 ## 🏗️ **Environment Configuration**
 
-### Staging Environment Setup Required:
+### ✅ **Staging Environment (ALREADY CONFIGURED)**
 
-1. **Firebase Project**: Create `linkedgoals-staging` project
-2. **OAuth Configuration**: Add staging URLs to LinkedIn app
-3. **Data Replication**: Setup automated prod→staging data sync
-4. **Configuration Sync**: Replicate secrets and settings
+**Hybrid Architecture**: Staging frontend + Production Cloud Functions
+
+- **Staging Frontend**: `https://linkedgoals-staging.web.app` (separate deployment)
+- **Staging Backend**: Uses production Cloud Functions (cost-effective, no duplication)
+- **Configuration**: `VITE_FUNCTIONS_BASE_URL` environment variable controls function URLs
+- **Data**: Uses production Firestore (real data for realistic testing)
+
+### 🚀 **Staging Deployment Process**
+
+```bash
+# Switch to staging branch (contains hybrid configuration)
+git checkout staging
+
+# Merge latest changes from main
+git merge main
+
+# Deploy staging frontend (uses production functions)
+firebase use crestcomnyc-6c86d
+npm run build && firebase deploy --only hosting
+
+# Test at: https://linkedgoals-staging.web.app
+```
+
+### 📊 **Testing on Staging**
+
+✅ **Full functionality available**: All features work because staging uses production functions
+✅ **Cost-effective**: No duplicate Cloud Function infrastructure needed  
+✅ **Real data**: Tests with actual production data for realistic scenarios
+✅ **Safe environment**: Frontend changes isolated from production users
 
 ## 🎯 **Testing Priorities for MVP Launch**
 

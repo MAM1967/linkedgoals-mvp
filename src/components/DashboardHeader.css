@@ -173,6 +173,7 @@
 
   .progress-percentage {
     font-size: var(--font-size-xl) !important;
+    color: #ffffff !important;
   }
 
   .dashboard-header__stats {
